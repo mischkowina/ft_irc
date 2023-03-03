@@ -1,0 +1,8 @@
+#test*
+#bircd
+*out
+*.o
+*.pyc
+*/client
+*/server
+
