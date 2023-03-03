@@ -1,0 +1,65 @@
+
+some general functionalities:
+/help
+
+/join #channel
+/close #channel
+/part #channel
+
+/away
+/names
+/time
+/whois
+/info
+/infolist
+/nick
+/msg <nickname> <text>							private chat
+/names #channel1,#channel2, ...					Displays a list of nicks in a given channel
+
+The commands which may only be used by channel operators:
+
+        KICK    - Eject a client from the channel								/kick #channel person [reason]
+        MODE    - Change the channel's mode
+        INVITE  - Invite a client to an invite-only channel (mode +i)
+        TOPIC   - Change the channel topic in a mode +t channel
+
+
+MODE:
+syntax: /mode <mode> [parameter]
+
+b <mask>[<reason>]
+    To ban someone and display the reason.
+
+o <nick>
+    To op someone
+
+v <nick>
+    Voice someone (Speaks through ban and moderations and get a nice + by their nick)
+
+I
+    Channel is invite-only
+
+l <limit>
+    Channel is limited to participants at the same time
+
+n
+    No messages/notices is allowed to be sent to the channel from outside.
+
+m
+    Channel is moderated. Only ops and voiced people can talk.
+
+t
+    No one but the ops can change the channel topic
+
+p
+    Channel is private
+
+s
+    Channel is secret
+
+k <key>
+    Set a password-key (any text) necessary to get into the channel.
+
+r
+    ACCOUNT-limited channel
+
