@@ -1,22 +1,7 @@
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <vector>
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
-#include <signal.h>
-#include <poll.h>
-#include <sys/select.h>
-
-#include "server.hpp"
-
+#include "../include/irc.hpp"
+#include "../include/server.hpp"
+#include "../include/client.hpp"
 
 int main(int argc, char **argv)
 {
@@ -51,23 +36,28 @@ int main(int argc, char **argv)
 		std::cerr << "ERROR listening" << std::endl;
 		exit(1);
 	}
-
-	// accept connection
-	sockaddr_in	client_addr;
-	socklen_t	clientSize = sizeof(client_addr);
-	char		buffer[4096];
-
-	int clientSocket;
-	int bytes_received = 0;
-	int bytes_sent = 0;
 	
-	clientSocket = accept(sockfd, (sockaddr *)&client_addr,	&clientSize);
-	if (clientSocket == -1) {
-		std::cerr << "ERROR on accept" << std::endl;
-		exit(1);
-	}
+	char							buffer[4096];
+	int								bytes_received = 0;
+	int								bytes_sent = 0;
+	std::map<std::string, Client>	client_map;//should be member of server class or the like
+	
 	while (true)
 	{
+		//loop to accept all new connections
+		sockaddr_in	client_addr;//temporary variable
+		socklen_t	clientSize = sizeof(client_addr);//temporary variable
+		int 		clientSocket;//temporary variable
+
+		while (true)
+		{
+			clientSocket = accept(sockfd, (sockaddr *)&client_addr,	&clientSize);
+			if (clientSocket == -1)
+				break ;
+			Client	newClient(clientSocket);
+			newClient.setIP(&client_addr);//HERE
+		}
+		
 		bzero(buffer, sizeof(buffer));
 		int n = fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 		if (n == -1) {
@@ -97,7 +87,7 @@ int main(int argc, char **argv)
 
 	}
 
-	close(clientSocket);
+	// close(clientSocket);
 	close(sockfd);
 
 	return 0;
