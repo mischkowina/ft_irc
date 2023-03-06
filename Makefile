@@ -6,7 +6,7 @@
 #    By: smischni <smischni@student.42wolfsburg.de> +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/02 12:40:43 by pdolinar          #+#    #+#              #
-#    Updated: 2023/03/06 15:47:29 by smischni         ###   ########.fr        #
+#    Updated: 2023/03/06 17:38:52 by smischni         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,9 @@ CC			:=	c++
 CPP_FLAGS	:=	-Wall -Wextra -Werror -std=c++98 -g
 RM			:=	rm -rf
 
-SRC			:=	main.cpp
+SRC			:=	main.cpp \
+				client.cpp \
+				utils.cpp
 
 SRC_DIR		:=	srcs/
 OBJ_DIR		:=	build/

@@ -36,11 +36,13 @@ int main(int argc, char **argv)
 		std::cerr << "ERROR listening" << std::endl;
 		exit(1);
 	}
-	
-	char							buffer[4096];
-	int								bytes_received = 0;
-	int								bytes_sent = 0;
-	std::map<std::string, Client>	client_map;//should be member of server class or the like
+
+	std::cout << "Server running." << std::endl;
+
+	char			buffer[4096];
+	int				bytes_received = 0;
+	int				bytes_sent = 0;
+	ft::ClientMap	client_map;//typedef in irc.hpp
 	
 	while (true)
 	{
@@ -55,7 +57,21 @@ int main(int argc, char **argv)
 			if (clientSocket == -1)
 				break ;
 			Client	newClient(clientSocket);
-			newClient.setIP(&client_addr);//HERE
+			newClient.setAddress(&client_addr);
+			std::pair<ft::ClientMap::iterator, bool> insert_return = client_map.insert(make_pair(newClient.getAddress(), newClient));
+			if (insert_return.second == false)
+				std::cout << "Connection request failed: duplicate key." << std::endl;
+			else
+				std::cout << "Client succesfully connected from " << newClient.getAddress() << ". Total number of connected clients: " << client_map.size() << std::endl;
+		}
+
+		//create struct pollfd with the appropriate size and populate it with the socket fds of all connected clients
+		struct pollfd pollfds[client_map.size()];
+		int i = 0;
+		for (ft::ClientMap::iterator it = client_map.begin(); it != client_map.end(); it++, i++)
+		{
+			pollfds[i].fd = it->second.getSocket();
+			pollfds[i].events = POLLIN;
 		}
 		
 		bzero(buffer, sizeof(buffer));

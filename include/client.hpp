@@ -5,15 +5,16 @@
 
 class Client {
 	private:
-		int const	socket;
-		std::string	ip_addr;
+		int			socket;
+		std::string	address;//IP adress + socket (!= port) -> 0.0.0.0:80
 
 	public:
 		Client(int socket);
 		~Client();
 
-		void	setIP(sockaddr_in *client_addr);
-		std::string	getIP() const;
+		void	setAddress(sockaddr_in *client_addr);
+		int		getSocket() const;
+		std::string	getAddress() const;
 };
 
 #endif

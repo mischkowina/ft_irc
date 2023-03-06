@@ -8,6 +8,9 @@
 #include <cstring>
 #include <vector>
 #include <map>
+#include <utility>
+#include <iterator>
+#include <sstream>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -20,5 +23,14 @@
 #include <signal.h>
 #include <poll.h>
 #include <sys/select.h>
+
+#include "../include/client.hpp"
+
+namespace ft
+{
+	typedef std::map<std::string, class Client>	ClientMap;
+
+	std::string	itos(int i);
+}
 
 #endif
