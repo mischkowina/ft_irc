@@ -7,6 +7,9 @@ class Client {
 	private:
 		int			socket;
 		std::string	address;//IP adress + socket (!= port) -> 0.0.0.0:80
+		std::string	nick;
+		std::string	name;
+		bool		isOperator;
 
 	public:
 		Client(int socket);

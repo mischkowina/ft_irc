@@ -47,9 +47,9 @@ int main(int argc, char **argv)
 	while (true)
 	{
 		//loop to accept all new connections
-		sockaddr_in	client_addr;//temporary variable
-		socklen_t	clientSize = sizeof(client_addr);//temporary variable
-		int 		clientSocket;//temporary variable
+		sockaddr_in	client_addr;//temporary variable / gets reused
+		socklen_t	clientSize = sizeof(client_addr);//temporary variable / gets reused
+		int 		clientSocket;//temporary variable / gets reused 
 
 		while (true)
 		{
@@ -70,10 +70,21 @@ int main(int argc, char **argv)
 		int i = 0;
 		for (ft::ClientMap::iterator it = client_map.begin(); it != client_map.end(); it++, i++)
 		{
+			bzero(&pollfds[i], sizeof(pollfds[i]));
 			pollfds[i].fd = it->second.getSocket();
 			pollfds[i].events = POLLIN;
 		}
+
+		int pollreturn = poll(pollfds, client_map.size(), 0);
+		if (pollreturn < 0)
+		{
+			std::cerr << "ERROR on poll" << std::endl;
+			exit(1);//tbd if we want to exit or just continue running the server??
+		}
+
+
 		
+		//clear the buffer and set the clientSocket to non-blocking
 		bzero(buffer, sizeof(buffer));
 		int n = fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 		if (n == -1) {
@@ -98,12 +109,9 @@ int main(int argc, char **argv)
 		std::cout << "Here is the message: " << buffer << " :from client " 
 				<< inet_ntoa(client_addr.sin_addr) << std::endl;
 
-		
-		
-
 	}
 
-	// close(clientSocket);
+	// close(clientSocket); //moved to Client destructor
 	close(sockfd);
 
 	return 0;

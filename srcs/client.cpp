@@ -3,7 +3,10 @@
 //Constructor with socket descriptor as parameter
 Client::Client(int socket) : socket(socket) {}
 
-Client::~Client() {}
+Client::~Client()
+{
+	close(socket);
+}
 
 void	Client::setAddress(sockaddr_in *client_addr)
 {
