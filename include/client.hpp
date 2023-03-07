@@ -16,8 +16,10 @@ class Client {
 		~Client();
 
 		void	setAddress(sockaddr_in *client_addr);
+		void	setIsOperator(bool status);
 		int		getSocket() const;
 		std::string	getAddress() const;
+		bool	getIsOperator() const;
 };
 
 #endif
