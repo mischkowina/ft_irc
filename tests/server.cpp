@@ -40,6 +40,10 @@ int main(int argc, char *argv[]) {
     bcopy((char *)server->h_addr, 
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
+    // same effect
+    // inet_pton(AF_INET, "0.0.0.0", &server_addr.sin_addr);
+    // server_addr.sin_addr.s_addr = INADDR_ANY;
+
     serv_addr.sin_port = htons(portno);
 
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 

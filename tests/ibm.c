@@ -6,12 +6,15 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <string.h>
+#include <unistd.h>
 
-#define SERVER_PORT  12345
+#define SERVER_PORT  6667
 
 #define TRUE             1
 #define FALSE            0
 
+int
 main (int argc, char *argv[])
 {
   int    len, rc, on = 1;
@@ -22,7 +25,7 @@ main (int argc, char *argv[])
   struct sockaddr_in6   addr;
   int    timeout;
   struct pollfd fds[200];
-  int    nfds = 1, current_size = 0, i, j;
+  int    nfds = 2, current_size = 0, i, j;
 
   /*************************************************************/
   /* Create an AF_INET6 stream socket to receive incoming      */
@@ -197,11 +200,12 @@ main (int argc, char *argv[])
           /* Add the new incoming connection to the            */
           /* pollfd structure                                  */
           /*****************************************************/
+          printf("let's see value of nfds: %d\n",nfds);
           printf("  New incoming connection - %d\n", new_sd);
           fds[nfds].fd = new_sd;
           fds[nfds].events = POLLIN;
           nfds++;
-
+         // printf("let's see if this segfauls: %d\n",fds[nfds].fd);
           /*****************************************************/
           /* Loop back up and accept another incoming          */
           /* connection                                        */
@@ -324,4 +328,3 @@ main (int argc, char *argv[])
       close(fds[i].fd);
   }
 }
-
