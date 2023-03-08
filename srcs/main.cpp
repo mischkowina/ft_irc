@@ -9,13 +9,11 @@ int main(int argc, char **argv)
 	// if (argc != 3)
 	// 		std::cerr << Correct use: ./ircserv <port> <password> << std::endl;
 
-	bool endServer = false;
+	// bool endServer = false;
 	int on = 1;
 	int sockfd;
 	int portnum = 6667; 		// portnum = atoi(argv[1]);
-	int numClien = 200;
-
-	struct pollfd clientsFds[numClien];
+	// int numClien = 200;
 
 	sockaddr_in server_addr;
 
