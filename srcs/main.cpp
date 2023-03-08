@@ -1,22 +1,6 @@
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <vector>
-
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <cerrno>
-
-#include <signal.h>
-#include <poll.h>
-#include <sys/select.h>
-
-#include "server.hpp"
+#include "../include/irc.hpp"
+#include "../include/server.hpp"
+#include "../include/client.hpp"
 
 int main(int argc, char **argv)
 {
@@ -71,95 +55,136 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	// initialize poll structs
-	memset(clientsFds, 0 , sizeof(clientsFds));
-	for (int i = 0; i < numClien; ++i)
+	//set listening socket to non-blocking
+	int fcntl_return = fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	if (fcntl_return == -1)
 	{
-		clientsFds[i].fd = sockfd;
-		clientsFds[i].events = POLLIN;
+		std::cerr << "ERROR on fcntl" << std::endl;
+		exit(1);
 	}
 
-	// accept connection
-	sockaddr_in	client_addr;
-	socklen_t	clientSize = sizeof(client_addr);
+	std::cout << "Server running." << std::endl;
 
-	int		clientSocket = 0;
-	char	buffer[4096];
-	int		bytes_received = 0;
-	int		bytes_sent = 0;
+	//map container to store all the client objects
+	ft::ClientMap	client_map;//typedef in irc.hpp
+	
+	while (true)
+	{
+		//create struct pollfd[] with the appropriate size (number of connected clients + 1 for the listening socket)
+		struct pollfd pollfds[client_map.size() + 1];
 
-	do {
-		if (poll(clientsFds, numClien, -1) == -1)
+		//initalize the first struct pollfd[0] to the listening socket
+		bzero(&pollfds[0], sizeof(pollfds[0]));
+		pollfds[0].fd = sockfd;
+		pollfds[0].events = POLLIN;
+
+		//populate the rest of the struct pollfd[] with the client socket descriptors - doesn't happen until a connection is established
+		int i = 1;
+		for (ft::ClientMap::iterator it = client_map.begin(); it != client_map.end(); it++, i++)
 		{
-			std::cerr << "ERROR at poll()" << std::endl;
-			close(sockfd);
-			exit(1);
+			bzero(&pollfds[i], sizeof(pollfds[i]));
+			pollfds[i].fd = it->second.getSocket();
+			pollfds[i].events = POLLIN;
 		}
+
+		//poll
+		int pollreturn = poll(pollfds, client_map.size() + 1, 0);
+		if (pollreturn < 0)
+		{
+			std::cerr << "ERROR on poll" << std::endl;
+			exit(1);//tbd if we want to exit or just continue running the server??
+		}
+		if (pollreturn == 0)
+			continue ;
 		
-		// find fds which had returned POLLIN oposed to those stil listening
-		int size = numClien;
-		for (int i = 0; i < size; ++i)
+		// check for error on listening socket
+		if (pollfds[0].revents & POLLERR || pollfds[0].revents & POLLHUP)
 		{
-			// verify if able to read from client fds
-			if (clientsFds[i].revents == 0)
-				continue;
-			if (clientsFds[i].revents != POLLIN) {
-				std::cerr << "ERROR at accept()" << std::endl;
-				exit(1);
-			}
-			if (clientsFds[i].fd == sockfd)
+			std::cout << "Problem on listening socket?" << std::endl; //TBD if necessary
+		}
+		//check the listening socket for new pending connections
+		if (pollfds[0].revents & POLLIN)
+		{
+			sockaddr_in	client_addr;
+			socklen_t	clientSize = sizeof(client_addr);
+			int 		clientSocket;
+
+			//accept all new pending connections
+			while (true)
 			{
-				std::cout << "listening to the client" << std::endl;
-				do {
-					// clientSocket = accept(sockfd, (sockaddr *)&client_addr,	&clientSize);
-					clientSocket = accept(sockfd, NULL,	NULL);
-					if (clientSocket < 0) {
-						if (errno != EWOULDBLOCK)
-						{
-							std::cerr << "ERROR accept()" << std::endl;
-							exit(1);
-						}
-						endServer = true;
-						break;
-					}
-					std::cout << "new connection: " << clientSocket << std::endl;
-					// clientsFds[i].fd = 
-				} while (clientSocket != -1);
-			}
-			else {
-				std::cout << "read from the client sock: " << clientsFds[i].fd << std::endl;
-				do {
-					bzero(buffer, sizeof(buffer));
-
-					// receive data from a client
-					bytes_received = recv(clientsFds[i].fd, buffer, sizeof(buffer), 0);
-					if (bytes_received == -1) {
-						std::cerr << "ERROR reading from socket" << std::endl;
-						close(sockfd);
-						exit(1);
-					}
-
-					// return msg
-					bytes_sent = send(clientsFds[i].fd, buffer, sizeof(buffer), 0);
-					if (bytes_sent == -1) {
-						std::cerr << "ERROR reading from socket" << std::endl;
-						exit(1);
-					}
-					getsockname(clientSocket, (struct sockaddr *)&client_addr, &clientSize);
-					std::cout << "Here is the message: " << buffer << " :from client " 
-							<< inet_ntoa(client_addr.sin_addr) << std::endl;
-				} while (true);
+				clientSocket = accept(sockfd, (sockaddr *)&client_addr,	&clientSize); 
+				if (clientSocket == -1)
+					break ; 
+				//if succesfull, create new client object for the connection 
+				Client	newClient(clientSocket);
+				//save address in object
+				newClient.setIP(&client_addr);
+				//insert new client into client map
+				std::pair<ft::ClientMap::iterator, bool> insert_return = client_map.insert(make_pair(newClient.getKey(), newClient));
+				//if there is already a client with the same ip adress + socket, insertion fails
+				if (insert_return.second == false)
+				{
+					std::cout << "Connection request failed: duplicate key." << std::endl;
+					close(newClient.getSocket());
+				}
+				else
+					std::cout << "Client succesfully connected from " << newClient.getIP() << " on socket " << newClient.getSocket() << ". Total number of connected clients: " << client_map.size() << std::endl;
 			}
 		}
 
-
-	} while (endServer == false);
-
-	for (int i = 0; i < numClien; ++i)
-	{
-		if (clientsFds[i].fd > 0)
-			close(clientsFds[i].fd);
+		//check all other sockets (of the clients) for events
+		i = 1;
+		for (ft::ClientMap::iterator it = client_map.begin(); it != client_map.end(); it++, i++)
+		{
+			//skip all sockets without an event
+			if (pollfds[i].revents == 0)
+				continue ;
+			//check socket for error events, if yes close the connection and delete the client from the map
+			if (pollfds[i].revents & POLLERR || pollfds[i].revents & POLLHUP)
+			{
+				std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
+				close(pollfds[i].fd);
+				client_map.erase(it);
+				continue;
+			}
+			//check for POLLIN events
+			if (pollfds[i].revents & POLLIN)
+			{
+				char	buffer[1024]; //TBD: max size of messages
+				
+				//receive message from socket
+				int recv_return = recv(pollfds[i].fd, buffer, sizeof(buffer), 0);
+				if (recv_return < 0)
+				{
+					std::cerr << "ERROR on recv" << std::endl;
+					exit(1);
+				}
+				//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client
+				else if (recv_return == 0)
+				{
+					std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
+					close(pollfds[i].fd);
+					client_map.erase(it);
+					continue; 
+				}
+				else
+				{
+					//Display received message in terminal
+					std::cout << "Message received: " << buffer << std::endl;
+					//echo that message back to the client who send it
+					int send_return = send(pollfds[i].fd, buffer, recv_return, 0);
+					if (send_return < 0)
+					{
+						std::cerr << "ERROR on send" << std::endl;
+						std::cout << "Closing connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " ." << std::endl;
+						close(pollfds[i].fd);
+						client_map.erase(it);
+					}
+				}
+			}
+		}
 	}
+	//TO-DO: close all client sockets
 	close(sockfd);
 
 	return 0;

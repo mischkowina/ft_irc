@@ -2,7 +2,7 @@
 all: cli ser
 
 c: cli
-	./client localhost 7000
+	./client localhost 6667
 
 s: ser
 	./server localhost 6667
