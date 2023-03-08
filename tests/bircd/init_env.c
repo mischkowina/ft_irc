@@ -13,8 +13,8 @@ void		init_env(t_env *e)
   e->fds = (t_fd*)Xv(NULL, malloc(sizeof(*e->fds) * e->maxfd), "malloc");
   i = 0;
   while (i < e->maxfd)
-    {
-      clean_fd(&e->fds[i]);
-      i++;
-    }
+  {
+    clean_fd(&e->fds[i]);
+    i++;
+  }
 }

@@ -1,4 +1,3 @@
-
 #include "../include/irc.hpp"
 #include "../include/server.hpp"
 #include "../include/client.hpp"
@@ -10,9 +9,14 @@ int main(int argc, char **argv)
 	// if (argc != 3)
 	// 		std::cerr << Correct use: ./ircserv <port> <password> << std::endl;
 
+	bool endServer = false;
+	int on = 1;
 	int sockfd;
 	int portnum = 6667; 		// portnum = atoi(argv[1]);
-	
+	int numClien = 200;
+
+	struct pollfd clientsFds[numClien];
+
 	sockaddr_in server_addr;
 
 	// create a socket
@@ -22,18 +26,32 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+	if (setsockopt(sockfd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) == -1) {
+		std::cerr << "ERROR setsockopt()" << std::endl;
+		close(sockfd);
+		exit(1);
+	}
+
+	if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1) {
+		std::cerr << "ERROR fcntl" << std::endl;
+		exit(1);
+	}
+
 	// bind the socket to an IP / port
+	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(portnum);		// small endian -> big endian
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-		perror(NULL);
+		std::cerr << "ERROR binding" << std::endl;
+		close(sockfd);
 		exit(1);
 	}
 
-	// set the socket for listening port
+	// set the socket for listening to port
 	if (listen(sockfd, SOMAXCONN) == -1) {
 		std::cerr << "ERROR listening" << std::endl;
+		close(sockfd);
 		exit(1);
 	}
 
@@ -171,4 +189,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
