@@ -1,5 +1,5 @@
 #ifndef IRC_HPP
-# define IRC_HPP
+#define IRC_HPP
 
 #include <iostream>
 #include <string>
@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <vector>
+#include <list>
 #include <map>
 #include <utility>
 #include <iterator>
@@ -24,7 +25,7 @@
 #include <poll.h>
 #include <sys/select.h>
 
-#include "../include/client.hpp"
+#include "client.hpp"
 
 namespace ft
 {

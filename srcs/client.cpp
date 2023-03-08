@@ -1,7 +1,7 @@
 #include "../include/client.hpp"
 
 //Constructor with socket descriptor as parameter
-Client::Client(int socket) : socket(socket)
+Client::Client(int socket) : _socket(socket)
 {
 	// set new socket to non blocking
 	// int fcntl_return = fcntl(this->socket, F_SETFL, O_NONBLOCK);
@@ -17,32 +17,32 @@ Client::~Client() {}
 
 void	Client::setIP(sockaddr_in *client_addr)
 {
-	this->IP = inet_ntoa((struct in_addr)client_addr->sin_addr);
-	this->key = this->IP + ":";
-	this->key.append(ft::itos(this->socket));
+	this->_IP = inet_ntoa((struct in_addr)client_addr->sin_addr);
+	this->_key = this->_IP + ":";
+	this->_key.append(ft::itos(this->_socket));
 }
 
 void	Client::setIsOperator(bool status)
 {
-	this->isOperator = status;
+	this->_isOperator = status;
 }
 
 int	Client::getSocket() const
 {
-	return this->socket;
+	return this->_socket;
 }
 
 std::string	Client::getIP() const
 {
-	return this->IP;
+	return this->_IP;
 }
 
 std::string	Client::getKey() const
 {
-	return this->key;
+	return this->_key;
 }
 
 bool	Client::getIsOperator() const
 {
-	return this->isOperator;
+	return this->_isOperator;
 }

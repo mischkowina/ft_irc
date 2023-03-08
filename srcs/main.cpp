@@ -1,6 +1,7 @@
-#include "../include/irc.hpp"
-#include "../include/server.hpp"
-#include "../include/client.hpp"
+#include "irc.hpp"
+#include "server.hpp"
+#include "client.hpp"
+#include "channel.hpp"
 
 int main(int argc, char **argv)
 {
@@ -10,62 +11,15 @@ int main(int argc, char **argv)
 	// 		std::cerr << Correct use: ./ircserv <port> <password> << std::endl;
 
 	// bool endServer = false;
-	int on = 1;
-	int sockfd;
-	int portnum = 6667; 		// portnum = atoi(argv[1]);
-	// int numClien = 200;
-
-	sockaddr_in server_addr;
-
-	// create a socket
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1) {
-		std::cerr << "ERROR opening socket" << std::endl;
-		exit(1);
-	}
-
-	if (setsockopt(sockfd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) == -1) {
-		std::cerr << "ERROR setsockopt()" << std::endl;
-		close(sockfd);
-		exit(1);
-	}
-
-	if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1) {
-		std::cerr << "ERROR fcntl" << std::endl;
-		exit(1);
-	}
-
-	// bind the socket to an IP / port
-	memset(&server_addr, 0, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(portnum);		// small endian -> big endian
-	server_addr.sin_addr.s_addr = INADDR_ANY;
-	if (bind(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-		std::cerr << "ERROR binding" << std::endl;
-		close(sockfd);
-		exit(1);
-	}
-
-	// set the socket for listening to port
-	if (listen(sockfd, SOMAXCONN) == -1) {
-		std::cerr << "ERROR listening" << std::endl;
-		close(sockfd);
-		exit(1);
-	}
-
-	//set listening socket to non-blocking
-	int fcntl_return = fcntl(sockfd, F_SETFL, O_NONBLOCK);
-	if (fcntl_return == -1)
-	{
-		std::cerr << "ERROR on fcntl" << std::endl;
-		exit(1);
-	}
+	
+	// IRCserver(atoi(argv[1]), std::string str(argv[2]);
+	Server	IRCserver(6667, "password");
 
 	std::cout << "Server running." << std::endl;
 
 	//map container to store all the client objects
 	ft::ClientMap	client_map;//typedef in irc.hpp
-	
+
 	while (true)
 	{
 		//create struct pollfd[] with the appropriate size (number of connected clients + 1 for the listening socket)
@@ -73,7 +27,7 @@ int main(int argc, char **argv)
 
 		//initalize the first struct pollfd[0] to the listening socket
 		bzero(&pollfds[0], sizeof(pollfds[0]));
-		pollfds[0].fd = sockfd;
+		pollfds[0].fd = IRCserver.getServerSoc();
 		pollfds[0].events = POLLIN;
 
 		//populate the rest of the struct pollfd[] with the client socket descriptors - doesn't happen until a connection is established
@@ -110,7 +64,7 @@ int main(int argc, char **argv)
 			//accept all new pending connections
 			while (true)
 			{
-				clientSocket = accept(sockfd, (sockaddr *)&client_addr,	&clientSize); 
+				clientSocket = accept(IRCserver.getServerSoc(), (sockaddr *)&client_addr,	&clientSize); 
 				if (clientSocket == -1)
 					break ; 
 				//if succesfull, create new client object for the connection 
@@ -183,7 +137,6 @@ int main(int argc, char **argv)
 		}
 	}
 	//TO-DO: close all client sockets
-	close(sockfd);
 
 	return 0;
 }

@@ -1,16 +1,16 @@
 #ifndef CLIENT_HPP
-# define CLIENT_HPP
+#define CLIENT_HPP
 
-#include "../include/irc.hpp"
+#include "irc.hpp"
 
 class Client {
 	private:
-		int			socket;
-		std::string	IP;
-		std::string	key;// = IP:socket; e.g. 127.0.0.1:4
-		std::string	nick;
-		std::string	name;
-		bool		isOperator;
+		int			_socket;
+		std::string	_IP;
+		std::string	_key;// = IP:socket; e.g. 127.0.0.1:4
+		std::string	_nick;
+		std::string	_name;
+		bool		_isOperator;
 
 	public:
 		Client(int socket);
