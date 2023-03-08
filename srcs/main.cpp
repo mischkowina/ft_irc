@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 		int current_size = client_map.size() + 1;
 		for (int i = 0; i < current_size; i++)
 		{
-			// std::cout << "POLLFDS[" << i << "].revents: " << pollfds[i].revents << std::endl;
+			std::cout << "POLLFDS[" << i << "].revents: " << pollfds[i].revents << std::endl;
 			// if (pollfds[i].revents != POLLIN) //skip all pollfds without an event
 			// 	continue ;
 			// else if (pollfds[i].revents != POLLIN)//TBD if we want to protect against other events?
@@ -149,10 +149,7 @@ int main(int argc, char **argv)
 						char	buffer[80]; //TBD: max size of messages
 						int recv_return = recv(pollfds[i].fd, buffer, sizeof(buffer), 0);//TBD if we need any flag for recv?
 						if (recv_return < 0)//TBD ob exit oder lieber nur break ;
-						{
-							std::cerr << "ERROR recv failed" << std::endl;
-							exit(1);
-						}
+							break;
 						else if (recv_return == 0)//connection has been closed - OPEN: close the fd, remove the client object
 							break;
 						else
