@@ -11,27 +11,30 @@ int main(int argc, char **argv)
 	// 		std::cerr << Correct use: ./ircserv <port> <password> << std::endl;
 
 	// bool endServer = false;
-	
 	// IRCserver(atoi(argv[1]), std::string str(argv[2]);
-	Server	IRCserver(6667, "password");
+	std::string	pass=  "password";
+	Server		IRCserver(6667,pass);
 
 	std::cout << "Server running." << std::endl;
 
 	//map container to store all the client objects
-	ft::ClientMap	client_map;//typedef in irc.hpp
+	ft::ClientMap	client_map;			//typedef in irc.hpp
+
+	//create struct pollfd[] with the appropriate size (number of connected clients + 1 for the listening socket)
+	// struct pollfd pollfds[client_map.size() + 1];
+	std::vector<pollfd> pollfds(1);
+
+	//initalize the first struct pollfd[0] to the listening socket
+	bzero(&pollfds[0], sizeof(pollfds[0]));
+	pollfds[0].fd = IRCserver.getServerSoc();
+	pollfds[0].events = POLLIN;
 
 	while (true)
 	{
-		//create struct pollfd[] with the appropriate size (number of connected clients + 1 for the listening socket)
-		struct pollfd pollfds[client_map.size() + 1];
-
-		//initalize the first struct pollfd[0] to the listening socket
-		bzero(&pollfds[0], sizeof(pollfds[0]));
-		pollfds[0].fd = IRCserver.getServerSoc();
-		pollfds[0].events = POLLIN;
+	int i = 1;
 
 		//populate the rest of the struct pollfd[] with the client socket descriptors - doesn't happen until a connection is established
-		int i = 1;
+		pollfds.resize(client_map.size() + 1);
 		for (ft::ClientMap::iterator it = client_map.begin(); it != client_map.end(); it++, i++)
 		{
 			bzero(&pollfds[i], sizeof(pollfds[i]));
@@ -40,22 +43,22 @@ int main(int argc, char **argv)
 		}
 
 		//poll
-		int pollreturn = poll(pollfds, client_map.size() + 1, 0);
+		int pollreturn = poll(pollfds.data(), client_map.size() + 1, 0);
 		if (pollreturn < 0)
 		{
 			std::cerr << "ERROR on poll" << std::endl;
 			exit(1);//tbd if we want to exit or just continue running the server??
 		}
-		if (pollreturn == 0)
+		else if (pollreturn == 0)
 			continue ;
 		
 		// check for error on listening socket
-		if (pollfds[0].revents & POLLERR || pollfds[0].revents & POLLHUP)
+		else if (pollfds[0].revents & POLLERR || pollfds[0].revents & POLLHUP)
 		{
 			std::cout << "Problem on listening socket?" << std::endl; //TBD if necessary
 		}
 		//check the listening socket for new pending connections
-		if (pollfds[0].revents & POLLIN)
+		else if (pollfds[0].revents & POLLIN)
 		{
 			sockaddr_in	client_addr;
 			socklen_t	clientSize = sizeof(client_addr);
@@ -95,9 +98,11 @@ int main(int argc, char **argv)
 			if (pollfds[i].revents & POLLERR || pollfds[i].revents & POLLHUP)
 			{
 				std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
+				std::cout << "BEFORE :client_map.size() : " << client_map.size() << std::endl;
 				close(pollfds[i].fd);
-				client_map.erase(it);
-				continue;
+				client_map.erase(it);			// clientMap size back to 0
+				std::cout << "AFTER: client_map.size() : " << client_map.size() << std::endl;
+				break;				// from continue -> break; return to the top
 			}
 			//check for POLLIN events
 			if (pollfds[i].revents & POLLIN)
@@ -116,7 +121,9 @@ int main(int argc, char **argv)
 				{
 					std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
 					close(pollfds[i].fd);
+					// std::cout << "BEFORE :client_map.size() : " << client_map.size() << std::endl;
 					client_map.erase(it);
+					// std::cout << " AFTER: client_map.size() : " << client_map.size() << std::endl;
 					continue; 
 				}
 				else
