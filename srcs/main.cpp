@@ -22,13 +22,6 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	int fcntl_return = fcntl(sockfd, F_SETFL, O_NONBLOCK);
-	if (fcntl_return == -1)
-	{
-		std::cerr << "ERROR on fcntl" << std::endl;
-		exit(1);
-	}
-
 	// bind the socket to an IP / port
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(portnum);		// small endian -> big endian
@@ -44,6 +37,14 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+	//set listening socket to non-blocking
+	int fcntl_return = fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	if (fcntl_return == -1)
+	{
+		std::cerr << "ERROR on fcntl" << std::endl;
+		exit(1);
+	}
+
 	std::cout << "Server running." << std::endl;
 
 	// char			buffer[4096];
@@ -53,16 +54,16 @@ int main(int argc, char **argv)
 	
 	while (true)
 	{
-		//loop to accept all new connections
+		// loop to accept all new connections
 		// sockaddr_in	client_addr;//temporary variable / gets reused
 		// socklen_t	clientSize = sizeof(client_addr);//temporary variable / gets reused
-		// int 		clientSocket;//temporary variable / gets reused 
 
 		// while (true)
 		// {
-		// 	clientSocket = accept(sockfd, (sockaddr *)&client_addr,	&clientSize);
+		// 	int	clientSocket = accept(sockfd, (sockaddr *)&client_addr,	&clientSize);
 		// 	if (clientSocket == -1)
 		// 		break ;
+		// 	std::cout << "clientSock: " << clientSocket << std::endl;
 		// 	Client	newClient(clientSocket);
 		// 	newClient.setAddress(&client_addr);
 		// 	std::pair<ft::ClientMap::iterator, bool> insert_return = client_map.insert(make_pair(newClient.getAddress(), newClient));
@@ -71,6 +72,8 @@ int main(int argc, char **argv)
 		// 	else
 		// 		std::cout << "Client succesfully connected from " << newClient.getAddress() << ". Total number of connected clients: " << client_map.size() << std::endl;
 		// }
+
+		
 		//create struct pollfd[] with the appropriate size (number of connected clients + 1 for the listening socket)
 		struct pollfd pollfds[client_map.size() + 1];
 
@@ -95,6 +98,8 @@ int main(int argc, char **argv)
 			std::cerr << "ERROR on poll" << std::endl;
 			exit(1);//tbd if we want to exit or just continue running the server??
 		}
+		if (pollreturn == 0)
+			continue ;
 
 		int current_size = client_map.size() + 1;
 		for (int i = 0; i < current_size; i++)
@@ -109,27 +114,24 @@ int main(int argc, char **argv)
 			// }
 			if (pollfds[i].revents & POLLIN) //POLLIN event occured!
 			{
-				std::cout << "POLLIN EVENT" << std::endl;
 				if (i == 0) //first fd, listening socket --> if this has an event, there is a new connection pending that has to be accpeted
 				{
-					sockaddr_in	client_addr;//temporary variable / gets reused
-					socklen_t	clientSize = sizeof(client_addr);//temporary variable / gets reused
-					int 		clientSocket;//temporary variable / gets reused
+					sockaddr_in	client_addr;
+					socklen_t	clientSize = sizeof(client_addr);
+					int 		clientSocket;
 
 					//accept all new pending connections
 					while (true)
 					{
-						std::cout << "START ACCEPT LOOP" << std::endl;
-						bzero(&client_addr, sizeof(client_addr));
 						clientSocket = accept(sockfd, (sockaddr *)&client_addr,	&clientSize); 
 						if (clientSocket == -1)
 							break ; 
 						//if succesfull, create new client object for each connection 
 						Client	newClient(clientSocket);
-						//save address + socket in object
-						newClient.setAddress(&client_addr);
+						//save address in object
+						newClient.setIP(&client_addr);
 						//insert new client into client map
-						std::pair<ft::ClientMap::iterator, bool> insert_return = client_map.insert(make_pair(newClient.getAddress(), newClient));
+						std::pair<ft::ClientMap::iterator, bool> insert_return = client_map.insert(make_pair(newClient.getKey(), newClient));
 						//if there is already a client with the same ip adress + socket, insertion fails
 						if (insert_return.second == false)
 						{
@@ -137,9 +139,8 @@ int main(int argc, char **argv)
 							close(newClient.getSocket());
 						}
 						else
-							std::cout << "Client succesfully connected from " << newClient.getAddress() << ". Total number of connected clients: " << client_map.size() << std::endl;
+							std::cout << "Client succesfully connected from " << newClient.getIP() << " on socket " << newClient.getSocket() << ". Total number of connected clients: " << client_map.size() << std::endl;
 					}
-					std::cout << "END ACCEPT LOOP" << std::endl;
 				}
 				else
 				{
@@ -157,7 +158,6 @@ int main(int argc, char **argv)
 						else
 							std::cout << "Message received: " << buffer << std::endl; 
 					}
-
 				}
 			}
 		}

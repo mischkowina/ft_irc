@@ -6,7 +6,8 @@
 class Client {
 	private:
 		int			socket;
-		std::string	address;//IP adress + socket (!= port) -> 0.0.0.0:80
+		std::string	IP;
+		std::string	key;// = IP:socket; e.g. 127.0.0.1:4
 		std::string	nick;
 		std::string	name;
 		bool		isOperator;
@@ -15,11 +16,12 @@ class Client {
 		Client(int socket);
 		~Client();
 
-		void	setAddress(sockaddr_in *client_addr);
-		void	setIsOperator(bool status);
-		int		getSocket() const;
-		std::string	getAddress() const;
-		bool	getIsOperator() const;
+		void		setIP(sockaddr_in *client_addr);
+		void		setIsOperator(bool status);
+		int			getSocket() const;
+		std::string	getIP() const;
+		std::string	getKey() const;
+		bool		getIsOperator() const;
 };
 
 #endif

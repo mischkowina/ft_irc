@@ -4,25 +4,22 @@
 Client::Client(int socket) : socket(socket)
 {
 	// set new socket to non blocking
-	int fcntl_return = fcntl(this->socket, F_SETFL, O_NONBLOCK);
-	if (fcntl_return == -1)
-	{
-		std::cerr << "ERROR on fcntl" << std::endl;
-		close(this->socket);
-		exit(1);
-	}
+	// int fcntl_return = fcntl(this->socket, F_SETFL, O_NONBLOCK);
+	// if (fcntl_return == -1)
+	// {
+	// 	std::cerr << "ERROR on fcntl" << std::endl;
+	// 	close(this->socket);
+	// 	exit(1);
+	// }
 }
 
-Client::~Client()
-{
-	close(socket);
-}
+Client::~Client() {}
 
-void	Client::setAddress(sockaddr_in *client_addr)
+void	Client::setIP(sockaddr_in *client_addr)
 {
-	this->address = inet_ntoa((struct in_addr)client_addr->sin_addr);
-	this->address += ":";
-	this->address.append(ft::itos(this->socket));
+	this->IP = inet_ntoa((struct in_addr)client_addr->sin_addr);
+	this->key = this->IP + ":";
+	this->key.append(ft::itos(this->socket));
 }
 
 void	Client::setIsOperator(bool status)
@@ -35,9 +32,14 @@ int	Client::getSocket() const
 	return this->socket;
 }
 
-std::string	Client::getAddress() const
+std::string	Client::getIP() const
 {
-	return this->address;
+	return this->IP;
+}
+
+std::string	Client::getKey() const
+{
+	return this->key;
 }
 
 bool	Client::getIsOperator() const
