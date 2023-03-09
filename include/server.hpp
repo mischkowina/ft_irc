@@ -10,6 +10,7 @@ class Server
 		int				_portNum;
 		std::string		_password;
 		sockaddr_in		_server_addr;
+		ft::ClientMap	_clients;
 
 	public:
 		Server(int port, std::string pass);
@@ -18,6 +19,11 @@ class Server
 		
 		int			getServerSoc(void) const;
 		std::string	getPass(void) const;
+
+		void	run();
+
+		void	checkAllClientSockets(std::vector<pollfd> pollfds);
+		void	checkListeningSocket(std::vector<pollfd> pollfds);
 };
 
 #endif

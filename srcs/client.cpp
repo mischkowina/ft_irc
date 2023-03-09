@@ -11,6 +11,8 @@ Client::Client(int socket) : _socket(socket)
 		close(this->_socket);
 		exit(1);
 	}
+
+	this->_recvBuffer = "";
 }
 
 Client::~Client() {}
@@ -25,6 +27,13 @@ void	Client::setIP(sockaddr_in *client_addr)
 void	Client::setIsOperator(bool status)
 {
 	this->_isOperator = status;
+}
+
+void	Client::addToRecvBuffer(char *buffer, int len)
+{
+	std::string	msg(buffer, len);
+	this->_recvBuffer += msg;
+	std::cout << "RECVBUFFER: " << _recvBuffer << std::endl;
 }
 
 int	Client::getSocket() const
@@ -45,4 +54,14 @@ std::string	Client::getKey() const
 bool	Client::getIsOperator() const
 {
 	return this->_isOperator;
+}
+
+std::string	Client::getRecvBuffer() const
+{
+	return this->_recvBuffer;
+}
+
+void	Client::clearRecvBuffer(int end)
+{
+	this->_recvBuffer.erase(0, end + 1);
 }
