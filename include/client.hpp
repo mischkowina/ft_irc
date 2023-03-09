@@ -16,6 +16,7 @@ class Client {
 	public:
 		Client(int socket);
 		~Client();
+		Client	&operator=(Client const &rhs);
 
 		void		setIP(sockaddr_in *client_addr);
 		void		setIsOperator(bool status);

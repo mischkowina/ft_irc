@@ -24,6 +24,21 @@ void	Client::setIP(sockaddr_in *client_addr)
 	this->_key.append(ft::itos(this->_socket));
 }
 
+Client	&Client::operator=(Client const &rhs)
+{
+	if (this != &rhs)
+	{
+		this->_socket = rhs._socket;
+		this->_IP = rhs._IP;
+		this->_key = rhs._key;
+		this->_nick = rhs._nick;
+		this->_name = rhs._name;
+		this->_isOperator = rhs._isOperator;
+		this->_recvBuffer = rhs._recvBuffer;
+	}
+	return (*this);
+}
+
 void	Client::setIsOperator(bool status)
 {
 	this->_isOperator = status;
@@ -33,7 +48,6 @@ void	Client::addToRecvBuffer(char *buffer, int len)
 {
 	std::string	msg(buffer, len);
 	this->_recvBuffer += msg;
-	std::cout << "RECVBUFFER: " << _recvBuffer << std::endl;
 }
 
 int	Client::getSocket() const

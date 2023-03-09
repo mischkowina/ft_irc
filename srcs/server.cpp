@@ -118,7 +118,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 		if (pollfds[i].revents & POLLIN)
 		{
 			char	buffer[1024]; //TBD: max size of messages
-			Client	currentClient = it->second;
+			Client	*currentClient = &it->second;
 			
 			//receive message from socket
 			int recv_return = recv(pollfds[i].fd, buffer, sizeof(buffer), 0);
@@ -130,7 +130,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client
 			else if (recv_return == 0)
 			{
-				std::cout << "Connection with " << currentClient.getIP() << " on socket " << currentClient.getSocket() << " lost because recv." << std::endl;
+				std::cout << "Connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " lost because recv." << std::endl;
 				close(pollfds[i].fd);
 				_clients.erase(it);
 				break ; // from continue -> break; return to the top, same as line 105
@@ -140,25 +140,25 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			if (send_return < 0)
 			{
 				std::cerr << "ERROR on send" << std::endl;
-				std::cout << "Closing connection with " << currentClient.getIP() << " on socket " << currentClient.getSocket() << " ." << std::endl;
+				std::cout << "Closing connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " ." << std::endl;
 				close(pollfds[i].fd);
 				_clients.erase(it);
 			}
-			currentClient.addToRecvBuffer(buffer, recv_return);
-			std::string	msg = currentClient.getRecvBuffer();
+			currentClient->addToRecvBuffer(buffer, recv_return);
+			std::string	msg = currentClient->getRecvBuffer();
 			//check if the message was correctly terminated by \r\n, if not keep it in the Clients recvBuffer
 			size_t msg_end = msg.find_last_of("\r\n");
 			if (msg_end == std::string::npos)
 			{
-				std::cout << "Incomplete message from " << currentClient.getKey() << " - storing for later." << std::endl;
+				std::cout << "Incomplete message from " << currentClient->getKey() << " - storing for later." << std::endl;
 				continue ;
 			}
 
 			//get the full message to work with
-			msg = currentClient.getRecvBuffer().substr(0, msg_end);
+			msg = currentClient->getRecvBuffer().substr(0, msg_end);
 			//clear the message from the buffer (potentially keeping content that follows \r\n)
-			currentClient.clearRecvBuffer(msg_end);
-			std::cout << "Message received: " << msg << std::endl;
+			currentClient->clearRecvBuffer(msg_end);
+			std::cout << "Full message received from " << currentClient->getKey() << " :" << std::endl << msg << std::endl;
 		}
 	}
 }
