@@ -38,6 +38,7 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass)
 		close(_sockfd);
 		exit(1);
 	}
+	std::cout << "Server running." << std::endl;
 }
 
 Server::~Server(void)

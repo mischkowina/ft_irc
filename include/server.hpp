@@ -6,10 +6,10 @@
 class Server
 {
 	private:
-		int 		_sockfd;
-		int			_portNum;
-		std::string	_password;
-		sockaddr_in	_server_addr;
+		int 			_sockfd;
+		int				_portNum;
+		std::string		_password;
+		sockaddr_in		_server_addr;
 
 	public:
 		Server(int port, std::string pass);

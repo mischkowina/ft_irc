@@ -15,8 +15,6 @@ int main(int argc, char **argv)
 	std::string	pass=  "password";
 	Server		IRCserver(6667,pass);
 
-	std::cout << "Server running." << std::endl;
-
 	//map container to store all the client objects
 	ft::ClientMap	client_map;			//typedef in irc.hpp
 
@@ -31,7 +29,7 @@ int main(int argc, char **argv)
 
 	while (true)
 	{
-	int i = 1;
+		int i = 1;
 
 		//populate the rest of the struct pollfd[] with the client socket descriptors - doesn't happen until a connection is established
 		pollfds.resize(client_map.size() + 1);
@@ -51,9 +49,61 @@ int main(int argc, char **argv)
 		}
 		else if (pollreturn == 0)
 			continue ;
-		
+
+		//check all client sockets (of the clients) for events
+		i = 1;
+		for (ft::ClientMap::iterator it = client_map.begin(); it != client_map.end(); it++, i++)
+		{
+			//skip all sockets without an event
+			if (pollfds[i].revents == 0)
+				continue ;
+			//check socket for error events, if yes close the connection and delete the client from the map
+			if (pollfds[i].revents & POLLERR || pollfds[i].revents & POLLHUP)
+			{
+				std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost because POLLERR/POLLHUP." << std::endl;
+				close(pollfds[i].fd);
+				client_map.erase(it);
+				break;				// from continue -> break; return to the top
+			}
+			//check for POLLIN events
+			if (pollfds[i].revents & POLLIN)
+			{
+				char	buffer[1024]; //TBD: max size of messages
+				
+				//receive message from socket
+				int recv_return = recv(pollfds[i].fd, buffer, sizeof(buffer), 0);
+				if (recv_return < 0)
+				{
+					std::cerr << "ERROR on recv" << std::endl;
+					exit(1);
+				}
+				//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client
+				else if (recv_return == 0)
+				{
+					std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost because recv." << std::endl;
+					close(pollfds[i].fd);
+					client_map.erase(it);
+					break ; // from continue -> break; return to the top, same as line 105
+				}
+				else
+				{
+					//Display received message in terminal
+					std::cout << "Message received: " << buffer << std::endl;
+					//echo that message back to the client who send it
+					int send_return = send(pollfds[i].fd, buffer, recv_return, 0);
+					if (send_return < 0)
+					{
+						std::cerr << "ERROR on send" << std::endl;
+						std::cout << "Closing connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " ." << std::endl;
+						close(pollfds[i].fd);
+						client_map.erase(it);
+					}
+				}
+			}
+		}
+
 		// check for error on listening socket
-		else if (pollfds[0].revents & POLLERR || pollfds[0].revents & POLLHUP)
+		if (pollfds[0].revents & POLLERR || pollfds[0].revents & POLLHUP)
 		{
 			std::cout << "Problem on listening socket?" << std::endl; //TBD if necessary
 		}
@@ -84,62 +134,6 @@ int main(int argc, char **argv)
 				}
 				else
 					std::cout << "Client succesfully connected from " << newClient.getIP() << " on socket " << newClient.getSocket() << ". Total number of connected clients: " << client_map.size() << std::endl;
-			}
-		}
-
-		//check all other sockets (of the clients) for events
-		i = 1;
-		for (ft::ClientMap::iterator it = client_map.begin(); it != client_map.end(); it++, i++)
-		{
-			//skip all sockets without an event
-			if (pollfds[i].revents == 0)
-				continue ;
-			//check socket for error events, if yes close the connection and delete the client from the map
-			if (pollfds[i].revents & POLLERR || pollfds[i].revents & POLLHUP)
-			{
-				std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
-				std::cout << "BEFORE :client_map.size() : " << client_map.size() << std::endl;
-				close(pollfds[i].fd);
-				client_map.erase(it);			// clientMap size back to 0
-				std::cout << "AFTER: client_map.size() : " << client_map.size() << std::endl;
-				break;				// from continue -> break; return to the top
-			}
-			//check for POLLIN events
-			if (pollfds[i].revents & POLLIN)
-			{
-				char	buffer[1024]; //TBD: max size of messages
-				
-				//receive message from socket
-				int recv_return = recv(pollfds[i].fd, buffer, sizeof(buffer), 0);
-				if (recv_return < 0)
-				{
-					std::cerr << "ERROR on recv" << std::endl;
-					exit(1);
-				}
-				//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client
-				else if (recv_return == 0)
-				{
-					std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
-					close(pollfds[i].fd);
-					// std::cout << "BEFORE :client_map.size() : " << client_map.size() << std::endl;
-					client_map.erase(it);
-					// std::cout << " AFTER: client_map.size() : " << client_map.size() << std::endl;
-					continue; 
-				}
-				else
-				{
-					//Display received message in terminal
-					std::cout << "Message received: " << buffer << std::endl;
-					//echo that message back to the client who send it
-					int send_return = send(pollfds[i].fd, buffer, recv_return, 0);
-					if (send_return < 0)
-					{
-						std::cerr << "ERROR on send" << std::endl;
-						std::cout << "Closing connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " ." << std::endl;
-						close(pollfds[i].fd);
-						client_map.erase(it);
-					}
-				}
 			}
 		}
 	}
