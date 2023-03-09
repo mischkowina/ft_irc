@@ -136,14 +136,14 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				break ; // from continue -> break; return to the top, same as line 105
 			}
 			//echo that message back to the client who send it --> REMOVE LATER
-			int send_return = send(pollfds[i].fd, buffer, recv_return, 0);
-			if (send_return < 0)
-			{
-				std::cerr << "ERROR on send" << std::endl;
-				std::cout << "Closing connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " ." << std::endl;
-				close(pollfds[i].fd);
-				_clients.erase(it);
-			}
+			// int send_return = send(pollfds[i].fd, buffer, recv_return, 0);
+			// if (send_return < 0)
+			// {
+			// 	std::cerr << "ERROR on send" << std::endl;
+			// 	std::cout << "Closing connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " ." << std::endl;
+			// 	close(pollfds[i].fd);
+			// 	_clients.erase(it);
+			// }
 			currentClient->addToRecvBuffer(buffer, recv_return);
 			std::string	msg = currentClient->getRecvBuffer();
 			//check if the message was correctly terminated by \r\n, if not keep it in the Clients recvBuffer
@@ -159,6 +159,15 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			//clear the message from the buffer (potentially keeping content that follows \r\n)
 			currentClient->clearRecvBuffer(msg_end);
 			std::cout << "Full message received from " << currentClient->getKey() << " :" << std::endl << msg << std::endl;
+			//echo that message back to the client who send it --> REMOVE LATER
+			int send_return = send(pollfds[i].fd, msg.c_str(), msg.length(), 0);
+			if (send_return < 0)
+			{
+				std::cerr << "ERROR on send" << std::endl;
+				std::cout << "Closing connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " ." << std::endl;
+				close(pollfds[i].fd);
+				_clients.erase(it);
+			}
 		}
 	}
 }
