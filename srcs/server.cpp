@@ -152,14 +152,14 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			currentClient->clearRecvBuffer(msg_end);
 			std::cout << "Full message received from " << currentClient->getKey() << " :" << std::endl << msg << std::endl;
 			//echo that message back to the client who send it --> REMOVE LATER
-			int send_return = send(pollfds[i].fd, msg.c_str(), msg.length(), 0);
-			if (send_return < 0)
-			{
-				std::cerr << "ERROR on send" << std::endl;
-				std::cout << "Closing connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " ." << std::endl;
-				close(pollfds[i].fd);
-				_clients.erase(it);
-			}
+			// int send_return = send(pollfds[i].fd, msg.c_str(), msg.length(), 0);
+			// if (send_return < 0)
+			// {
+			// 	std::cerr << "ERROR on send" << std::endl;
+			// 	std::cout << "Closing connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " ." << std::endl;
+			// 	close(pollfds[i].fd);
+			// 	_clients.erase(it);
+			// }
 			this->process_request(currentClient, msg);
 		}
 	}
@@ -213,6 +213,13 @@ void	Server::process_request(Client *client, std::string msg)
 		//send error message to client
 		return ;
 	}
+	//TESTING:
+	std::cout << "Prefix: " << message.getPrefix() << std::endl;
+	std::cout << "Command: " << message.getCommand() << std::endl;
+	std::cout << "Parameters:" << std::endl;
+	std::vector<std::string>	parameters = message.getParameters();
+	for (std::vector<std::string>::iterator it = parameters.begin(); it != parameters.end(); it++)
+		std::cout << *it << std::endl;
 	(void)client;//only to compile
 	//next steps:
 	//check if message._command is a valid command -> compare with a command map -> still has to be created

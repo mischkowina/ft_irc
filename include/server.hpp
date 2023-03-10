@@ -1,7 +1,7 @@
 #ifndef __SERVER__HPP
-#define __SERVER__HPP
+# define __SERVER__HPP
 
-#include "irc.hpp"
+# include "irc.hpp"
 
 class Server
 {

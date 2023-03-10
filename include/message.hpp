@@ -14,7 +14,10 @@ class Message {
 		Message(std::string	msg);
 		~Message();
 
-		bool	isValid() const;
+		std::string					getPrefix() const;
+		std::string					getCommand() const;
+		std::vector<std::string>	getParameters() const;
+		bool						isValid() const;
 };
 
 #endif
