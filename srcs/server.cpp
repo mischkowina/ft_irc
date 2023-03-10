@@ -109,7 +109,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 		//check socket for error events, if yes close the connection and delete the client from the map
 		if (pollfds[i].revents & POLLERR || pollfds[i].revents & POLLHUP)
 		{
-			std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost because POLLERR/POLLHUP." << std::endl;
+			std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
 			close(pollfds[i].fd);
 			_clients.erase(it);
 			break;				// from continue -> break; return to the top
@@ -130,7 +130,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client
 			else if (recv_return == 0)
 			{
-				std::cout << "Connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " lost because recv." << std::endl;
+				std::cout << "Connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " lost." << std::endl;
 				close(pollfds[i].fd);
 				_clients.erase(it);
 				break ; // from continue -> break; return to the top, same as line 105
@@ -213,6 +213,7 @@ void	Server::process_request(Client *client, std::string msg)
 		//send error message to client
 		return ;
 	}
+
 	//TESTING:
 	std::cout << "Prefix: " << message.getPrefix() << std::endl;
 	std::cout << "Command: " << message.getCommand() << std::endl;
@@ -220,6 +221,7 @@ void	Server::process_request(Client *client, std::string msg)
 	std::vector<std::string>	parameters = message.getParameters();
 	for (std::vector<std::string>::iterator it = parameters.begin(); it != parameters.end(); it++)
 		std::cout << *it << std::endl;
+
 	(void)client;//only to compile
 	//next steps:
 	//check if message._command is a valid command -> compare with a command map -> still has to be created
