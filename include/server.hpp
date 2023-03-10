@@ -24,6 +24,7 @@ class Server
 
 		void	checkAllClientSockets(std::vector<pollfd> pollfds);
 		void	checkListeningSocket(std::vector<pollfd> pollfds);
+		void	process_request(Client *client, std::string msg);
 };
 
 #endif

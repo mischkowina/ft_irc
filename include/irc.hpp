@@ -26,6 +26,7 @@
 #include <sys/select.h>
 
 #include "client.hpp"
+#include "message.hpp"
 
 namespace ft
 {

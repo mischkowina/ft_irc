@@ -135,19 +135,11 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				_clients.erase(it);
 				break ; // from continue -> break; return to the top, same as line 105
 			}
-			//echo that message back to the client who send it --> REMOVE LATER
-			// int send_return = send(pollfds[i].fd, buffer, recv_return, 0);
-			// if (send_return < 0)
-			// {
-			// 	std::cerr << "ERROR on send" << std::endl;
-			// 	std::cout << "Closing connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " ." << std::endl;
-			// 	close(pollfds[i].fd);
-			// 	_clients.erase(it);
-			// }
+			//add message to what is in the clients message buffer
 			currentClient->addToRecvBuffer(buffer, recv_return);
 			std::string	msg = currentClient->getRecvBuffer();
 			//check if the message was correctly terminated by \r\n, if not keep it in the Clients recvBuffer
-			size_t msg_end = msg.find_last_of("\r\n");
+			size_t msg_end = msg.find_last_of("\r\n");//maybe find first of?
 			if (msg_end == std::string::npos)
 			{
 				std::cout << "Incomplete message from " << currentClient->getKey() << " - storing for later." << std::endl;
@@ -168,6 +160,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				close(pollfds[i].fd);
 				_clients.erase(it);
 			}
+			this->process_request(currentClient, msg);
 		}
 	}
 }
@@ -208,4 +201,20 @@ void	Server::checkListeningSocket(std::vector<pollfd> pollfds)
 				std::cout << "Client succesfully connected from " << newClient.getIP() << " on socket " << newClient.getSocket() << ". Total number of connected clients: " << _clients.size() << std::endl;
 		}
 	}
+}
+
+void	Server::process_request(Client *client, std::string msg)
+{
+	//turn message string into message object --> parsing in Message constructor
+	Message	message(msg);
+	//check if the message was in valid format -> else return and send an error message to client
+	if (message.isValid() == false)
+	{
+		//send error message to client
+		return ;
+	}
+	(void)client;//only to compile
+	//next steps:
+	//check if message._command is a valid command -> compare with a command map -> still has to be created
+	//execute corresponding command
 }

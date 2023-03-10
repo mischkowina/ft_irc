@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: pdolinar <pdolinar@student.42.fr>          +#+  +:+       +#+         #
+#    By: smischni <smischni@student.42wolfsburg.de> +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/02 12:40:43 by pdolinar          #+#    #+#              #
-#    Updated: 2023/03/08 18:56:01 by pdolinar         ###   ########.fr        #
+#    Updated: 2023/03/10 11:54:19 by smischni         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,6 +15,7 @@ INC		:=		./include
 HEADER	:=		$(INC)/server.hpp \
 				$(INC)/client.hpp \
 				$(INC)/channel.hpp \
+				$(INC)/message.hpp \
 				$(INC)/irc.hpp
 
 CC			:=	c++
@@ -24,6 +25,7 @@ RM			:=	rm -rf
 SRC			:=	main.cpp \
 				client.cpp \
 				server.cpp \
+				message.cpp \
 				utils.cpp
 
 SRC_DIR		:=	srcs/
