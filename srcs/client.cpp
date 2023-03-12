@@ -1,4 +1,4 @@
-#include "../include/client.hpp"
+#include "client.hpp"
 
 //Constructor with socket descriptor as parameter
 Client::Client(int socket) : _socket(socket)

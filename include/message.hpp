@@ -9,6 +9,7 @@ class Message {
 		std::string					_command;
 		std::vector<std::string>	_parameters;
 		bool						_isValid;
+		bool						_isCommand;
 
 	public:
 		Message(std::string	msg);
@@ -18,6 +19,9 @@ class Message {
 		std::string					getCommand() const;
 		std::vector<std::string>	getParameters() const;
 		bool						isValid() const;
+		bool						isCommand() const;
+
+		void	runCmd();
 };
 
 #endif

@@ -18,4 +18,14 @@ class Channel
 		~Channel();
 };
 
+void	connect();
+void	join();
+void	help();
+void	closeChannel();
+void	info();
+void	whois();
+void	changeNick();
+void	msg();
+void	displayNames();
+
 #endif

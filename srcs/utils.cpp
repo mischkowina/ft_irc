@@ -1,4 +1,4 @@
-#include "../include/irc.hpp"
+#include "irc.hpp"
 
 std::string	ft::itos(int i)
 {

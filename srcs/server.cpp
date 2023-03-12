@@ -182,7 +182,7 @@ void	Server::checkListeningSocket(std::vector<pollfd> pollfds)
 		//accept all new pending connections
 		while (true)
 		{
-			clientSocket = accept(_sockfd, (sockaddr *)&client_addr,	&clientSize); 
+			clientSocket = accept(_sockfd, (sockaddr *)&client_addr, &clientSize); 
 			if (clientSocket == -1)
 				break ; 
 			//if succesfull, create new client object for the connection 
@@ -214,8 +214,8 @@ void	Server::process_request(Client *client, std::string msg)
 		return ;
 	}
 
-	//TESTING:
-	std::cout << "Prefix: " << message.getPrefix() << std::endl;
+	//TESTING:				/help  /info  /join #newchannel
+	std::cout << "Prefix: " << message.getPrefix() << std::endl;		// this should be '/'
 	std::cout << "Command: " << message.getCommand() << std::endl;
 	std::cout << "Parameters:" << std::endl;
 	std::vector<std::string>	parameters = message.getParameters();
@@ -223,7 +223,94 @@ void	Server::process_request(Client *client, std::string msg)
 		std::cout << *it << std::endl;
 
 	(void)client;//only to compile
+
+	if (message.isCommand() == true)
+		message.runCmd();
+
 	//next steps:
-	//check if message._command is a valid command -> compare with a command map -> still has to be created
-	//execute corresponding command
+	// implement functions, channels, ...
 }
+
+void	Message::runCmd()			// move to msg.cpp
+{
+	std::map<std::string, FuncPtr> cmd;
+	cmd["/connect"] = &connect;
+	cmd["/join"] = &join;
+	cmd["/help"] = &help;
+	cmd["/close"] = &closeChannel;
+	cmd["/part"] = &closeChannel;
+	cmd["/info"] = &info;
+	cmd["/whois"] = &whois;
+	cmd["/nick"] = &changeNick;
+	cmd["/msg"] = &msg;
+	cmd["/names"] = &displayNames;
+	// add the rest ...
+
+	// get (weird/awkward) const variable to work with
+	const std::map<std::string, FuncPtr> cmdMap = cmd;
+
+	std::map<std::string, FuncPtr>::const_iterator it = cmdMap.find(_command);
+	if (it == cmdMap.end())
+	{
+		std::cerr << "Error: Invalid command " << _command << std::endl;
+		return;
+	}
+	(*it->second)();
+}
+
+// ahhh .... check the documentation
+void	connect()
+{
+	// establish initial connection -> server should add this new client
+	// and enable him to open/manage new channels and usage of general functions
+}
+
+void	join()
+{
+	//create new channel [#name] if it doesn't exist yet
+	std::cout << " ----> i want to get into a channel!\n";
+}
+
+void	help()
+{
+	// display standard stuff ...
+	std::cout << " ----> what help?\n";
+}
+
+void	closeChannel()
+{
+	// leave channel, and if it's empty, remove it
+}
+
+void	info()
+{
+	// display standard stuff ...
+
+}
+
+void	whois()
+{
+	// display info about specific user
+		// go through the channel's list of users
+		// and return error / user's info
+}
+
+void	changeNick()
+{
+	// change user's nick
+	// Each user is distinguished from other users by a unique nickname
+	// having a maximum length of nine (9) characters
+}
+
+void	msg()
+{
+	// send private msg to a specific user
+}
+
+void	displayNames()
+{
+	// display all users of a specific channel(s)
+		// go through the channel's list of users
+}
+
+// operator: tbc

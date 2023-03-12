@@ -27,4 +27,20 @@ class Server
 		void	process_request(Client *client, std::string msg);
 };
 
+/* 
+ * functions to comunicate with clients
+ */
+typedef void (*FuncPtr)();
+
+
+void	connect();
+void	join();
+void	help();
+void	closeChannel();
+void	info();
+void	whois();
+void	changeNick();
+void	msg();
+void	displayNames();
+
 #endif
