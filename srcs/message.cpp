@@ -8,18 +8,18 @@ Message::Message(std::string msg)
 	_isValid = false;
 	_isCommand = false;
 
-	// parse cmd 		-> /join #channel 	/help 	/whois user
-	// /cmd -o arg; /cmd #arg;
-	if (msg.length() > 1 && msg[0] == '/') {
-		_isCommand = true;
-		size_t pos = msg.find(' ');
-		_command = msg.substr(0, pos);
-		// not considering excesive spaces atm, include it to loop
-		if (msg[++pos] == '-')
-		{
-			_parameters.push_back("TEST");
-		}
-	}
+	// // parse cmd 		-> /join #channel 	/help 	/whois user
+	// // /cmd -o arg; /cmd #arg;
+	// if (msg.length() > 1 && msg[0] == '/') {
+	// 	_isCommand = true;
+	// 	size_t pos = msg.find(' ');
+	// 	_command = msg.substr(0, pos);
+	// 	// not considering excesive spaces atm, include it to loop
+	// 	if (msg[++pos] == '-')
+	// 	{
+	// 		_parameters.push_back("TEST");
+	// 	}
+	// }
 
 	//checks if the message is within maximum length according to IRC documentation
 	if (msg.length() > 510)

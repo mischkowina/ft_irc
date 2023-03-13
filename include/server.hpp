@@ -11,6 +11,7 @@ class Server
 		std::string		_password;
 		sockaddr_in		_server_addr;
 		ft::ClientMap	_clients;
+		// std::map<std::string, Channel>	_channels;
 
 	public:
 		Server(int port, std::string pass);

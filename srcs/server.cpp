@@ -224,8 +224,8 @@ void	Server::process_request(Client *client, std::string msg)
 
 	(void)client;//only to compile
 
-	if (message.isCommand() == true)
-		message.runCmd();
+	// if (message.isCommand() == true)
+	message.runCmd();
 
 	//next steps:
 	// implement functions, channels, ...
@@ -234,16 +234,16 @@ void	Server::process_request(Client *client, std::string msg)
 void	Message::runCmd()			// move to msg.cpp
 {
 	std::map<std::string, FuncPtr> cmd;
-	cmd["/connect"] = &connect;
-	cmd["/join"] = &join;
-	cmd["/help"] = &help;
-	cmd["/close"] = &closeChannel;
-	cmd["/part"] = &closeChannel;
-	cmd["/info"] = &info;
-	cmd["/whois"] = &whois;
-	cmd["/nick"] = &changeNick;
-	cmd["/msg"] = &msg;
-	cmd["/names"] = &displayNames;
+	cmd["CONNECT"] = &connect;
+	cmd["JOIN"] = &join;
+	cmd["HELP"] = &help;
+	cmd["CLOSE"] = &closeChannel;
+	cmd["PART"] = &closeChannel;
+	cmd["INFO"] = &info;
+	cmd["WHOIS"] = &whois;
+	cmd["NICK"] = &changeNick;
+	cmd["MSG"] = &msg;
+	cmd["NAMES"] = &displayNames;
 	// add the rest ...
 
 	// get (weird/awkward) const variable to work with
@@ -255,6 +255,7 @@ void	Message::runCmd()			// move to msg.cpp
 		std::cerr << "Error: Invalid command " << _command << std::endl;
 		return;
 	}
+	//check if the User already used PASS, NICK and USER (except QUIT??)
 	(*it->second)();
 }
 
@@ -297,6 +298,48 @@ void	whois()
 
 void	changeNick()
 {
+	// Command: NICK
+	// Parameters: <nickname> (<hopcount>)
+
+// 	Command: NICK
+//    Parameters: <nickname> [ <hopcount> ]
+
+//    NICK message is used to give user a nickname or change the previous
+//    one.  The <hopcount> parameter is only used by servers to indicate
+//    how far away a nick is from its home server.  A local connection has
+//    a hopcount of 0.  If supplied by a client, it must be ignored.
+
+//    If a NICK message arrives at a server which already knows about an
+//    identical nickname for another client, a nickname collision occurs.
+//    As a result of a nickname collision, all instances of the nickname
+//    are removed from the server's database, and a KILL command is issued
+//    to remove the nickname from all other server's database. If the NICK
+//    message causing the collision was a nickname change, then the
+//    original (old) nick must be removed as well.
+
+//    If the server recieves an identical NICK from a client which is
+//    directly connected, it may issue an ERR_NICKCOLLISION to the local
+//    client, drop the NICK command, and not generate any kills.
+
+
+
+// Oikarinen & Reed                                               [Page 14]
+
+// RFC 1459              Internet Relay Chat Protocol              May 1993
+
+
+//    Numeric Replies:
+
+//            ERR_NONICKNAMEGIVEN             ERR_ERRONEUSNICKNAME
+//            ERR_NICKNAMEINUSE               ERR_NICKCOLLISION
+
+//    Example:
+
+//    NICK Wiz                        ; Introducing new nick "Wiz".
+
+//    :WiZ NICK Kilroy                ; WiZ changed his nickname to Kilroy.
+
+
 	// change user's nick
 	// Each user is distinguished from other users by a unique nickname
 	// having a maximum length of nine (9) characters
