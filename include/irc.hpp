@@ -33,7 +33,7 @@ namespace ft
 	typedef std::map<std::string, class Client>	ClientMap;
 
 	std::string	itos(int i);
-	std::string	skipSpaces(std::string msg);
+	std::string	skipCharacter(std::string msg, char c);
 }
 
 #endif

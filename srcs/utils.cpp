@@ -9,10 +9,10 @@ std::string	ft::itos(int i)
 	return (str);
 }
 
-std::string	ft::skipSpaces(std::string msg)
+std::string	ft::skipCharacter(std::string msg, char c)
 {
 	size_t	i = 0;
-	while (msg[i] == ' ' && i < msg.length())
+	while (msg[i] == c && i < msg.length())
 		i++;
 	if (i > 0)
 		msg.erase(0, i);

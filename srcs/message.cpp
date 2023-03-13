@@ -3,51 +3,27 @@
 Message::Message(std::string msg)
 {
 	// initialize
-	_prefix = "null";
-	_command = "null";
+	_prefix = "";
+	_command = "";
 	_isValid = false;
-	_isCommand = false;
-
-	// // parse cmd 		-> /join #channel 	/help 	/whois user
-	// // /cmd -o arg; /cmd #arg;
-	// if (msg.length() > 1 && msg[0] == '/') {
-	// 	_isCommand = true;
-	// 	size_t pos = msg.find(' ');
-	// 	_command = msg.substr(0, pos);
-	// 	// not considering excesive spaces atm, include it to loop
-	// 	if (msg[++pos] == '-')
-	// 	{
-	// 		_parameters.push_back("TEST");
-	// 	}
-	// }
 
 	//checks if the message is within maximum length according to IRC documentation
 	if (msg.length() > 510)
 	{
-		this->_isValid = false;
 		//send error message to client(would need client object as parameter)?? or in calling function??
 		return ;
 	}
 
 	//checks for a prefix and extracts it, then erases it from message string
-	if (msg[0] == ':')
+	//prefixes start with ':' and end at the next space character
+	if (msg[0] == ':' && msg.find(' ', 0) != std::string::npos)
 	{
-		if (msg.find(' ', 0) != std::string::npos)
-		{
-			this->_prefix = msg.substr(1, msg.find(' ', 0));
-			msg.erase(0, msg.find(' ', 0));
-		}
-		//if nothing follows after a prefix, the request is incomplete, error
-		else
-		{
-			this->_isValid = false;
-			//send error message to client(would need client object as parameter)?? or in calling function??
-			return ;
-		}
+		this->_prefix = msg.substr(1, msg.find(' ', 0));
+		msg.erase(0, msg.find(' ', 0));
 	}
 
 	//skip & erase all spaces at beginning of the string
-	msg = ft::skipSpaces(msg);
+	msg = ft::skipCharacter(msg, ' ');
 
 	//extracts everything before the next space as the command
 	if (!msg.empty())
@@ -69,13 +45,12 @@ Message::Message(std::string msg)
 	//if there is no command, return & error (every request needs a command)
 	else
 	{
-		this->_isValid = false;
 		//send error message to client(would need client object as parameter)?? or in calling function??
 		return ;
 	}
 
 	//skip & erase all spaces at beginning of the string
-	msg = ft::skipSpaces(msg);
+	msg = ft::skipCharacter(msg, ' ');
 
 	//parse parameters
 	while (!msg.empty())
@@ -91,7 +66,7 @@ Message::Message(std::string msg)
 		{
 			this->_parameters.push_back(msg.substr(0, msg.find(' ', 0)));
 			msg.erase(0, msg.find(' ', 0) + 1);
-			msg = ft::skipSpaces(msg);
+			msg = ft::skipCharacter(msg, ' ');
 		}
 		//if there is no more space, take the rest of the string as parameter
 		else
@@ -123,9 +98,4 @@ std::vector<std::string>	Message::getParameters() const
 bool	Message::isValid() const
 {
 	return this->_isValid;
-}
-
-bool	Message::isCommand() const
-{
-	return this->_isCommand;
 }

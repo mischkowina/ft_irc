@@ -77,5 +77,9 @@ std::string	Client::getRecvBuffer() const
 
 void	Client::clearRecvBuffer(int end)
 {
-	this->_recvBuffer.erase(0, end + 1);
+	this->_recvBuffer.erase(0, end);
+	if (this->_recvBuffer[0] == '\r')
+		this->_recvBuffer.erase(0, 1);
+	if (this->_recvBuffer[0] == '\n')
+		this->_recvBuffer.erase(0, 1);
 }

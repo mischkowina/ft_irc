@@ -137,30 +137,28 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			}
 			//add message to what is in the clients message buffer
 			currentClient->addToRecvBuffer(buffer, recv_return);
-			std::string	msg = currentClient->getRecvBuffer();
-			//check if the message was correctly terminated by \r\n, if not keep it in the Clients recvBuffer
-			size_t msg_end = msg.find_last_of("\r\n");//maybe find first of?
-			if (msg_end == std::string::npos)
+			
+			//process overall content of the buffer unless it is empty
+			while (currentClient->getRecvBuffer().empty() == false)
 			{
-				std::cout << "Incomplete message from " << currentClient->getKey() << " - storing for later." << std::endl;
-				continue ;
-			}
+				std::string	msg = currentClient->getRecvBuffer();
+				//find either a \r or \n to signal end of a message
+				size_t msg_end = msg.find_first_of("\r\n");
+				//if there is none, the message is incomplete and stays stored in the buffer
+				if (msg_end == std::string::npos)
+				{
+					std::cout << "Incomplete message from " << currentClient->getKey() << " - storing for later." << std::endl;
+					break ;
+				}
 
-			//get the full message to work with
-			msg = currentClient->getRecvBuffer().substr(0, msg_end);
-			//clear the message from the buffer (potentially keeping content that follows \r\n)
-			currentClient->clearRecvBuffer(msg_end);
-			std::cout << "Full message received from " << currentClient->getKey() << " :" << std::endl << msg << std::endl;
-			//echo that message back to the client who send it --> REMOVE LATER
-			// int send_return = send(pollfds[i].fd, msg.c_str(), msg.length(), 0);
-			// if (send_return < 0)
-			// {
-			// 	std::cerr << "ERROR on send" << std::endl;
-			// 	std::cout << "Closing connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " ." << std::endl;
-			// 	close(pollfds[i].fd);
-			// 	_clients.erase(it);
-			// }
-			this->process_request(currentClient, msg);
+				//get the terminated message to work with
+				msg = currentClient->getRecvBuffer().substr(0, msg_end);
+				//clear the message from the buffer (potentially keeping content that follows \r\n)
+				currentClient->clearRecvBuffer(msg_end);
+				std::cout << "Full message received from " << currentClient->getKey() << " :" << std::endl << msg << std::endl;
+				//process the message (further parse it and execute the according command)
+				this->process_request(currentClient, msg);
+			}
 		}
 	}
 }
@@ -224,7 +222,6 @@ void	Server::process_request(Client *client, std::string msg)
 
 	(void)client;//only to compile
 
-	// if (message.isCommand() == true)
 	message.runCmd();
 
 	//next steps:
