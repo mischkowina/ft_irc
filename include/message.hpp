@@ -19,7 +19,6 @@ class Message {
 		std::vector<std::string>	getParameters() const;
 		bool						isValid() const;
 
-		void	runCmd();
 };
 
 #endif
