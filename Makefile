@@ -19,13 +19,14 @@ HEADER	:=		$(INC)/server.hpp \
 				$(INC)/irc.hpp
 
 CC			:=	c++
-CPP_FLAGS	:=	-Wall -Wextra -Werror -std=c++98 -g
+CPP_FLAGS	:=	-Wall -Wextra -Werror -std=c++98 -g -Wfatal-errors
 RM			:=	rm -rf
 
 SRC			:=	main.cpp \
 				client.cpp \
 				server.cpp \
 				message.cpp \
+				channel.cpp \
 				utils.cpp
 
 SRC_DIR		:=	srcs/

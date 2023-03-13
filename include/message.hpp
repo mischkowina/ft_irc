@@ -21,7 +21,6 @@ class Message {
 		bool						isValid() const;
 		bool						isCommand() const;
 
-		void	runCmd();
 };
 
 #endif

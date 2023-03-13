@@ -4,6 +4,8 @@
 
 #include "irc.hpp"
 
+class Client;
+
 class Channel
 {
 	private:

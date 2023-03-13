@@ -39,6 +39,22 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass)
 		exit(1);
 	}
 	std::cout << "Server running." << std::endl;
+
+	// functions
+	std::map<std::string, FuncPtr> cmd;
+	cmd["CONNECT"] = &connect;
+	cmd["JOIN"] = &join;
+	cmd["HELP"] = &help;
+	cmd["CLOSE"] = &closeChannel;
+	cmd["PART"] = &closeChannel;
+	cmd["INFO"] = &info;
+	cmd["WHOIS"] = &whois;
+	cmd["NICK"] = &changeNick;
+	cmd["PRIVMSG"] = &sendMsg;
+	cmd["NAMES"] = &displayNames;
+	// add the rest ...
+
+	_cmdMap = cmd;
 }
 
 Server::~Server(void)
@@ -184,7 +200,7 @@ void	Server::checkListeningSocket(std::vector<pollfd> pollfds)
 		{
 			clientSocket = accept(_sockfd, (sockaddr *)&client_addr, &clientSize); 
 			if (clientSocket == -1)
-				break ; 
+				break ;
 			//if succesfull, create new client object for the connection 
 			Client	newClient(clientSocket);
 			//save address in object
@@ -225,79 +241,86 @@ void	Server::process_request(Client *client, std::string msg)
 	(void)client;//only to compile
 
 	// if (message.isCommand() == true)
-	message.runCmd();
+	this->runCmd(client, message);
 
 	//next steps:
 	// implement functions, channels, ...
 }
 
-void	Message::runCmd()			// move to msg.cpp
+// void	runCmd(Message& msg)
+void	Server::runCmd(Client *client, Message& msg)
 {
-	std::map<std::string, FuncPtr> cmd;
-	cmd["CONNECT"] = &connect;
-	cmd["JOIN"] = &join;
-	cmd["HELP"] = &help;
-	cmd["CLOSE"] = &closeChannel;
-	cmd["PART"] = &closeChannel;
-	cmd["INFO"] = &info;
-	cmd["WHOIS"] = &whois;
-	cmd["NICK"] = &changeNick;
-	cmd["MSG"] = &msg;
-	cmd["NAMES"] = &displayNames;
-	// add the rest ...
 
-	// get (weird/awkward) const variable to work with
-	const std::map<std::string, FuncPtr> cmdMap = cmd;
-
-	std::map<std::string, FuncPtr>::const_iterator it = cmdMap.find(_command);
-	if (it == cmdMap.end())
+	std::map<std::string, FuncPtr>::const_iterator it = _cmdMap.find(msg.getCommand());
+	if (it == _cmdMap.end())
 	{
-		std::cerr << "Error: Invalid command " << _command << std::endl;
+		std::cerr << "Error: Invalid command " << msg.getCommand() << std::endl;
 		return;
 	}
 	//check if the User already used PASS, NICK and USER (except QUIT??)
-	(*it->second)();
+	(*it->second)(this, client, msg);
 }
 
 // ahhh .... check the documentation
-void	connect()
+void	connect(Server *server, Client *client, Message& msg)
 {
+	(void)server;
+	(void)client;
+	(void)msg;
 	// establish initial connection -> server should add this new client
 	// and enable him to open/manage new channels and usage of general functions
 }
 
-void	join()
+void	join(Server *server, Client *client, Message& msg)
 {
+	(void)server;
+	(void)client;
+	(void)msg;
 	//create new channel [#name] if it doesn't exist yet
 	std::cout << " ----> i want to get into a channel!\n";
 }
 
-void	help()
+void	help(Server *server, Client *client, Message& msg)
 {
+	(void)server;
+	(void)client;
+	(void)msg;
 	// display standard stuff ...
 	std::cout << " ----> what help?\n";
 }
 
-void	closeChannel()
+void	closeChannel(Server *server, Client *client, Message& msg)
 {
+	(void)server;
+	(void)client;
+	(void)msg;
 	// leave channel, and if it's empty, remove it
 }
 
-void	info()
+void	info(Server *server, Client *client, Message& msg)
 {
+	(void)server;
+	(void)client;
+	(void)msg;
 	// display standard stuff ...
 
 }
 
-void	whois()
+void	whois(Server *server, Client *client, Message& msg)
 {
+	(void)server;
+	(void)client;
+	(void)msg;
 	// display info about specific user
 		// go through the channel's list of users
 		// and return error / user's info
 }
 
-void	changeNick()
+void	changeNick(Server *server, Client *client, Message& msg)
 {
+		(void)server;
+	(void)client;
+(void)msg;
 	// Command: NICK
 	// Parameters: <nickname> (<hopcount>)
 
@@ -345,13 +368,19 @@ void	changeNick()
 	// having a maximum length of nine (9) characters
 }
 
-void	msg()
+void	sendMsg(Server *server, Client *client, Message& msg)
 {
+	(void)server;
+	(void)client;
+	(void)msg;
 	// send private msg to a specific user
 }
 
-void	displayNames()
+void	displayNames(Server *server, Client *client, Message& msg)
 {
+	(void)server;
+	(void)client;
+	(void)msg;
 	// display all users of a specific channel(s)
 		// go through the channel's list of users
 }
