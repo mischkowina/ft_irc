@@ -373,6 +373,16 @@ void	sendMsg(Server *server, Client *client, Message& msg)
 	(void)client;
 	(void)msg;
 	// send private msg to a specific user
+
+	//parse first parameter by commas to get all the recipients of the message
+	//look for matches of the receivers with the clientmap and the channelmap
+
+	//send the message (2nd parameter) to all receivers
+	// --> get the socket descriptor of each receiver and send the message
+	// client->_name: 2nd parameter
+	// e.g.: Primoz: Hi 
+
+	
 }
 
 void	displayNames(Server *server, Client *client, Message& msg)
