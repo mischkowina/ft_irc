@@ -10,6 +10,7 @@ class Server
 	private:
 		int 			_sockfd;
 		int				_portNum;
+		std::string		_hostname;
 		std::string		_password;
 		sockaddr_in		_server_addr;
 		ft::ClientMap	_clients;
@@ -44,8 +45,8 @@ void	help(Server *server, Client *client, Message& msg);
 void	closeChannel(Server *server, Client *client, Message& msg);
 void	info(Server *server, Client *client, Message& msg);
 void	whois(Server *server, Client *client, Message& msg);
-void	changeNick(Server *server, Client *client, Message& msg);
-void	sendMsg(Server *server, Client *client, Message& msg);
+void	nick(Server *server, Client *client, Message& msg);
+void	privmsg(Server *server, Client *client, Message& msg);
 void	displayNames(Server *server, Client *client, Message& msg);
 
 #endif

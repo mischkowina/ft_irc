@@ -38,7 +38,13 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass)
 		close(_sockfd);
 		exit(1);
 	}
-	std::cout << "Server running." << std::endl;
+
+	//get hostname
+	char hstnme[256]; // 255 is maxlen for hostname according to manpages
+	gethostname(hstnme, 256);
+	this->_hostname = std::string(hstnme);
+
+	std::cout << "Server running on " << _hostname << " on port " << _portNum << "." << std::endl;
 
 	// functions
 	std::map<std::string, FuncPtr> cmd;
@@ -49,8 +55,8 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass)
 	cmd["PART"] = &closeChannel;
 	cmd["INFO"] = &info;
 	cmd["WHOIS"] = &whois;
-	cmd["NICK"] = &changeNick;
-	cmd["PRIVMSG"] = &sendMsg;
+	cmd["NICK"] = &nick;
+	cmd["PRIVMSG"] = &privmsg;
 	cmd["NAMES"] = &displayNames;
 	// add the rest ...
 
@@ -315,7 +321,7 @@ void	whois(Server *server, Client *client, Message& msg)
 		// and return error / user's info
 }
 
-void	changeNick(Server *server, Client *client, Message& msg)
+void	nick(Server *server, Client *client, Message& msg)
 {
 		(void)server;
 	(void)client;
@@ -367,7 +373,7 @@ void	changeNick(Server *server, Client *client, Message& msg)
 	// having a maximum length of nine (9) characters
 }
 
-void	sendMsg(Server *server, Client *client, Message& msg)
+void	privmsg(Server *server, Client *client, Message& msg)
 {
 	(void)server;
 	(void)client;
