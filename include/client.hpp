@@ -18,6 +18,7 @@ class Client {
 		~Client();
 		Client	&operator=(Client const &rhs);
 
+		void		setNick(std::string nick);
 		void		setIP(sockaddr_in *client_addr);
 		void		setIsOperator(bool status);
 		void		addToRecvBuffer(char *buffer, int len);
@@ -29,7 +30,9 @@ class Client {
 
 		void		clearRecvBuffer(int end);
 
-		
+		std::string	getNick() const;
+		std::string	getName() const;
+
 
 };
 

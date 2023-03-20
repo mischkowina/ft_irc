@@ -11,6 +11,7 @@ class Channel
 	private:
 		std::list<Client>	_channelOperator;
 		std::list<Client>	_channelUsers;
+		std::string			_channelName;
 		std::string			_channelbuffer;
 		std::string			_password;
 		bool				_inviteOnly;
@@ -18,6 +19,13 @@ class Channel
 	public:
 		Channel();
 		~Channel();
+		Channel(std::string name);
+
+		void	setName(std::string channelName);
+
+		std::string  getChannelName() const;
+		std::list<Client> getChannelOperator() const;
+		std::list<Client> getChannelUsers() const;
 };
 
 void	connect();

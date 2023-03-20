@@ -23,14 +23,16 @@ class Server
 		
 		int			getServerSoc(void) const;
 		std::string	getPass(void) const;
+		ft::ClientMap	getClientMap() const;
+		ft::ChannelMap	getChannelMap() const;
 
 		void	run();
 
 		void	checkAllClientSockets(std::vector<pollfd> pollfds);
 		void	checkListeningSocket(std::vector<pollfd> pollfds);
 		void	process_request(Client *client, std::string msg);
-		
-		void	runCmd(Client *client, Message& msg);
+
+		void	execCmd(Client *client, Message& msg);
 
 };
 
