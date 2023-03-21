@@ -17,6 +17,11 @@ Client::Client(int socket) : _socket(socket)
 
 Client::~Client() {}
 
+void	Client::setNick(std::string nick)	// remove after testing
+{
+	this->_nick = nick;
+}
+
 void	Client::setIP(sockaddr_in *client_addr)
 {
 	this->_IP = inet_ntoa((struct in_addr)client_addr->sin_addr);
@@ -82,4 +87,14 @@ void	Client::clearRecvBuffer(int end)
 		this->_recvBuffer.erase(0, 1);
 	if (this->_recvBuffer[0] == '\n')
 		this->_recvBuffer.erase(0, 1);
+}
+
+std::string	Client::getNick() const
+{
+	return _nick;
+}
+
+std::string	Client::getName() const
+{
+	return _name;
 }
