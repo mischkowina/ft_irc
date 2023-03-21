@@ -28,6 +28,7 @@
 # include "channel.hpp"
 # include "client.hpp"
 # include "message.hpp"
+# include "error.hpp"
 
 class Server;
 

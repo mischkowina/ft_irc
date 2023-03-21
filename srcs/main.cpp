@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 	// bool endServer = false;
 	// IRCserver(atoi(argv[1]), std::string str(argv[2]);
 	std::string	pass=  "password";
-	Server		IRCserver(6667,pass);
+	Server		IRCserver(6667, pass);
 
 	IRCserver.run();
 
