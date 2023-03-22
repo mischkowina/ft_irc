@@ -3,7 +3,7 @@
 
 # include "irc.hpp"
 
-typedef void (*FuncPtr)(Server *server, Client *client, Message& msg);
+typedef void (*FuncPtr)(Server *server, Client &client, Message& msg);
 
 class Server
 {
@@ -16,6 +16,7 @@ class Server
 		ft::ClientMap	_clients;
 		ft::ChannelMap	_channels;
 		std::map<std::string, FuncPtr> _cmdMap;
+		bool			_noAuthorization;
 
 	public:
 		Server(int port, std::string pass);
@@ -23,17 +24,21 @@ class Server
 		~Server();
 		
 		int			getServerSoc(void) const;
+		std::string	getHostname() const;
 		std::string	getPass(void) const;
 		ft::ClientMap	getClientMap() const;
 		ft::ChannelMap	getChannelMap() const;
+
+		void		eraseFromClientMap(Client &client);
+		bool		addClient(Client &client);
 
 		void	run();
 
 		void	checkAllClientSockets(std::vector<pollfd> pollfds);
 		void	checkListeningSocket(std::vector<pollfd> pollfds);
-		void	process_request(Client *client, std::string msg);
+		void	process_request(Client &client, std::string msg);
 
-		void	execCmd(Client *client, Message& msg);
+		void	execCmd(Client &client, Message& msg);
 
 };
 
@@ -41,14 +46,15 @@ class Server
  * functions to comunicate with clients
  */
 
-void	connect(Server *server, Client *client, Message& msg);
-void	join(Server *server, Client *client, Message& msg);
-void	help(Server *server, Client *client, Message& msg);
-void	closeChannel(Server *server, Client *client, Message& msg);
-void	info(Server *server, Client *client, Message& msg);
-void	whois(Server *server, Client *client, Message& msg);
-void	nick(Server *server, Client *client, Message& msg);
-void	privmsg(Server *server, Client *client, Message& msg);
-void	displayNames(Server *server, Client *client, Message& msg);
+void	connect(Server *server, Client &client, Message& msg);
+void	join(Server *server, Client &client, Message& msg);
+void	help(Server *server, Client &client, Message& msg);
+void	closeChannel(Server *server, Client &client, Message& msg);
+void	info(Server *server, Client &client, Message& msg);
+void	whois(Server *server, Client &client, Message& msg);
+void	nick(Server *server, Client &client, Message& msg);
+void	privmsg(Server *server, Client &client, Message& msg);
+void	displayNames(Server *server, Client &client, Message& msg);
+void	pass_cmd(Server *server, Client &client, Message& msg);
 
 #endif

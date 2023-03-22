@@ -1,7 +1,8 @@
 #include "client.hpp"
+#include "server.hpp"
 
 //Constructor with socket descriptor as parameter
-Client::Client(int socket) : _socket(socket)
+Client::Client(int socket, bool isAuthorized) : _socket(socket), _isAuthorized(isAuthorized)
 {
 	// set new socket to non blocking
 	int fcntl_return = fcntl(this->_socket, F_SETFL, O_NONBLOCK);
@@ -15,6 +16,12 @@ Client::Client(int socket) : _socket(socket)
 	this->_recvBuffer = "";
 }
 
+Client::Client(Client const &rhs)
+{
+	if (this != &rhs)
+		*this = rhs;
+}
+
 Client::~Client() {}
 
 void	Client::setNick(std::string nick)
@@ -22,11 +29,9 @@ void	Client::setNick(std::string nick)
 	this->_nick = nick;
 }
 
-void	Client::setIP(sockaddr_in *client_addr)
+void	Client::setIsAuthorized(bool status)
 {
-	this->_IP = inet_ntoa((struct in_addr)client_addr->sin_addr);
-	this->_nick = this->_IP + ":";
-	this->_nick.append(ft::itos(this->_socket));
+	this->_isAuthorized = status;
 }
 
 Client	&Client::operator=(Client const &rhs)
@@ -37,10 +42,19 @@ Client	&Client::operator=(Client const &rhs)
 		this->_IP = rhs._IP;
 		this->_nick = rhs._nick;
 		this->_name = rhs._name;
+		this->_isAuthorized = rhs._isAuthorized;
 		this->_isOperator = rhs._isOperator;
 		this->_recvBuffer = rhs._recvBuffer;
+		//TBD
 	}
 	return (*this);
+}
+
+void	Client::setIP(sockaddr_in *client_addr)
+{
+	this->_IP = inet_ntoa((struct in_addr)client_addr->sin_addr);
+	this->_nick = this->_IP + ":";
+	this->_nick.append(ft::itos(this->_socket));
 }
 
 void	Client::setIsOperator(bool status)
@@ -74,6 +88,11 @@ std::string	Client::getName() const
 	return _name;
 }
 
+bool	Client::getIsAuthorized() const
+{
+	return this->_isAuthorized;
+}
+
 bool	Client::getIsOperator() const
 {
 	return this->_isOperator;
@@ -91,4 +110,19 @@ void	Client::clearRecvBuffer(int end)
 		this->_recvBuffer.erase(0, 1);
 	if (this->_recvBuffer[0] == '\n')
 		this->_recvBuffer.erase(0, 1);
+}
+
+void	Client::sendErrMsg(Server *server, std::string const err_code, char const *err_param)
+{
+	std::string	err_msg = err_code;
+
+	if (err_msg.find("<") == 4 && err_param != NULL && err_msg.find(">"))
+	{
+		int pos = err_msg.find(">");
+		err_msg.erase(4, pos - 4);
+		err_msg.insert(4, err_param);
+	}
+	err_msg.insert(4, _nick + " ");
+	err_msg.insert(0, ":" + server->getHostname() + " ");
+	send(this->_socket, err_msg.data(), err_msg.length(), 0);
 }

@@ -1,8 +1,11 @@
 
 #include "server.hpp"
 
-Server::Server(int port, std::string pass) : _portNum(port), _password(pass)
+Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _noAuthorization(false)
 {
+	if (this->_password.empty() == true)
+		this->_noAuthorization = true;
+	
 	// create a socket
 	// TODO: ALL neTWORK INTERFACES
 	_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -59,7 +62,7 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass)
 	cmd["NICK"] = &nick;
 	cmd["PRIVMSG"] = &privmsg;
 	cmd["NAMES"] = &displayNames;
-	// add the rest ...
+	cmd["PASS"] = &pass_cmd;
 
 	_cmdMap = cmd;
 }
@@ -79,6 +82,11 @@ int		Server::getServerSoc() const
 	return _sockfd;
 }
 
+std::string	Server::getHostname() const
+{
+	return this->_hostname;
+}
+
 ft::ClientMap	Server::getClientMap() const
 {
 	return _clients;
@@ -87,6 +95,22 @@ ft::ClientMap	Server::getClientMap() const
 ft::ChannelMap	Server::getChannelMap() const
 {
 	return _channels;
+}
+
+void	Server::eraseFromClientMap(Client &client)
+{
+	_clients.erase(client.getNick());
+}
+
+bool	Server::addClient(Client &client)
+{
+	ft::ClientMap::const_iterator it = _clients.find(client.getNick());
+	if (it == _clients.end())
+	{
+		_clients.insert(std::make_pair(client.getNick(), client));
+		return true;
+	}
+	return false;	
 }
 
 void	Server::run()
@@ -151,7 +175,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 		if (pollfds[i].revents & POLLIN)
 		{
 			char	buffer[1024]; //TBD: max size of messages
-			Client	*currentClient = &it->second;
+			Client	currentClient = (*it).second;
 			
 			//receive message from socket
 			int recv_return = recv(pollfds[i].fd, buffer, sizeof(buffer), 0);
@@ -163,32 +187,32 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client
 			else if (recv_return == 0)
 			{
-				std::cout << "Connection with " << currentClient->getIP() << " on socket " << currentClient->getSocket() << " lost." << std::endl;
+				std::cout << "Connection with " << currentClient.getIP() << " on socket " << currentClient.getSocket() << " lost." << std::endl;
 				close(pollfds[i].fd);
 				_clients.erase(it);
 				break ; // from continue -> break; return to the top, same as line 105
 			}
 			//add message to what is in the clients message buffer
-			currentClient->addToRecvBuffer(buffer, recv_return);
+			currentClient.addToRecvBuffer(buffer, recv_return);
 			
 			//process overall content of the buffer unless it is empty
-			while (currentClient->getRecvBuffer().empty() == false)
+			while (currentClient.getRecvBuffer().empty() == false)
 			{
-				std::string	msg = currentClient->getRecvBuffer();
+				std::string	msg = currentClient.getRecvBuffer();
 				//find either a \r or \n to signal end of a message
 				size_t msg_end = msg.find_first_of("\r\n");
 				//if there is none, the message is incomplete and stays stored in the buffer
 				if (msg_end == std::string::npos)
 				{
-					std::cout << "Incomplete message from " << currentClient->getNick() << " - storing for later." << std::endl;
+					std::cout << "Incomplete message from " << currentClient.getNick() << " - storing for later." << std::endl;
 					break ;
 				}
 
 				//get the terminated message to work with
-				msg = currentClient->getRecvBuffer().substr(0, msg_end);
+				msg = currentClient.getRecvBuffer().substr(0, msg_end);
 				//clear the message from the buffer (potentially keeping content that follows \r\n)
-				currentClient->clearRecvBuffer(msg_end);
-				std::cout << "Full message received from " << currentClient->getNick() << " :" << std::endl << msg << std::endl;
+				currentClient.clearRecvBuffer(msg_end);
+				std::cout << "Full message received from " << currentClient.getNick() << " :" << std::endl << msg << std::endl;
 				//process the message (further parse it and execute the according command)
 				this->process_request(currentClient, msg);
 			}
@@ -217,7 +241,7 @@ void	Server::checkListeningSocket(std::vector<pollfd> pollfds)
 			if (clientSocket == -1)
 				break ;
 			//if succesfull, create new client object for the connection 
-			Client	newClient(clientSocket);
+			Client	newClient(clientSocket, this->_noAuthorization);
 			//save address in object
 			newClient.setIP(&client_addr);
 			//insert new client into client map
@@ -234,7 +258,7 @@ void	Server::checkListeningSocket(std::vector<pollfd> pollfds)
 	}
 }
 
-void	Server::process_request(Client *client, std::string msg)
+void	Server::process_request(Client &client, std::string msg)
 {
 	//turn message string into message object --> parsing in Message constructor
 	Message	message(msg);
@@ -264,7 +288,7 @@ void	Server::process_request(Client *client, std::string msg)
 }
 
 // void	execCmd(Message& msg)
-void	Server::execCmd(Client *client, Message& msg)
+void	Server::execCmd(Client &client, Message& msg)
 {
 
 	std::map<std::string, FuncPtr>::const_iterator it = _cmdMap.find(msg.getCommand());
@@ -350,7 +374,7 @@ void findReceivers(Server *server, std::vector<std::string> listOfRecv, std::str
 }
 
 // send (private) msg to a specific user/channel
-void	privmsg(Server *server, Client *client, Message& msg)
+void	privmsg(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -389,7 +413,7 @@ void	privmsg(Server *server, Client *client, Message& msg)
 
 }
 
-void	displayNames(Server *server, Client *client, Message& msg)
+void	displayNames(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -399,7 +423,7 @@ void	displayNames(Server *server, Client *client, Message& msg)
 }
 
 // ahhh .... check the documentation
-void	connect(Server *server, Client *client, Message& msg)
+void	connect(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -408,7 +432,7 @@ void	connect(Server *server, Client *client, Message& msg)
 	// and enable him to open/manage new channels and usage of general functions
 }
 
-void	join(Server *server, Client *client, Message& msg)
+void	join(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -417,7 +441,7 @@ void	join(Server *server, Client *client, Message& msg)
 	std::cout << " ----> i want to get into a channel!\n";
 }
 
-void	help(Server *server, Client *client, Message& msg)
+void	help(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -426,7 +450,7 @@ void	help(Server *server, Client *client, Message& msg)
 	std::cout << " ----> what help?\n";
 }
 
-void	closeChannel(Server *server, Client *client, Message& msg)
+void	closeChannel(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -434,7 +458,7 @@ void	closeChannel(Server *server, Client *client, Message& msg)
 	// leave channel, and if it's empty, remove it
 }
 
-void	info(Server *server, Client *client, Message& msg)
+void	info(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -443,7 +467,7 @@ void	info(Server *server, Client *client, Message& msg)
 
 }
 
-void	whois(Server *server, Client *client, Message& msg)
+void	whois(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -453,56 +477,55 @@ void	whois(Server *server, Client *client, Message& msg)
 		// and return error / user's info
 }
 
-void	nick(Server *server, Client *client, Message& msg)
+void	nick(Server *server, Client &client, Message& msg)
 {
-		(void)server;
-		(void)client;
-		(void)msg;
-	// Command: NICK
-	// Parameters: <nickname> (<hopcount>)
+	std::vector<std::string> parameters = msg.getParameters();
+	
+	//check if there is at least one parameter
+	if (parameters.empty() == true)
+	{
+		client.sendErrMsg(server, ERR_NONICKNAMEGIVEN, NULL);
+		return ;
+	}
+	
+	//check if first parameter is a valid nickname
+	if (ft::isValidNick(parameters[0]) == false)
+	{
+		client.sendErrMsg(server, ERR_ERRONEUSNICKNAME, parameters[0].c_str());
+		return ;
+	}
 
-// 	Command: NICK
-//    Parameters: <nickname> [ <hopcount> ]
+	// try changing the nickname of the client
+	// original has to be erased and a copy with the new nick to be inserted in order for map to work properly (no changing of keys)
+	Client	changedClient(client);
+	changedClient.setNick(parameters[0]);
 
-//    NICK message is used to give user a nickname or change the previous
-//    one.  The <hopcount> parameter is only used by servers to indicate
-//    how far away a nick is from its home server.  A local connection has
-//    a hopcount of 0.  If supplied by a client, it must be ignored.
-
-//    If a NICK message arrives at a server which already knows about an
-//    identical nickname for another client, a nickname collision occurs.
-//    As a result of a nickname collision, all instances of the nickname
-//    are removed from the server's database, and a KILL command is issued
-//    to remove the nickname from all other server's database. If the NICK
-//    message causing the collision was a nickname change, then the
-//    original (old) nick must be removed as well.
-
-//    If the server recieves an identical NICK from a client which is
-//    directly connected, it may issue an ERR_NICKCOLLISION to the local
-//    client, drop the NICK command, and not generate any kills.
-
-
-
-// Oikarinen & Reed                                               [Page 14]
-
-// RFC 1459              Internet Relay Chat Protocol              May 1993
-
-
-//    Numeric Replies:
-
-//            ERR_NONICKNAMEGIVEN             ERR_ERRONEUSNICKNAME
-//            ERR_NICKNAMEINUSE               ERR_NICKCOLLISION
-
-//    Example:
-
-//    NICK Wiz                        ; Introducing new nick "Wiz".
-
-//    :WiZ NICK Kilroy                ; WiZ changed his nickname to Kilroy.
-
-
-	// change user's nick
-	// Each user is distinguished from other users by a unique nickname
-	// having a maximum length of nine (9) characters
+	if (server->addClient(changedClient) == false)
+		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
+	else
+		server->eraseFromClientMap(client);
+	//COMMENT: No implementation of ERR_NICKCOLLISION since it is only applicable for multi-server connections
 }
 
-// operator: tbc
+void	pass_cmd(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string> parameters = msg.getParameters();
+
+	//check if client is already authorized (already used PASS before)
+	if (client.getIsAuthorized() == true)
+	{
+		client.sendErrMsg(server, ERR_ALREADYREGISTRED, NULL);
+		return ;
+	}
+	
+	//check if there is a password parameter
+	if (parameters.empty() == true)
+	{
+		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, msg.getCommand().c_str());
+		return ;
+	}
+
+	//check if the password is correct, if so change status of client to isAuthorized == true
+	if (parameters[0] == server->getPass())
+		client.setIsAuthorized(true);
+}

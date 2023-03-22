@@ -39,6 +39,8 @@ namespace ft
 
 	std::string	itos(int i);
 	std::string	skipCharacter(std::string msg, char c);
+	bool		isValidNick(std::string &nick);
+	bool		isSpecial(char c);
 }
 
 #endif
