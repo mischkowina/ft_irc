@@ -17,7 +17,7 @@ Client::Client(int socket) : _socket(socket)
 
 Client::~Client() {}
 
-void	Client::setNick(std::string nick)	// remove after testing
+void	Client::setNick(std::string nick)
 {
 	this->_nick = nick;
 }
@@ -25,8 +25,8 @@ void	Client::setNick(std::string nick)	// remove after testing
 void	Client::setIP(sockaddr_in *client_addr)
 {
 	this->_IP = inet_ntoa((struct in_addr)client_addr->sin_addr);
-	this->_key = this->_IP + ":";
-	this->_key.append(ft::itos(this->_socket));
+	this->_nick = this->_IP + ":";
+	this->_nick.append(ft::itos(this->_socket));
 }
 
 Client	&Client::operator=(Client const &rhs)
@@ -35,7 +35,6 @@ Client	&Client::operator=(Client const &rhs)
 	{
 		this->_socket = rhs._socket;
 		this->_IP = rhs._IP;
-		this->_key = rhs._key;
 		this->_nick = rhs._nick;
 		this->_name = rhs._name;
 		this->_isOperator = rhs._isOperator;
@@ -65,9 +64,14 @@ std::string	Client::getIP() const
 	return this->_IP;
 }
 
-std::string	Client::getKey() const
+std::string	Client::getNick() const
 {
-	return this->_key;
+	return this->_nick;
+}
+
+std::string	Client::getName() const
+{
+	return _name;
 }
 
 bool	Client::getIsOperator() const
@@ -87,14 +91,4 @@ void	Client::clearRecvBuffer(int end)
 		this->_recvBuffer.erase(0, 1);
 	if (this->_recvBuffer[0] == '\n')
 		this->_recvBuffer.erase(0, 1);
-}
-
-std::string	Client::getNick() const
-{
-	return _nick;
-}
-
-std::string	Client::getName() const
-{
-	return _name;
 }

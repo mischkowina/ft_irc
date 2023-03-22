@@ -13,7 +13,7 @@ Channel::Channel(std::string name)
 	, _channelbuffer("null")
 	, _password("")
 	, _inviteOnly(false)
-{}
+{_inviteOnly = false;}//for compiling with unused variable
 
 void	Channel::setName(std::string channelName)
 {

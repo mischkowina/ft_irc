@@ -180,7 +180,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				//if there is none, the message is incomplete and stays stored in the buffer
 				if (msg_end == std::string::npos)
 				{
-					std::cout << "Incomplete message from " << currentClient->getKey() << " - storing for later." << std::endl;
+					std::cout << "Incomplete message from " << currentClient->getNick() << " - storing for later." << std::endl;
 					break ;
 				}
 
@@ -188,7 +188,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				msg = currentClient->getRecvBuffer().substr(0, msg_end);
 				//clear the message from the buffer (potentially keeping content that follows \r\n)
 				currentClient->clearRecvBuffer(msg_end);
-				std::cout << "Full message received from " << currentClient->getKey() << " :" << std::endl << msg << std::endl;
+				std::cout << "Full message received from " << currentClient->getNick() << " :" << std::endl << msg << std::endl;
 				//process the message (further parse it and execute the according command)
 				this->process_request(currentClient, msg);
 			}
@@ -221,7 +221,7 @@ void	Server::checkListeningSocket(std::vector<pollfd> pollfds)
 			//save address in object
 			newClient.setIP(&client_addr);
 			//insert new client into client map
-			std::pair<ft::ClientMap::iterator, bool> insert_return = _clients.insert(make_pair(newClient.getKey(), newClient));
+			std::pair<ft::ClientMap::iterator, bool> insert_return = _clients.insert(make_pair(newClient.getNick(), newClient));
 			//if there is already a client with the same ip adress + socket, insertion fails
 			if (insert_return.second == false)
 			{
@@ -280,49 +280,73 @@ void	Server::execCmd(Client *client, Message& msg)
 
 void findReceivers(Server *server, std::vector<std::string> listOfRecv, std::string msg)
 {
-	bool found = false;
+	// bool found = false;
 	ft::ClientMap tmpClient = server->getClientMap();
-	// rename test client
-	tmpClient.begin()->second.setNick("wewe");
+	ft::ChannelMap tmpChannel = server->getChannelMap();
 
 	// iterate through server's clients
-	for (ft::ClientMap::const_iterator itClien = tmpClient.begin(); itClien != tmpClient.end(); ++itClien)
+
+	for (std::vector<std::string>::const_iterator itRecv = listOfRecv.begin(); itRecv != listOfRecv.end(); itRecv++)
 	{
-		std::cout << "Clients TEST: " <<itClien->second.getNick() << std::endl;
-		for (std::vector<std::string>::const_iterator itRecv = listOfRecv.begin(); itRecv != listOfRecv.end(); itRecv++) {
-			if (itClien->second.getNick() == *itRecv)
-			{
-				send(itClien->second.getSocket(), msg.data(), msg.size(), 0);
-				found = true;
-			}
+		ft::ClientMap::const_iterator itClien = tmpClient.find(*itRecv);
+		if (itClien != tmpClient.end())
+		{
+			//OPEN: NEEDS FORMATING
+			send(itClien->second.getSocket(), msg.data(), msg.size(), 0);
+			continue ;
 		}
+		ft::ChannelMap::const_iterator itChannel = tmpChannel.find(*itRecv);
+		if (itChannel != tmpChannel.end())
+		{
+			std::list<Client> tmpChannelUsers = itChannel->second.getChannelUsers();
+			for (std::list<Client>::const_iterator itChannelRecv = tmpChannelUsers.begin(); itChannelRecv != tmpChannelUsers.end(); itChannelRecv++)
+			{
+				//OPEN: NEEDS FORMATING
+				send(itChannelRecv->getSocket(), msg.data(), msg.size(), 0);
+			}
+			continue ;
+		}
+		//ERROR: receiver not found
 	}
 
-	ft::ChannelMap tmpChannel = server->getChannelMap();
-	Channel 	dummyChannel("dummy");
-	tmpChannel.insert(std::make_pair("dummy", dummyChannel));
-	// iterate through channels' clients
-	for (ft::ChannelMap::const_iterator itChannel = tmpChannel.begin(); itChannel != tmpChannel.end(); ++itChannel)
-	{
-		std::cout << "Channel TEST: " <<itChannel->second.getChannelName() << std::endl;
-		for (std::vector<std::string>::const_iterator itRecv = listOfRecv.begin(); itRecv != listOfRecv.end(); itRecv++) {
-			if (itChannel->second.getChannelName() == *itRecv)
-			{
-				// iterate through channel's list of users
-				std::list<Client> tmpChannelUsers = itChannel->second.getChannelUsers();
-				for (std::list<Client>::const_iterator itChannelRecv = tmpChannelUsers.begin(); itChannelRecv != tmpChannelUsers.end(); itChannelRecv++) {
-					send(itChannelRecv->getSocket(), msg.data(), msg.size(), 0);
-				}
-				found = true;
-			}
-		}
-	}
+	
+	// for (ft::ClientMap::const_iterator itClien = tmpClient.begin(); itClien != tmpClient.end(); ++itClien)
+	// {
+	// 	std::cout << "Clients TEST: " <<itClien->second.getNick() << std::endl;
+	// 	for (std::vector<std::string>::const_iterator itRecv = listOfRecv.begin(); itRecv != listOfRecv.end(); itRecv++) {
+	// 		if (itClien->second.getNick() == *itRecv)
+	// 		{
+	// 			send(itClien->second.getSocket(), msg.data(), msg.size(), 0);
+	// 			found = true;
+	// 		}
+	// 	}
+	// }
 
-	if (found == false)
-	{
-		// return msg to client ? check irc docs
-		throw std::runtime_error("no receivers found");
-	}
+	// ft::ChannelMap tmpChannel = server->getChannelMap();
+	// Channel 	dummyChannel("dummy");
+	// tmpChannel.insert(std::make_pair("dummy", dummyChannel));
+	// // iterate through channels' clients
+	// for (ft::ChannelMap::const_iterator itChannel = tmpChannel.begin(); itChannel != tmpChannel.end(); ++itChannel)
+	// {
+	// 	std::cout << "Channel TEST: " <<itChannel->second.getChannelName() << std::endl;
+	// 	for (std::vector<std::string>::const_iterator itRecv = listOfRecv.begin(); itRecv != listOfRecv.end(); itRecv++) {
+	// 		if (itChannel->second.getChannelName() == *itRecv)
+	// 		{
+	// 			// iterate through channel's list of users
+	// 			std::list<Client> tmpChannelUsers = itChannel->second.getChannelUsers();
+	// 			for (std::list<Client>::const_iterator itChannelRecv = tmpChannelUsers.begin(); itChannelRecv != tmpChannelUsers.end(); itChannelRecv++) {
+	// 				send(itChannelRecv->getSocket(), msg.data(), msg.size(), 0);
+	// 			}
+	// 			found = true;
+	// 		}
+	// 	}
+	// }
+
+	// if (found == false)
+	// {
+	// 	// return msg to client ? check irc docs
+	// 	throw std::runtime_error("no receivers found");
+	// }
 }
 
 // send (private) msg to a specific user/channel

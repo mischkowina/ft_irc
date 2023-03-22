@@ -7,7 +7,6 @@ class Client {
 	private:
 		int			_socket;
 		std::string	_IP;
-		std::string	_key;// = IP:socket; e.g. 127.0.0.1:4
 		std::string	_nick;
 		std::string	_name;
 		bool		_isOperator;
@@ -18,20 +17,20 @@ class Client {
 		~Client();
 		Client	&operator=(Client const &rhs);
 
-		void		setNick(std::string nick);
 		void		setIP(sockaddr_in *client_addr);
+		void		setNick(std::string nick);
 		void		setIsOperator(bool status);
 		void		addToRecvBuffer(char *buffer, int len);
 		int			getSocket() const;
 		std::string	getIP() const;
-		std::string	getKey() const;
+		std::string	getNick() const;
+		std::string	getName() const;
 		bool		getIsOperator() const;
 		std::string	getRecvBuffer() const;
 
 		void		clearRecvBuffer(int end);
 
-		std::string	getNick() const;
-		std::string	getName() const;
+		
 
 
 };
