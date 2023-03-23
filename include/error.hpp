@@ -5,6 +5,10 @@
 
 # define ERR_NOSUCHNICK "401 <nickname> :No such nick/channel"
 
+# define ERR_NORECIPIENT "411 :No recipient given (<command>)"
+
+# define ERR_NOTEXTTOSEND " 412 :No text to send"
+
 # define ERR_NONICKNAMEGIVEN "431 :No nickname given"
 
 # define ERR_ERRONEUSNICKNAME "432 <nick> :Erroneus nickname"

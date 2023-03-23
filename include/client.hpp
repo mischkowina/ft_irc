@@ -36,10 +36,7 @@ class Client {
 
 		void		clearRecvBuffer(int end);
 		void		sendErrMsg(Server *server, std::string const err_code, char const *err_param);
-
-		
-
-
+		void		sendPrivMsg(Client &sender, std::string msg) const;
 };
 
 #endif

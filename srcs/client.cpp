@@ -115,14 +115,31 @@ void	Client::sendErrMsg(Server *server, std::string const err_code, char const *
 {
 	std::string	err_msg = err_code;
 
-	if (err_msg.find("<") == 4 && err_param != NULL && err_msg.find(">"))
+	if (err_msg.find("<") && err_param != NULL && err_msg.find(">"))
 	{
-		int pos = err_msg.find(">");
-		err_msg.erase(4, pos - 3);
-		err_msg.insert(4, err_param);
+		int pos1 = err_msg.find("<");
+		int pos2 = err_msg.find(">");
+		err_msg.erase(pos1, pos2 - pos1 + 1);
+		err_msg.insert(pos1, err_param);
 	}
 	err_msg.insert(4, _nick + " ");
 	err_msg.insert(0, ":" + server->getHostname() + " ");
 	err_msg.append("\r\n");
 	send(this->_socket, err_msg.data(), err_msg.length(), 0);
+}
+
+void	Client::sendPrivMsg(Client &sender, std::string msg) const
+{
+	//insert command name
+	msg.insert(0, " PRIVMSG ");
+
+	//insert full prefix of sender - :<nick>!<username>@<IP>
+	msg.insert(0, sender.getIP());
+	msg.insert(0, "@");
+	msg.insert(0, sender.getName());
+	msg.insert(0, "!");
+	msg.insert(0, sender.getNick());
+	msg.insert(0, ":");
+	msg.append("\r\n");
+	send(this->_socket, msg.data(), msg.size(), 0);
 }
