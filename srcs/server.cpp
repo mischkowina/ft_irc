@@ -1,7 +1,7 @@
 
 #include "server.hpp"
 
-Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _noAuthorization(false)
+Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _noAuthorization(false), _clientMapChanged(false)
 {
 	if (this->_password.empty() == true)
 		this->_noAuthorization = true;
@@ -100,6 +100,7 @@ ft::ChannelMap	Server::getChannelMap() const
 void	Server::eraseFromClientMap(Client &client)
 {
 	_clients.erase(client.getNick());
+	this->_clientMapChanged = true;
 }
 
 bool	Server::addClient(Client &client)
@@ -215,7 +216,14 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				std::cout << "Full message received from " << currentClient.getNick() << " :" << std::endl << msg << std::endl;
 				//process the message (further parse it and execute the according command)
 				this->process_request(currentClient, msg);
+				if (this->_clientMapChanged == true)
+					break ;
 			}
+		}
+		if (this->_clientMapChanged == true)
+		{
+			this->_clientMapChanged = false;
+			break ;
 		}
 	}
 }
@@ -276,8 +284,6 @@ void	Server::process_request(Client &client, std::string msg)
 	std::vector<std::string>	parameters = message.getParameters();
 	for (std::vector<std::string>::iterator it = parameters.begin(); it != parameters.end(); it++)
 		std::cout << *it << std::endl;
-
-	(void)client;//only to compile
 
 
 	// if (message.isCommand() == true)
@@ -376,9 +382,9 @@ void findReceivers(Server *server, std::vector<std::string> listOfRecv, std::str
 // send (private) msg to a specific user/channel
 void	privmsg(Server *server, Client &client, Message& msg)
 {
-	(void)server;
+	// (void)server;
 	(void)client;
-	(void)msg;
+	// (void)msg;
 
 	//parse first parameter by commas to get all the recipients -> <receiver> can be a list of names or channels
 	// Parameters: <receiver>{,<receiver>} <text to be sent>
@@ -512,6 +518,7 @@ void	pass_cmd(Server *server, Client &client, Message& msg)
 	std::vector<std::string> parameters = msg.getParameters();
 
 	//check if client is already authorized (already used PASS before)
+	std::cout << "Client is Authorized:" << client.getIsAuthorized() << std::endl;
 	if (client.getIsAuthorized() == true)
 	{
 		client.sendErrMsg(server, ERR_ALREADYREGISTRED, NULL);
@@ -528,4 +535,5 @@ void	pass_cmd(Server *server, Client &client, Message& msg)
 	//check if the password is correct, if so change status of client to isAuthorized == true
 	if (parameters[0] == server->getPass())
 		client.setIsAuthorized(true);
+		
 }

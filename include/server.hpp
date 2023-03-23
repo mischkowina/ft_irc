@@ -17,6 +17,7 @@ class Server
 		ft::ChannelMap	_channels;
 		std::map<std::string, FuncPtr> _cmdMap;
 		bool			_noAuthorization;
+		bool			_clientMapChanged;
 
 	public:
 		Server(int port, std::string pass);

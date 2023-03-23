@@ -119,10 +119,11 @@ void	Client::sendErrMsg(Server *server, std::string const err_code, char const *
 	if (err_msg.find("<") == 4 && err_param != NULL && err_msg.find(">"))
 	{
 		int pos = err_msg.find(">");
-		err_msg.erase(4, pos - 4);
+		err_msg.erase(4, pos - 3);
 		err_msg.insert(4, err_param);
 	}
 	err_msg.insert(4, _nick + " ");
 	err_msg.insert(0, ":" + server->getHostname() + " ");
+	err_msg.append("\r\n");
 	send(this->_socket, err_msg.data(), err_msg.length(), 0);
 }
