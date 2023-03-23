@@ -1,7 +1,4 @@
 #include "irc.hpp"
-#include "server.hpp"
-#include "client.hpp"
-#include "channel.hpp"
 
 int main(int argc, char **argv)
 {

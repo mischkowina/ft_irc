@@ -7,19 +7,11 @@ typedef void (*FuncPtr)(Server *server, Client &client, Message& msg);
 
 class Server
 {
-	private:
-		int 			_sockfd;
-		int				_portNum;
-		std::string		_hostname;
-		std::string		_password;
-		sockaddr_in		_server_addr;
-		ft::ClientMap	_clients;
-		ft::ChannelMap	_channels;
-		std::map<std::string, FuncPtr> _cmdMap;
-		bool			_noAuthorization;
-		bool			_clientMapChanged;
-
 	public:
+
+		typedef std::map<std::string, class Client>		ClientMap;
+		typedef std::map<std::string, class Channel>	ChannelMap;
+
 		Server(int port, std::string pass);
 		Server();
 		~Server();
@@ -27,8 +19,8 @@ class Server
 		int			getServerSoc(void) const;
 		std::string	getHostname() const;
 		std::string	getPass(void) const;
-		ft::ClientMap	getClientMap() const;
-		ft::ChannelMap	getChannelMap() const;
+		ClientMap	getClientMap() const;
+		ChannelMap	getChannelMap() const;
 
 		void		eraseFromClientMap(Client &client);
 		bool		addClient(Client &client);
@@ -40,7 +32,18 @@ class Server
 		void	process_request(Client &client, std::string msg);
 
 		void	execCmd(Client &client, Message& msg);
-
+	
+	private:
+		int 			_sockfd;
+		int				_portNum;
+		std::string		_hostname;
+		std::string		_password;
+		sockaddr_in		_server_addr;
+		ClientMap		_clients;
+		ChannelMap		_channels;
+		std::map<std::string, FuncPtr> _cmdMap;
+		bool			_noAuthorization;
+		bool			_clientMapChanged;
 };
 
 /* 

@@ -6,7 +6,7 @@
 #    By: smischni <smischni@student.42wolfsburg.de> +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/02 12:40:43 by pdolinar          #+#    #+#              #
-#    Updated: 2023/03/20 16:13:33 by smischni         ###   ########.fr        #
+#    Updated: 2023/03/23 13:41:04 by smischni         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,8 @@ HEADER	:=		$(INC)/server.hpp \
 				$(INC)/channel.hpp \
 				$(INC)/message.hpp \
 				$(INC)/irc.hpp \
-				$(INC)/error.hpp
+				$(INC)/error.hpp \
+				$(INC)/cmds.hpp
 
 CC			:=	c++
 CPP_FLAGS	:=	-Wall -Wextra -Werror -std=c++98 -g -Wfatal-errors
@@ -28,7 +29,8 @@ SRC			:=	main.cpp \
 				server.cpp \
 				message.cpp \
 				channel.cpp \
-				utils.cpp
+				utils.cpp \
+				cmds.cpp
 
 SRC_DIR		:=	srcs/
 OBJ_DIR		:=	build/

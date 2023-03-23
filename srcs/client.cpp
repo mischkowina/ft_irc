@@ -1,5 +1,4 @@
 #include "client.hpp"
-#include "server.hpp"
 
 //Constructor with socket descriptor as parameter
 Client::Client(int socket, bool isAuthorized) : _socket(socket), _isAuthorized(isAuthorized)

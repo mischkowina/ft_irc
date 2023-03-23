@@ -29,14 +29,11 @@
 # include "client.hpp"
 # include "message.hpp"
 # include "error.hpp"
-
-class Server;
+# include "cmds.hpp"
+# include "server.hpp"
 
 namespace ft
 {
-	typedef std::map<std::string, class Client>		ClientMap;
-	typedef std::map<std::string, class Channel>	ChannelMap;
-
 	std::string	itos(int i);
 	std::string	skipCharacter(std::string msg, char c);
 	bool		isValidNick(std::string &nick);
