@@ -2,7 +2,7 @@
 
 void findReceivers(Server *server, Client &sender, std::vector<std::string> listOfRecv, std::string msg)
 {
-	Server::ClientMap tmpClient = server->getClientMap();
+	Server::ClientMap tmpClient = server->getAuthorizedClientMap();
 	Server::ChannelMap tmpChannel = server->getChannelMap();
 
 	// iterate through receivers, try to find a matching channel or client to send the messag eto
@@ -160,7 +160,11 @@ void	nick(Server *server, Client &client, Message& msg)
 	if (server->addClient(changedClient) == false)
 		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
 	else
+	{
+		if (changedClient.getName().empty() == false)
+			server->addAuthorizedClient(changedClient);
 		server->eraseFromClientMap(client);
+	}
 	//COMMENT: No implementation of ERR_NICKCOLLISION since it is only applicable for multi-server connections
 }
 
@@ -187,4 +191,41 @@ void	pass_cmd(Server *server, Client &client, Message& msg)
 	//check if the password is correct, if so change status of client to isAuthorized == true
 	if (parameters[0] == server->getPass())
 		client.setIsAuthorized(true);
+}
+
+void	user(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string> parameters = msg.getParameters();
+
+	if (client.getName().empty() != true)
+	{
+		client.sendErrMsg(server, ERR_ALREADYREGISTRED, NULL);
+		return ;
+	}
+
+	if (parameters.size() < 4)
+	{
+		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, "USER");
+		return ;
+	}
+
+	client.setUserData(parameters);
+
+	if (client.getNick().empty() == false)
+		server->addAuthorizedClient(client);
+}
+
+void	quit(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string> parameters = msg.getParameters();
+	std::string	message = ":" + server->getHostname() + " QUIT ";
+
+	if (parameters.empty() == true)
+		message.append(client.getNick());
+	else
+		message.append(parameters[0]);
+
+	send(client.getSocket(), message.data(), message.length(), 0);
+	close(client.getSocket());
+	server->eraseFromClientMap(client);
 }

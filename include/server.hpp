@@ -20,10 +20,12 @@ class Server
 		std::string	getHostname() const;
 		std::string	getPass(void) const;
 		ClientMap	getClientMap() const;
+		ClientMap	getAuthorizedClientMap() const;
 		ChannelMap	getChannelMap() const;
 
 		void		eraseFromClientMap(Client &client);
 		bool		addClient(Client &client);
+		void		addAuthorizedClient(Client &client);
 
 		void	run();
 
@@ -41,6 +43,7 @@ class Server
 		sockaddr_in		_server_addr;
 		ClientMap		_clients;
 		ChannelMap		_channels;
+		ClientMap		_authorizedClients;//only contains the clients that are authenticated and allowed to interact on the server
 		std::map<std::string, FuncPtr> _cmdMap;
 		bool			_noAuthorization;
 		bool			_clientMapChanged;

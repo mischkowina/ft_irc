@@ -62,6 +62,8 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _n
 	cmd["PRIVMSG"] = &privmsg;
 	cmd["NAMES"] = &displayNames;
 	cmd["PASS"] = &pass_cmd;
+	cmd["USER"] = &user;
+	cmd["QUIT"] = &quit;
 
 	_cmdMap = cmd;
 }
@@ -91,6 +93,11 @@ Server::ClientMap	Server::getClientMap() const
 	return _clients;
 }
 
+Server::ClientMap	Server::getAuthorizedClientMap() const
+{
+	return _authorizedClients;
+}
+
 Server::ChannelMap	Server::getChannelMap() const
 {
 	return _channels;
@@ -99,6 +106,7 @@ Server::ChannelMap	Server::getChannelMap() const
 void	Server::eraseFromClientMap(Client &client)
 {
 	_clients.erase(client.getNick());
+	_authorizedClients.erase(client.getNick());
 	this->_clientMapChanged = true;
 }
 
@@ -111,6 +119,11 @@ bool	Server::addClient(Client &client)
 		return true;
 	}
 	return false;	
+}
+
+void	Server::addAuthorizedClient(Client &client)
+{
+	_authorizedClients.insert(std::make_pair(client.getNick(), client));
 }
 
 void	Server::run()
@@ -166,10 +179,11 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 		//check socket for error events, if yes close the connection and delete the client from the map
 		if (pollfds[i].revents & POLLERR || pollfds[i].revents & POLLHUP)
 		{
+			Message msg("QUIT :Connection with " + it->second.getNick() + " lost.");
+			quit(this, it->second, msg);
 			std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
-			close(pollfds[i].fd);
-			_clients.erase(it);
-			break;				// from continue -> break; return to the top
+			this->_clientMapChanged = false;
+			break;
 		}
 		//check for POLLIN events
 		if (pollfds[i].revents & POLLIN)
@@ -187,9 +201,10 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client
 			else if (recv_return == 0)
 			{
-				std::cout << "Connection with " << currentClient.getIP() << " on socket " << currentClient.getSocket() << " lost." << std::endl;
-				close(pollfds[i].fd);
-				_clients.erase(it);
+				Message msg("QUIT :Connection with " + it->second.getNick() + " lost.");
+				quit(this, it->second, msg);
+				std::cout << "Connection with " << it->second.getIP() << " on socket " << it->second.getSocket() << " lost." << std::endl;
+				this->_clientMapChanged = false;
 				break ; // from continue -> break; return to the top, same as line 105
 			}
 			//add message to what is in the clients message buffer
@@ -275,21 +290,7 @@ void	Server::process_request(Client &client, std::string msg)
 		//send error message to client
 		return ;
 	}
-
-	//TESTING:				/help  /info  /join #newchannel
-	std::cout << "Prefix: " << message.getPrefix() << std::endl;		// this should be '/'
-	std::cout << "Command: " << message.getCommand() << std::endl;
-	std::cout << "Parameters:" << std::endl;
-	std::vector<std::string>	parameters = message.getParameters();
-	for (std::vector<std::string>::iterator it = parameters.begin(); it != parameters.end(); it++)
-		std::cout << *it << std::endl;
-
-
-	// if (message.isCommand() == true)
 	this->execCmd(client, message);
-
-	//next steps:
-	// implement functions, channels, ...
 }
 
 // void	execCmd(Message& msg)
@@ -299,10 +300,24 @@ void	Server::execCmd(Client &client, Message& msg)
 	std::map<std::string, FuncPtr>::const_iterator it = _cmdMap.find(msg.getCommand());
 	if (it == _cmdMap.end())
 	{
-		std::cerr << "Error: Invalid command " << msg.getCommand() << std::endl;
+		client.sendErrMsg(this, ERR_UNKNOWNCOMMAND, msg.getCommand().c_str());
 		return;
 	}
-	//check if the User already used PASS, NICK and USER (except QUIT??)
+	if (msg.getCommand() == "QUIT")//QUIT can always be used no matter the authorization
+	{
+		quit(this, client, msg);
+		return;
+	}
+	if (client.getIsAuthorized() == false && msg.getCommand() != "PASS")//PASS has to be used before any other command can be used
+	{
+		client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
+		return ;
+	}
+	if (client.getIsAuthorized() == true && (client.getName().empty() == true || client.getNick().empty() == true))//NICK and USER have to be used after PASS before any other command can be used
+	{
+		client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
+		return ;
+	}
 	(*it->second)(this, client, msg);
 }
 //////////////////////////////////////////////////////////////////////////////////

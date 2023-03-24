@@ -10,7 +10,10 @@ class Client {
 		int			_socket;
 		std::string	_IP;
 		std::string	_nick;
-		std::string	_name;
+		std::string	_username;
+		std::string	_hostname;
+		std::string	_servername;
+		std::string	_realname;
 		bool		_isAuthorized;
 		bool		_isOperator;
 		std::string	_recvBuffer;
@@ -23,6 +26,7 @@ class Client {
 
 		void		setIP(sockaddr_in *client_addr);
 		void		setNick(std::string nick);
+		void		setUserData(std::vector<std::string> &parameters);
 		void		setIsAuthorized(bool status);
 		void		setIsOperator(bool status);
 		void		addToRecvBuffer(char *buffer, int len);

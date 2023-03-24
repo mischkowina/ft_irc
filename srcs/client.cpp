@@ -1,7 +1,7 @@
 #include "client.hpp"
 
 //Constructor with socket descriptor as parameter
-Client::Client(int socket, bool isAuthorized) : _socket(socket), _isAuthorized(isAuthorized)
+Client::Client(int socket, bool isAuthorized) : _socket(socket), _username(""), _isAuthorized(isAuthorized)
 {
 	// set new socket to non blocking
 	int fcntl_return = fcntl(this->_socket, F_SETFL, O_NONBLOCK);
@@ -28,6 +28,14 @@ void	Client::setNick(std::string nick)
 	this->_nick = nick;
 }
 
+void	Client::setUserData(std::vector<std::string> &parameters)
+{
+	this->_username = parameters[0];
+	this->_hostname = parameters[0];
+	this->_servername = parameters[0];
+	this->_realname = parameters[0];
+}
+
 void	Client::setIsAuthorized(bool status)
 {
 	this->_isAuthorized = status;
@@ -40,7 +48,10 @@ Client	&Client::operator=(Client const &rhs)
 		this->_socket = rhs._socket;
 		this->_IP = rhs._IP;
 		this->_nick = rhs._nick;
-		this->_name = rhs._name;
+		this->_username = rhs._username;
+		this->_hostname = rhs._hostname;
+		this->_servername = rhs._servername;
+		this->_realname = rhs._realname;
 		this->_isAuthorized = rhs._isAuthorized;
 		this->_isOperator = rhs._isOperator;
 		this->_recvBuffer = rhs._recvBuffer;
@@ -84,7 +95,7 @@ std::string	Client::getNick() const
 
 std::string	Client::getName() const
 {
-	return _name;
+	return _username;
 }
 
 bool	Client::getIsAuthorized() const

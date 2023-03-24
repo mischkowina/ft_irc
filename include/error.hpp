@@ -9,11 +9,15 @@
 
 # define ERR_NOTEXTTOSEND " 412 :No text to send"
 
+# define ERR_UNKNOWNCOMMAND "421 <command> :Unknown command"
+
 # define ERR_NONICKNAMEGIVEN "431 :No nickname given"
 
 # define ERR_ERRONEUSNICKNAME "432 <nick> :Erroneus nickname"
 
 # define ERR_NICKNAMEINUSE "433 <nick> :Nickname is already in use"
+
+# define ERR_NOTREGISTERED "451 :You have not registered"
 
 # define ERR_NEEDMOREPARAMS "461 <command> :Not enough parameters"
 
