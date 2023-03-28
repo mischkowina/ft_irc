@@ -308,14 +308,20 @@ void	Server::execCmd(Client &client, Message& msg)
 		quit(this, client, msg);
 		return;
 	}
-	if (client.getIsAuthorized() == false && msg.getCommand() != "PASS")//PASS has to be used before any other command can be used
+	if (client.getHasPass() == false && msg.getCommand() != "PASS")//PASS has to be used before any other command can be used
 	{
 		client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
 		return ;
 	}
-	if (client.getIsAuthorized() == true && (client.getName().empty() == true || client.getNick().empty() == true))//NICK and USER have to be used after PASS before any other command can be used
+	else if (client.getHasPass() == true && client.getIsAuthorized() == false)
 	{
-		client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
+		std::string	nick = client.getNick();
+		if (msg.getCommand() == "NICK" && ft::isValidNick(nick) == false)
+			(*it->second)(this, client, msg);
+		else if (msg.getCommand() == "USER" && client.getName().empty() == true)
+			(*it->second)(this, client, msg);
+		else
+			client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
 		return ;
 	}
 	(*it->second)(this, client, msg);

@@ -1,7 +1,7 @@
 #include "client.hpp"
 
 //Constructor with socket descriptor as parameter
-Client::Client(int socket, bool isAuthorized) : _socket(socket), _username(""), _isAuthorized(isAuthorized)
+Client::Client(int socket, bool hasPass) : _socket(socket), _username(""), _hasPass(hasPass)
 {
 	// set new socket to non blocking
 	int fcntl_return = fcntl(this->_socket, F_SETFL, O_NONBLOCK);
@@ -13,6 +13,7 @@ Client::Client(int socket, bool isAuthorized) : _socket(socket), _username(""), 
 	}
 
 	this->_recvBuffer = "";
+	this->_isAuthorized = false;
 }
 
 Client::Client(Client const &rhs)
@@ -41,6 +42,11 @@ void	Client::setIsAuthorized(bool status)
 	this->_isAuthorized = status;
 }
 
+void	Client::setHasPass(bool status)
+{
+	this->_hasPass = status;
+}
+
 Client	&Client::operator=(Client const &rhs)
 {
 	if (this != &rhs)
@@ -52,6 +58,7 @@ Client	&Client::operator=(Client const &rhs)
 		this->_hostname = rhs._hostname;
 		this->_servername = rhs._servername;
 		this->_realname = rhs._realname;
+		this->_hasPass = rhs._hasPass;
 		this->_isAuthorized = rhs._isAuthorized;
 		this->_isOperator = rhs._isOperator;
 		this->_recvBuffer = rhs._recvBuffer;
@@ -96,6 +103,11 @@ std::string	Client::getNick() const
 std::string	Client::getName() const
 {
 	return _username;
+}
+
+bool	Client::getHasPass() const
+{
+	return this->_hasPass;
 }
 
 bool	Client::getIsAuthorized() const

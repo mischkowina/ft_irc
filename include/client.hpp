@@ -14,6 +14,7 @@ class Client {
 		std::string	_hostname;
 		std::string	_servername;
 		std::string	_realname;
+		bool		_hasPass;
 		bool		_isAuthorized;
 		bool		_isOperator;
 		std::string	_recvBuffer;
@@ -28,6 +29,7 @@ class Client {
 		void		setNick(std::string nick);
 		void		setUserData(std::vector<std::string> &parameters);
 		void		setIsAuthorized(bool status);
+		void		setHasPass(bool status);
 		void		setIsOperator(bool status);
 		void		addToRecvBuffer(char *buffer, int len);
 		int			getSocket() const;
@@ -35,6 +37,7 @@ class Client {
 		std::string	getNick() const;
 		std::string	getName() const;
 		bool		getIsAuthorized() const;
+		bool		getHasPass() const;
 		bool		getIsOperator() const;
 		std::string	getRecvBuffer() const;
 
