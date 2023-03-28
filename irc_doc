@@ -68,3 +68,59 @@ Client information:
 nickname (max. 9 characters) - has to be unique
 username 
 
+
+
+COMMANDS:
+Connection: //MUSTHAVES
+- pass - done
+- nick - done
+- user - done
+- server - nope
+- oper - todo
+- quit - done
+- squit - nope
+
+Channel Operation: //MUSTHAVES
+- join - todo //MUSTHAVE
+- part - todo //MUSTHAVE
+- mode - todo //MUSTHAVE
+- topic - todo //MUSTHAVE
+- names - todo //MUSTHAVE
+- list - todo //MUSTHAVE
+- invite - todo //MUSTHAVE
+- kick - todo
+
+Server Queries:
+- version - nope?
+- stats - nope?
+- links - nope
+- time - todo?
+- connect - nope
+- trace - nope
+- admin - nope?
+- info - todo?
+
+Send Messages: //MUSTHAVES
+- privmsg - done
+- notice - todo 
+
+User-based queries:
+- who - todo?
+- whois - todo?
+- whowas - nope?
+
+Misc.:
+- kill - todo?
+- ping - todo?
+- pong - todo?
+- error - nope?
+
+Optional:
+- away - todo?
+- rehash - nope
+- restart - todo?
+- summon - nope
+- users - todo?
+- wallops - nope
+- userhost - nope?
+- ison - todo?
