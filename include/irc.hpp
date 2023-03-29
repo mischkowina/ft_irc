@@ -29,6 +29,7 @@
 # include "client.hpp"
 # include "message.hpp"
 # include "error.hpp"
+# include "reply.hpp"
 # include "cmds.hpp"
 # include "server.hpp"
 

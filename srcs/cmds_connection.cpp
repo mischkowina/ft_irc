@@ -32,6 +32,7 @@ void	nick(Server *server, Client &client, Message& msg)
 		{
 			changedClient.setIsAuthorized(true);
 			server->addAuthorizedClient(changedClient);
+			sendWelcome(server, client);
 		}	
 		server->eraseFromClientMap(client);
 	}
@@ -87,6 +88,7 @@ void	user(Server *server, Client &client, Message& msg)
 	{
 		client.setIsAuthorized(true);
 		server->addAuthorizedClient(client);
+		sendWelcome(server, client);
 	}	
 }
 
@@ -109,7 +111,35 @@ void	quit(Server *server, Client &client, Message& msg)
 
 /////////////////////////////////// OPER ////////////////////////////////////
 
-// void	oper(Server *server, Client &client, Message& msg)
-// {
+void	oper(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string> parameters = msg.getParameters();
 
-// }
+	if (parameters.size() < 2)
+	{
+		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, "OPER");
+		return ;
+	}
+
+	Server::ClientMap::iterator it = server->getAuthorizedClientMap().find(parameters[0]);
+
+	if (it == server->getAuthorizedClientMap().end())
+		return ;
+	
+	if (parameters[1] == server->getOperPass())
+	{
+		(*it).second.setIsOperator(true);//TODO: CALL MODE
+		(*it).second.sendErrMsg(server, RPL_YOUREOPER, NULL);//TBD: FUNCTION FOR REPLIES?
+	}
+	else
+		client.sendErrMsg(server, ERR_PASSWDMISMATCH, NULL);
+}
+
+void	sendWelcome(Server *server, Client &client)
+{
+	std::string message = client.getNick() + "!" + client.getName() + "@" + client.getIP();
+	client.sendErrMsg(server, RPL_WELCOME, message.c_str());
+	client.sendErrMsg(server, RPL_YOURHOST, server->getHostname().c_str());
+	client.sendErrMsg(server, RPL_CREATED, NULL);
+	client.sendErrMsg(server, RPL_MYINFO, server->getHostname().c_str());
+}

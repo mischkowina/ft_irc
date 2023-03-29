@@ -1,6 +1,6 @@
 #include "server.hpp"
 
-Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _noAuthorization(false), _clientMapChanged(false)
+Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _oper_password("operator"), _noAuthorization(false), _clientMapChanged(false)
 {
 	if (this->_password.empty() == true)
 		this->_noAuthorization = true;
@@ -64,6 +64,8 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _n
 	cmd["PASS"] = &pass_cmd;
 	cmd["USER"] = &user;
 	cmd["QUIT"] = &quit;
+	cmd["OPER"] = &oper;
+	cmd["NOTICE"] = &notice;
 
 	_cmdMap = cmd;
 }
@@ -78,6 +80,11 @@ std::string	Server::getPass() const
 	return _password;
 }
 
+std::string	Server::getOperPass() const
+{
+	return _oper_password;
+}
+
 int		Server::getServerSoc() const
 {
 	return _sockfd;
@@ -88,17 +95,17 @@ std::string	Server::getHostname() const
 	return this->_hostname;
 }
 
-Server::ClientMap	Server::getClientMap() const
+Server::ClientMap	&Server::getClientMap()
 {
 	return _clients;
 }
 
-Server::ClientMap	Server::getAuthorizedClientMap() const
+Server::ClientMap	&Server::getAuthorizedClientMap()
 {
 	return _authorizedClients;
 }
 
-Server::ChannelMap	Server::getChannelMap() const
+Server::ChannelMap	&Server::getChannelMap()
 {
 	return _channels;
 }
@@ -290,6 +297,7 @@ void	Server::process_request(Client &client, std::string msg)
 		//send error message to client
 		return ;
 	}
+	std::cout << "Is OP: " << client.getIsOperator() << std::endl;
 	this->execCmd(client, message);
 }
 

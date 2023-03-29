@@ -18,5 +18,6 @@ void	displayNames(Server *server, Client &client, Message& msg);
 void	pass_cmd(Server *server, Client &client, Message& msg);
 void	user(Server *server, Client &client, Message& msg);
 void	quit(Server *server, Client &client, Message& msg);
+void	oper(Server *server, Client &client, Message& msg);
 
 #endif

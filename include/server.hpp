@@ -19,9 +19,10 @@ class Server
 		int			getServerSoc(void) const;
 		std::string	getHostname() const;
 		std::string	getPass(void) const;
-		ClientMap	getClientMap() const;
-		ClientMap	getAuthorizedClientMap() const;
-		ChannelMap	getChannelMap() const;
+		std::string	getOperPass() const;
+		ClientMap	&getClientMap();
+		ClientMap	&getAuthorizedClientMap();
+		ChannelMap	&getChannelMap();
 
 		void		eraseFromClientMap(Client &client);
 		bool		addClient(Client &client);
@@ -41,6 +42,7 @@ class Server
 		std::string		_hostname;
 		std::string		_password;
 		sockaddr_in		_server_addr;
+		std::string		_oper_password;
 		ClientMap		_clients;
 		ChannelMap		_channels;
 		ClientMap		_authorizedClients;//only contains the clients that are authenticated and allowed to interact on the server
@@ -65,5 +67,8 @@ void	displayNames(Server *server, Client &client, Message& msg);
 void	pass_cmd(Server *server, Client &client, Message& msg);
 void	user(Server *server, Client &client, Message& msg);
 void	quit(Server *server, Client &client, Message& msg);
+// void	notice(Server *server, Client &client, Message& msg);
+
+void	sendWelcome(Server *server, Client &client);
 
 #endif

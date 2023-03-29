@@ -23,4 +23,6 @@
 
 # define ERR_ALREADYREGISTRED "462 :You may not reregister"
 
+# define ERR_PASSWDMISMATCH "464 :Password incorrect"
+
 #endif
