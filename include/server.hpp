@@ -67,7 +67,7 @@ void	displayNames(Server *server, Client &client, Message& msg);
 void	pass_cmd(Server *server, Client &client, Message& msg);
 void	user(Server *server, Client &client, Message& msg);
 void	quit(Server *server, Client &client, Message& msg);
-// void	notice(Server *server, Client &client, Message& msg);
+void	notice(Server *server, Client &client, Message& msg);
 
 void	sendWelcome(Server *server, Client &client);
 

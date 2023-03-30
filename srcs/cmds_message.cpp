@@ -13,7 +13,7 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 		{
 			std::string tmp = msg;
 			tmp.insert(0, (*itClien).second.getNick() + " ");
-			(*itClien).second.sendPrivMsg(sender, tmp);
+			(*itClien).second.sendMsg(sender, tmp, " PRIVMSG ");
 			continue ;
 		}
 		Server::ChannelMap::const_iterator itChannel = tmpChannel.find(*itRecv);
@@ -23,7 +23,7 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 			tmp.insert(0, (*itChannel).second.getChannelName() + " ");
 			std::list<Client> tmpChannelUsers = itChannel->second.getChannelUsers();
 			for (std::list<Client>::const_iterator itChannelRecv = tmpChannelUsers.begin(); itChannelRecv != tmpChannelUsers.end(); itChannelRecv++)
-				(*itChannelRecv).sendPrivMsg(sender, tmp);
+				(*itChannelRecv).sendMsg(sender, tmp, " PRIVMSG ");
 			continue ;
 		}
 		sender.sendErrMsg(server, ERR_NOSUCHNICK, (*itRecv).c_str());
@@ -68,7 +68,18 @@ void	privmsg(Server *server, Client &client, Message& msg)
 	}
 }
 
-// void	notice(Server *server, Client &client, Message& msg)
-// {
+void	notice(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string>	parameters = msg.getParameters();
 
-// }
+	if (parameters.size() < 2)
+		return;
+
+	Server::ClientMap::iterator it = server->getAuthorizedClientMap().find(parameters[0]);
+	if (it == server->getAuthorizedClientMap().end())
+		return;
+
+	std::string tmp = parameters[1];
+	tmp.insert(0, (*it).second.getNick() + " ");
+	(*it).second.sendMsg(client, tmp, " NOTICE ");
+}

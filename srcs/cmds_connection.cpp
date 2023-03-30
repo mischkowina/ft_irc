@@ -61,7 +61,11 @@ void	pass_cmd(Server *server, Client &client, Message& msg)
 
 	//check if the password is correct, if so change status of client to isAuthorized == true
 	if (parameters[0] == server->getPass())
+	{
 		client.setHasPass(true);
+		std::string tmp = server->getHostname() + " NOTICE  Good Pass\r\n";
+		send(client.getSocket(), tmp.data(), tmp.length(), 0);
+	}
 }
 
 /////////////////////////////////// USER ////////////////////////////////////
@@ -128,7 +132,9 @@ void	oper(Server *server, Client &client, Message& msg)
 	
 	if (parameters[1] == server->getOperPass())
 	{
-		(*it).second.setIsOperator(true);//TODO: CALL MODE
+		(*it).second.setIsOperator(true);
+		Server::ClientMap::iterator itC = server->getClientMap().find((*it).second.getNick());
+		(*itC).second.setIsOperator(true);
 		(*it).second.sendErrMsg(server, RPL_YOUREOPER, NULL);//TBD: FUNCTION FOR REPLIES?
 	}
 	else

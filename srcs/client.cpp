@@ -14,6 +14,7 @@ Client::Client(int socket, bool hasPass) : _socket(socket), _username(""), _hasP
 
 	this->_recvBuffer = "";
 	this->_isAuthorized = false;
+	this->_isOperator = false;
 }
 
 Client::Client(Client const &rhs)
@@ -151,10 +152,10 @@ void	Client::sendErrMsg(Server *server, std::string const err_code, char const *
 	send(this->_socket, err_msg.data(), err_msg.length(), 0);
 }
 
-void	Client::sendPrivMsg(Client &sender, std::string msg) const
+void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
 {
 	//insert command name
-	msg.insert(0, " PRIVMSG ");
+	msg.insert(0, type);
 
 	//insert full prefix of sender - :<nick>!<username>@<IP>
 	msg.insert(0, sender.getIP());
