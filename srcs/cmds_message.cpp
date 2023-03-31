@@ -11,19 +11,15 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 		Server::ClientMap::const_iterator itClien = tmpClient.find(*itRecv);
 		if (itClien != tmpClient.end())
 		{
-			std::string tmp = msg;
-			tmp.insert(0, (*itClien).second.getNick() + " ");
-			(*itClien).second.sendMsg(sender, tmp, " PRIVMSG ");
+			(*itClien).second.sendMsg(sender, msg, "PRIVMSG");
 			continue ;
 		}
 		Server::ChannelMap::const_iterator itChannel = tmpChannel.find(*itRecv);
 		if (itChannel != tmpChannel.end())
 		{
-			std::string tmp = msg;
-			tmp.insert(0, (*itChannel).second.getChannelName() + " ");
 			std::list<Client> tmpChannelUsers = itChannel->second.getChannelUsers();
 			for (std::list<Client>::const_iterator itChannelRecv = tmpChannelUsers.begin(); itChannelRecv != tmpChannelUsers.end(); itChannelRecv++)
-				(*itChannelRecv).sendMsg(sender, tmp, " PRIVMSG ");
+				(*itChannelRecv).sendMsg(sender, msg, "PRIVMSG");
 			continue ;
 		}
 		sender.sendErrMsg(server, ERR_NOSUCHNICK, (*itRecv).c_str());
@@ -79,7 +75,5 @@ void	notice(Server *server, Client &client, Message& msg)
 	if (it == server->getAuthorizedClientMap().end())
 		return;
 
-	std::string tmp = parameters[1];
-	tmp.insert(0, (*it).second.getNick() + " ");
-	(*it).second.sendMsg(client, tmp, " NOTICE ");
+	(*it).second.sendMsg(client, parameters[1], "NOTICE");
 }

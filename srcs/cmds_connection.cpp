@@ -24,16 +24,20 @@ void	nick(Server *server, Client &client, Message& msg)
 	Client	changedClient(client);
 	changedClient.setNick(parameters[0]);
 
+	if (changedClient.getName().empty() == false)
+		changedClient.setIsAuthorized(true);
+
 	if (server->addClient(changedClient) == false)
 		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
 	else
 	{
 		if (changedClient.getName().empty() == false)
 		{
-			changedClient.setIsAuthorized(true);
 			server->addAuthorizedClient(changedClient);
-			sendWelcome(server, client);
-		}	
+			std::string oldnick = client.getNick();
+			if (ft::isValidNick(oldnick) == false)
+				sendWelcome(server, changedClient);
+		}
 		server->eraseFromClientMap(client);
 	}
 	//COMMENT: No implementation of ERR_NICKCOLLISION since it is only applicable for multi-server connections
@@ -63,7 +67,7 @@ void	pass_cmd(Server *server, Client &client, Message& msg)
 	if (parameters[0] == server->getPass())
 	{
 		client.setHasPass(true);
-		std::string tmp = server->getHostname() + " NOTICE  Good Pass\r\n";
+		std::string tmp = server->getHostname() + " NOTICE GoodPass\r\n";
 		send(client.getSocket(), tmp.data(), tmp.length(), 0);
 	}
 }
@@ -88,7 +92,8 @@ void	user(Server *server, Client &client, Message& msg)
 
 	client.setUserData(parameters);
 
-	if (client.getNick().empty() == false)
+	std::string nick = client.getNick();
+	if (ft::isValidNick(nick) == true)
 	{
 		client.setIsAuthorized(true);
 		server->addAuthorizedClient(client);
@@ -148,4 +153,15 @@ void	sendWelcome(Server *server, Client &client)
 	client.sendErrMsg(server, RPL_YOURHOST, server->getHostname().c_str());
 	client.sendErrMsg(server, RPL_CREATED, NULL);
 	client.sendErrMsg(server, RPL_MYINFO, server->getHostname().c_str());
+	Message msg("");
+	motd(server, client, msg);
+}
+
+void	motd(Server *server, Client &client, Message& msg)
+{
+	(void)msg;
+	
+	client.sendErrMsg(server, RPL_MOTDSTART, server->getHostname().c_str());
+	client.sendErrMsg(server, RPL_MOTD, "Whatever");
+	client.sendErrMsg(server, RPL_ENDOFMOTD, NULL);
 }

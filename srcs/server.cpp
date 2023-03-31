@@ -66,6 +66,7 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["QUIT"] = &quit;
 	cmd["OPER"] = &oper;
 	cmd["NOTICE"] = &notice;
+	cmd["MOTD"] = &motd;
 
 	_cmdMap = cmd;
 }
@@ -234,7 +235,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				msg = currentClient.getRecvBuffer().substr(0, msg_end);
 				//clear the message from the buffer (potentially keeping content that follows \r\n)
 				currentClient.clearRecvBuffer(msg_end);
-				std::cout << "Full message received from " << currentClient.getNick() << " :" << std::endl << msg << std::endl;
+				std::cout << YELLOW << currentClient.getNick() << ": " RESET << msg << std::endl;
 				//process the message (further parse it and execute the according command)
 				this->process_request(currentClient, msg);
 				if (this->_clientMapChanged == true)
@@ -295,9 +296,8 @@ void	Server::process_request(Client &client, std::string msg)
 	if (message.isValid() == false)
 	{
 		//send error message to client
-		return ;
+		return ; 
 	}
-	std::cout << "Is OP: " << client.getIsOperator() << std::endl;
 	this->execCmd(client, message);
 }
 
@@ -319,6 +319,7 @@ void	Server::execCmd(Client &client, Message& msg)
 	if (client.getHasPass() == false && msg.getCommand() != "PASS")//PASS has to be used before any other command can be used
 	{
 		client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
+		std::cout << "CASE 1" << std::endl;
 		return ;
 	}
 	else if (client.getHasPass() == true && client.getIsAuthorized() == false)
@@ -329,7 +330,10 @@ void	Server::execCmd(Client &client, Message& msg)
 		else if (msg.getCommand() == "USER" && client.getName().empty() == true)
 			(*it->second)(this, client, msg);
 		else
+		{
 			client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
+			std::cout << "CASE 2" << std::endl;
+		}
 		return ;
 	}
 	(*it->second)(this, client, msg);

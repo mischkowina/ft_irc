@@ -148,15 +148,20 @@ void	Client::sendErrMsg(Server *server, std::string const err_code, char const *
 	}
 	err_msg.insert(4, _nick + " ");
 	err_msg.insert(0, ":" + server->getHostname() + " ");
+	std::cout << RED "Sending to " << this->_nick << ": " RESET << err_msg << std::endl;
 	err_msg.append("\r\n");
 	send(this->_socket, err_msg.data(), err_msg.length(), 0);
 }
 
 void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
 {
+	if (msg.find(" ", 0) != std::string::npos)
+		msg.insert(0, ":");
+	msg.insert(0, " " + this->_nick + " ");
 	//insert command name
 	msg.insert(0, type);
 
+	msg.insert(0, " ");
 	//insert full prefix of sender - :<nick>!<username>@<IP>
 	msg.insert(0, sender.getIP());
 	msg.insert(0, "@");
@@ -164,6 +169,7 @@ void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
 	msg.insert(0, "!");
 	msg.insert(0, sender.getNick());
 	msg.insert(0, ":");
+	std::cout << BLUE "Sending to " << this->_nick << ": " RESET << msg << std::endl;
 	msg.append("\r\n");
 	send(this->_socket, msg.data(), msg.size(), 0);
 }
