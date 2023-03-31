@@ -2,7 +2,7 @@
 some general functionalities:
 /help
 
-/join #channel
+/join <channel>{,<channel>} [<key>{,<key>}]
 /close #channel
 /part #channel
 

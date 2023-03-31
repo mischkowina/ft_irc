@@ -5,7 +5,7 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 	Server::ClientMap tmpClient = server->getClientMap();
 	Server::ChannelMap tmpChannel = server->getChannelMap();
 
-	// iterate through receivers, try to find a matching channel or client to send the messag eto
+	// iterate through receivers, try to find a matching channel or client to send the message
 	for (std::vector<std::string>::const_iterator itRecv = listOfRecv.begin(); itRecv != listOfRecv.end(); itRecv++)
 	{
 		Server::ClientMap::const_iterator itClien = tmpClient.find(*itRecv);
@@ -68,7 +68,86 @@ void	privmsg(Server *server, Client &client, Message& msg)
 	}
 }
 
-void	displayNames(Server *server, Client &client, Message& msg)
+//////////////////////////////  CHANNEL  ////////////////////////////////////////
+void	Server::addChannel(std::string name)
+{
+	_channels.insert(std::make_pair(name, Channel(name)));
+	// set client as op
+}
+
+void	Channel::setNewChannel(Client& client)
+{
+	_channelOperator.push_back(client);
+}
+
+void	join(Server *server, Client &client, Message& msg)				// channel -> <#name, Channel()>
+{
+	(void)client;
+
+	std::vector<std::string>	parameters = msg.getParameters();
+	std::vector<std::string>	keys;
+	// if (parameters[1].empty() == false)
+	// 	keys = parameters[1];
+
+	std::vector<std::string> channelNames;
+
+	//parse first parameter by commas to get all channel names
+	std::stringstream ss(parameters[0]);
+	std::string token;
+	while (std::getline(ss, token, ',')) {
+		channelNames.push_back(token); // or std::pair<std::string, bool>(token, validName)
+		token.clear();
+	}
+	// a client can be a member of 10 channels max
+
+	Server::ChannelMap mapOfChannels = server->getChannelMap();
+	// loop through map of channels -> if not found; create one (and open an irc client window-> docs)
+	for (Server::ChannelMap::const_iterator iterChannel = mapOfChannels.begin();
+		iterChannel != mapOfChannels.end(); iterChannel++) {
+
+		// iter
+		if ((token.at(0) != '#' && token.at(0) != '&') || token.length() > 199 || token.find_first_of(' ') != std::string::npos)
+			// error
+		// find the existing channel
+		if (iterName != channelNames.end() && iterName->second)
+		{
+			// check any invalid conditions to add a new client to the channel
+			// user's nick/username/hostname must not match any active bans;
+			// the user must be invited if the channel is invite-only;	-> check the flag
+			// the correct key (password) must be given if it is set.
+
+		// add client to the channel 
+		}
+	
+		// else -> create one
+		else {
+			// add new channel to the server
+			server->addChannel(iterChannel->first);			// get param to set mode (pass, +s, ...)
+		}
+
+
+	}
+
+
+
+	// send msg to channel's participants < <nick> joined the channel ...>
+
+
+	std::cout << " ---- creating channels ... ----\n";
+}
+
+void	closeChannel(Server *server, Client &client, Message& msg)
+{
+	(void)server;
+	(void)client;
+	(void)msg;
+	// loop thru map of channels and remove client from channel when found -> else send error msg
+	// check if last client; than remove channel
+
+}
+
+//////////////////////////////  nick  ////////////////////////////////////////
+void	names(Server *server, Client &client, Message& msg)
 {
 	(void)server;
 	(void)client;
@@ -87,15 +166,6 @@ void	connect(Server *server, Client &client, Message& msg)
 	// and enable him to open/manage new channels and usage of general functions
 }
 
-void	join(Server *server, Client &client, Message& msg)
-{
-	(void)server;
-	(void)client;
-	(void)msg;
-	//create new channel [#name] if it doesn't exist yet
-	std::cout << " ----> i want to get into a channel!\n";
-}
-
 void	help(Server *server, Client &client, Message& msg)
 {
 	(void)server;
@@ -103,14 +173,6 @@ void	help(Server *server, Client &client, Message& msg)
 	(void)msg;
 	// display standard stuff ...
 	std::cout << " ----> what help?\n";
-}
-
-void	closeChannel(Server *server, Client &client, Message& msg)
-{
-	(void)server;
-	(void)client;
-	(void)msg;
-	// leave channel, and if it's empty, remove it
 }
 
 void	info(Server *server, Client &client, Message& msg)

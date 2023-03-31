@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 	// 		std::cerr << Correct use: ./ircserv <port> <password> << std::endl;
 
 	// bool endServer = false;
-	// IRCserver(atoi(argv[1]), std::string str(argv[2]);
+	// Server IRCserver(atoi(argv[1]), std::string str(argv[2]);
 	std::string	pass=  "password";
 	Server		IRCserver(6667, pass);
 

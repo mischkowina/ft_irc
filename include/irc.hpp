@@ -9,6 +9,7 @@
 # include <vector>
 # include <list>
 # include <map>
+# include <algorithm>
 # include <utility>
 # include <iterator>
 # include <sstream>

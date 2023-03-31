@@ -60,7 +60,7 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _n
 	cmd["WHOIS"] = &whois;
 	cmd["NICK"] = &nick;
 	cmd["PRIVMSG"] = &privmsg;
-	cmd["NAMES"] = &displayNames;
+	cmd["NAMES"] = &names;
 	cmd["PASS"] = &pass_cmd;
 
 	_cmdMap = cmd;
@@ -116,7 +116,6 @@ bool	Server::addClient(Client &client)
 void	Server::run()
 {
 	//create struct pollfd[] with the appropriate size (number of connected clients + 1 for the listening socket)
-	// struct pollfd pollfds[_clients.size() + 1];
 	std::vector<pollfd> pollfds(1);
 
 	//initalize the first struct pollfd[0] to the listening socket

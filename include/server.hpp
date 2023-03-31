@@ -25,6 +25,8 @@ class Server
 		void		eraseFromClientMap(Client &client);
 		bool		addClient(Client &client);
 
+		void		addChannel(std::string name);
+
 		void	run();
 
 		void	checkAllClientSockets(std::vector<pollfd> pollfds);

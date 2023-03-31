@@ -14,7 +14,7 @@ void	info(Server *server, Client &client, Message& msg);
 void	whois(Server *server, Client &client, Message& msg);
 void	nick(Server *server, Client &client, Message& msg);
 void	privmsg(Server *server, Client &client, Message& msg);
-void	displayNames(Server *server, Client &client, Message& msg);
+void	names(Server *server, Client &client, Message& msg);
 void	pass_cmd(Server *server, Client &client, Message& msg);
 
 #endif
