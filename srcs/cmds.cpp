@@ -74,7 +74,8 @@ void	Server::createNewChannel(std::string name, Client &client)
 	(void)client;
 	// error.hpp -> include all needed macros
 	if ((name[0] != '#' && name[0] != '&') || name.length() > 199 || name.find_first_of(' ') != std::string::npos) {
-		throw std::runtime_error("invalid channel name");	// replace with macro -> send err to client
+		// sendErrMsg();
+		// return;
 	}
 	_channels.insert(std::make_pair(name, Channel(name)));
 	// set client as op
@@ -126,20 +127,12 @@ void	join(Server *server, Client &client, Message& msg)
 		if (itChannel != mapOfChannels.end())
 		{
 			// add client to the channel
-			try {
-				server->addClientToChannel(client);
-			} catch (const std::exception& e) {
-				std::cerr << "Error: " << e.what() << std::endl;	// adjust appropriate response here
-			}
+			server->addClientToChannel(client);
 		}
 	
 		else {
 			// else add new channel to the server
-			try {
-				server->createNewChannel(*iterChannelName, client);
-			} catch (const std::exception& e) {
-				std::cerr << "Error: " << e.what() << std::endl;	// adjust appropriate response here
-			}
+			server->createNewChannel(*iterChannelName, client);
 		}
 	}
 	// send msg to channel's participants < <nick> joined the channel ...>
