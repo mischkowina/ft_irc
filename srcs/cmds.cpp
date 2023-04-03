@@ -69,25 +69,44 @@ void	privmsg(Server *server, Client &client, Message& msg)
 }
 
 //////////////////////////////  CHANNEL  ////////////////////////////////////////
-void	Server::addChannel(std::string name)
+void	Server::createChannel(std::string name, Client &client)
 {
+	(void)client;
 	_channels.insert(std::make_pair(name, Channel(name)));
 	// set client as op
+	// _channelOperator.push_back(client);
+
+	// set password if there's one
+	// set modes (invate, private, etc.) if needed
+	(void)client;
 }
 
 void	Channel::setNewChannel(Client& client)
 {
-	_channelOperator.push_back(client);
+	(void)client;
 }
 
-void	join(Server *server, Client &client, Message& msg)				// channel -> <#name, Channel()>
+void	Server::addClientToChannel(Client& client)
+{
+	// wip
+	(void)client;
+	// check any invalid conditions to add a new client to the channel -> throw exception
+			// the correct key (password) must be given if it is set.
+			// a client can be a member of 10 channels max
+			// user's nick/username/hostname must not match any active bans;
+			// the user must be invited if the channel is invite-only;
+}
+
+void	join(Server *server, Client &client, Message& msg)
 {
 	(void)client;
 
 	std::vector<std::string>	parameters = msg.getParameters();
 	std::vector<std::string>	keys;
-	// if (parameters[1].empty() == false)
+	// if (parameters[1].empty() == false) {
 	// 	keys = parameters[1];
+	// set var to later check for pass
+	// }
 
 	std::vector<std::string> channelNames;
 
@@ -98,41 +117,34 @@ void	join(Server *server, Client &client, Message& msg)				// channel -> <#name,
 		channelNames.push_back(token); // or std::pair<std::string, bool>(token, validName)
 		token.clear();
 	}
-	// a client can be a member of 10 channels max
 
-	Server::ChannelMap mapOfChannels = server->getChannelMap();
-	// loop through map of channels -> if not found; create one (and open an irc client window-> docs)
-	for (Server::ChannelMap::const_iterator iterChannel = mapOfChannels.begin();
-		iterChannel != mapOfChannels.end(); iterChannel++) {
+	Server::ChannelMap mapOfChannels = server->getChannelMap();			// channel -> <#name, Channel()>
+	for (std::vector<std::string>::const_iterator iterChannelName = channelNames.begin();
+		iterChannelName != channelNames.end(); iterChannelName++) {
 
-		// iter
-		if ((token.at(0) != '#' && token.at(0) != '&') || token.length() > 199 || token.find_first_of(' ') != std::string::npos)
-			// error
 		// find the existing channel
-		if (iterName != channelNames.end() && iterName->second)
+		Server::ChannelMap::const_iterator itChannel = mapOfChannels.find(*iterChannelName);	
+		if (itChannel != mapOfChannels.end())
 		{
-			// check any invalid conditions to add a new client to the channel
-			// user's nick/username/hostname must not match any active bans;
-			// the user must be invited if the channel is invite-only;	-> check the flag
-			// the correct key (password) must be given if it is set.
-
-		// add client to the channel 
+			// add client to the channel
+			try {
+				server->addClientToChannel(client);
+			} catch (const std::exception& e) {
+				std::cerr << "Error: " << e.what() << std::endl;	// adjust appropriate response here
+			}
 		}
 	
-		// else -> create one
 		else {
+			// else -> create one
+			if ((*iterChannelName != "#" && *iterChannelName != "&") || iterChannelName->length() > 199 || iterChannelName->find_first_of(' ') != std::string::npos) {
+				std::cerr << "Error: invalid channel name" << std::endl;	// replace with macro 
+				continue;
+			}
 			// add new channel to the server
-			server->addChannel(iterChannel->first);			// get param to set mode (pass, +s, ...)
+			server->createChannel(*iterChannelName, client);
 		}
-
-
 	}
-
-
-
 	// send msg to channel's participants < <nick> joined the channel ...>
-
-
 	std::cout << " ---- creating channels ... ----\n";
 }
 
@@ -141,9 +153,8 @@ void	closeChannel(Server *server, Client &client, Message& msg)
 	(void)server;
 	(void)client;
 	(void)msg;
-	// loop thru map of channels and remove client from channel when found -> else send error msg
+	// loop through map of channels and remove client from channel when found -> else send error msg
 	// check if last client; than remove channel
-
 }
 
 //////////////////////////////  nick  ////////////////////////////////////////

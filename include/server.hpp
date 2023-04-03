@@ -25,7 +25,8 @@ class Server
 		void		eraseFromClientMap(Client &client);
 		bool		addClient(Client &client);
 
-		void		addChannel(std::string name);
+		void		addClientToChannel(Client &client);
+		void		createChannel(std::string name, Client &client);
 
 		void	run();
 
