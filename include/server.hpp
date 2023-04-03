@@ -26,7 +26,7 @@ class Server
 		bool		addClient(Client &client);
 
 		void		addClientToChannel(Client &client);
-		void		createChannel(std::string name, Client &client);
+		void		createNewChannel(std::string name, Client &client);
 
 		void	run();
 

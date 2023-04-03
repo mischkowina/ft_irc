@@ -69,20 +69,19 @@ void	privmsg(Server *server, Client &client, Message& msg)
 }
 
 //////////////////////////////  CHANNEL  ////////////////////////////////////////
-void	Server::createChannel(std::string name, Client &client)
+void	Server::createNewChannel(std::string name, Client &client)
 {
 	(void)client;
+	// error.hpp -> include all needed macros
+	if ((name[0] != '#' && name[0] != '&') || name.length() > 199 || name.find_first_of(' ') != std::string::npos) {
+		throw std::runtime_error("invalid channel name");	// replace with macro -> send err to client
+	}
 	_channels.insert(std::make_pair(name, Channel(name)));
 	// set client as op
 	// _channelOperator.push_back(client);
 
 	// set password if there's one
 	// set modes (invate, private, etc.) if needed
-	(void)client;
-}
-
-void	Channel::setNewChannel(Client& client)
-{
 	(void)client;
 }
 
@@ -135,13 +134,12 @@ void	join(Server *server, Client &client, Message& msg)
 		}
 	
 		else {
-			// else -> create one
-			if ((*iterChannelName != "#" && *iterChannelName != "&") || iterChannelName->length() > 199 || iterChannelName->find_first_of(' ') != std::string::npos) {
-				std::cerr << "Error: invalid channel name" << std::endl;	// replace with macro 
-				continue;
+			// else add new channel to the server
+			try {
+				server->createNewChannel(*iterChannelName, client);
+			} catch (const std::exception& e) {
+				std::cerr << "Error: " << e.what() << std::endl;	// adjust appropriate response here
 			}
-			// add new channel to the server
-			server->createChannel(*iterChannelName, client);
 		}
 	}
 	// send msg to channel's participants < <nick> joined the channel ...>
