@@ -23,6 +23,7 @@ class Server
 		ClientMap	&getClientMap();
 		ClientMap	&getAuthorizedClientMap();
 		ChannelMap	&getChannelMap();
+		void		setHasDied(bool status);
 
 		void		eraseFromClientMap(Client &client);
 		bool		addClient(Client &client);

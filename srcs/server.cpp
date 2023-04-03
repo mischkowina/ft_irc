@@ -117,6 +117,11 @@ Server::ChannelMap	&Server::getChannelMap()
 	return _channels;
 }
 
+void	Server::setHasDied(bool status)
+{
+	this->_died = status;
+}
+
 void	Server::eraseFromClientMap(Client &client)
 {
 	_clients.erase(client.getNick());
