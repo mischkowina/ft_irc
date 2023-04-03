@@ -68,10 +68,6 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["DIE"] = &die;
 
 	cmd["JOIN"] = &join;
-	cmd["HELP"] = &help;
-	cmd["CLOSE"] = &closeChannel;
-	cmd["PART"] = &closeChannel;
-	cmd["WHOIS"] = &whois;
 
 	_cmdMap = cmd;
 }
