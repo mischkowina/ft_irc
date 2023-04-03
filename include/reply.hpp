@@ -11,6 +11,8 @@
 
 # define RPL_MYINFO "004 :<servername> ft_irc 1.0 iswo opsitnmlbvk"
 
+# define RPL_NOTOPIC "331 <channel> :No topic is set"
+
 # define RPL_MOTDSTART "375 :- <server> Message of the day - "
 
 # define RPL_MOTD "372 :- <text>"
