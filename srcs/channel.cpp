@@ -34,3 +34,24 @@ std::string  Channel::getChannelName() const
 {
 	return _channelName;
 }
+
+bool	Channel::removeUser(Client& client)
+{
+	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
+	{
+		if (it->getNick() == client.getNick())
+		{
+			for (std::list<Client>::iterator it2 = _channelOperator.begin(); it2 != _channelOperator.end(); it2++)
+			{
+				if (it2->getNick() == client.getNick())
+				{
+					_channelOperator.erase(it2);
+					break ;
+				}
+			}
+			_channelUsers.erase(it);
+			return true;
+		}
+	}
+	return false;
+}

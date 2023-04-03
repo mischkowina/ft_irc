@@ -13,6 +13,9 @@ void	quit(Server *server, Client &client, Message& msg);
 void	oper(Server *server, Client &client, Message& msg);
 void	sendWelcome(Server *server, Client &client);
 
+void	join(Server *server, Client &client, Message& msg);
+void	part(Server *server, Client &client, Message& msg);
+
 void	motd(Server *server, Client &client, Message& msg);
 
 void	privmsg(Server *server, Client &client, Message& msg);
@@ -24,7 +27,5 @@ void	pong(Server *server, Client &client, Message& msg);
 void	die(Server *server, Client &client, Message& msg);
 
 
-//TBD if neeeded?
-void	join(Server *server, Client &client, Message& msg);
 
 #endif

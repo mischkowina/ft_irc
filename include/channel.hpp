@@ -23,6 +23,7 @@ class Channel
 
 		void	setName(std::string channelName);
 		void	setNewChannel(Client& client);
+		bool	removeUser(Client& client);
 
 		std::string			getChannelName() const;
 		std::list<Client>	getChannelOperator() const;

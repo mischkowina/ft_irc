@@ -57,6 +57,9 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["QUIT"] = &quit;
 	cmd["OPER"] = &oper;
 
+	cmd["JOIN"] = &join;
+	cmd["PART"] = &part;
+
 	cmd["MOTD"] = &oper;
 
 	cmd["PRIVMSG"] = &privmsg;
@@ -66,8 +69,6 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["PONG"] = &pong;
 
 	cmd["DIE"] = &die;
-
-	cmd["JOIN"] = &join;
 
 	_cmdMap = cmd;
 }
