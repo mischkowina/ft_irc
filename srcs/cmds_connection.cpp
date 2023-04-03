@@ -24,15 +24,20 @@ void	nick(Server *server, Client &client, Message& msg)
 	Client	changedClient(client);
 	changedClient.setNick(parameters[0]);
 
+	if (changedClient.getName().empty() == false)
+		changedClient.setIsAuthorized(true);
+
 	if (server->addClient(changedClient) == false)
 		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
 	else
 	{
 		if (changedClient.getName().empty() == false)
 		{
-			changedClient.setIsAuthorized(true);
 			server->addAuthorizedClient(changedClient);
-		}	
+			std::string oldnick = client.getNick();
+			if (ft::isValidNick(oldnick) == false)
+				sendWelcome(server, changedClient);
+		}
 		server->eraseFromClientMap(client);
 	}
 	//COMMENT: No implementation of ERR_NICKCOLLISION since it is only applicable for multi-server connections
@@ -60,7 +65,11 @@ void	pass_cmd(Server *server, Client &client, Message& msg)
 
 	//check if the password is correct, if so change status of client to isAuthorized == true
 	if (parameters[0] == server->getPass())
+	{
 		client.setHasPass(true);
+		std::string tmp = server->getHostname() + " NOTICE GoodPass\r\n";
+		send(client.getSocket(), tmp.data(), tmp.length(), 0);
+	}
 }
 
 /////////////////////////////////// USER ////////////////////////////////////
@@ -83,10 +92,12 @@ void	user(Server *server, Client &client, Message& msg)
 
 	client.setUserData(parameters);
 
-	if (client.getNick().empty() == false)
+	std::string nick = client.getNick();
+	if (ft::isValidNick(nick) == true)
 	{
 		client.setIsAuthorized(true);
 		server->addAuthorizedClient(client);
+		sendWelcome(server, client);
 	}	
 }
 
@@ -109,7 +120,39 @@ void	quit(Server *server, Client &client, Message& msg)
 
 /////////////////////////////////// OPER ////////////////////////////////////
 
-// void	oper(Server *server, Client &client, Message& msg)
-// {
+void	oper(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string> parameters = msg.getParameters();
 
-// }
+	if (parameters.size() < 2)
+	{
+		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, "OPER");
+		return ;
+	}
+
+	Server::ClientMap::iterator it = server->getAuthorizedClientMap().find(parameters[0]);
+
+	if (it == server->getAuthorizedClientMap().end())
+		return ;
+	
+	if (parameters[1] == server->getOperPass())
+	{
+		(*it).second.setIsOperator(true);
+		Server::ClientMap::iterator itC = server->getClientMap().find((*it).second.getNick());
+		(*itC).second.setIsOperator(true);
+		(*it).second.sendErrMsg(server, RPL_YOUREOPER, NULL);//TBD: FUNCTION FOR REPLIES?
+	}
+	else
+		client.sendErrMsg(server, ERR_PASSWDMISMATCH, NULL);
+}
+
+void	sendWelcome(Server *server, Client &client)
+{
+	std::string message = client.getNick() + "!" + client.getName() + "@" + client.getIP();
+	client.sendErrMsg(server, RPL_WELCOME, message.c_str());
+	client.sendErrMsg(server, RPL_YOURHOST, server->getHostname().c_str());
+	client.sendErrMsg(server, RPL_CREATED, NULL);
+	client.sendErrMsg(server, RPL_MYINFO, server->getHostname().c_str());
+	Message msg("");
+	motd(server, client, msg);
+}

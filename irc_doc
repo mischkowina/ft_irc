@@ -71,56 +71,59 @@ username
 
 
 COMMANDS:
-Connection: //MUSTHAVES
+Connection: //MUSTHAVES - DONE
 - pass - done
 - nick - done
 - user - done
 - server - nope
-- oper - todo
+- oper - done
 - quit - done
 - squit - nope
 
 Channel Operation: //MUSTHAVES
-- join - todo //MUSTHAVE
-- part - todo //MUSTHAVE
-- mode - todo //MUSTHAVE
-- topic - todo //MUSTHAVE
-- names - todo //MUSTHAVE
-- list - todo //MUSTHAVE
-- invite - todo //MUSTHAVE
+- join - todo 
+- part - todo 
+- mode - todo 
+- topic - todo 
+- names - todo 
+- list - todo 
+- invite - todo
 - kick - todo
 
 Server Queries:
-- version - nope?
-- stats - nope?
+- motd - done
+- lusers - maybe?
+- version - nope
+- stats - nope
 - links - nope
-- time - todo?
+- time - maybe?
 - connect - nope
 - trace - nope
-- admin - nope?
-- info - todo?
+- admin - maybe?
+- info - nope
 
-Send Messages: //MUSTHAVES
+Send Messages: //MUSTHAVES - DONE
 - privmsg - done
-- notice - todo 
+- notice - done
 
 User-based queries:
 - who - todo?
 - whois - todo?
-- whowas - nope?
+- whowas - nope
 
 Misc.:
-- kill - todo?
-- ping - todo?
-- pong - todo?
-- error - nope?
+- kill - nope?
+- ping - done // ELSE PROBLEM WITH SOME CLIENTS
+- pong - done //ELSE PROBLEM WITH SOME CLIENTS
+- error - nope
 
 Optional:
-- away - todo?
+- away - maybe?
 - rehash - nope
-- restart - todo?
+- die - maybe?
+- restart - nope
 - summon - nope
-- users - todo?
+- users - nope
 - wallops - nope
-- userhost - nope?
-- ison - todo?
+- userhost - nope
+- ison - maybe?

@@ -19,9 +19,11 @@ class Server
 		int			getServerSoc(void) const;
 		std::string	getHostname() const;
 		std::string	getPass(void) const;
-		ClientMap	getClientMap() const;
-		ClientMap	getAuthorizedClientMap() const;
-		ChannelMap	getChannelMap() const;
+		std::string	getOperPass() const;
+		ClientMap	&getClientMap();
+		ClientMap	&getAuthorizedClientMap();
+		ChannelMap	&getChannelMap();
+		void		setHasDied(bool status);
 
 		void		eraseFromClientMap(Client &client);
 		bool		addClient(Client &client);
@@ -41,29 +43,14 @@ class Server
 		std::string		_hostname;
 		std::string		_password;
 		sockaddr_in		_server_addr;
+		std::string		_oper_password;
 		ClientMap		_clients;
 		ChannelMap		_channels;
 		ClientMap		_authorizedClients;//only contains the clients that are authenticated and allowed to interact on the server
 		std::map<std::string, FuncPtr> _cmdMap;
 		bool			_noAuthorization;
 		bool			_clientMapChanged;
+		bool			_died;
 };
-
-/* 
- * functions to comunicate with clients
- */
-
-void	connect(Server *server, Client &client, Message& msg);
-void	join(Server *server, Client &client, Message& msg);
-void	help(Server *server, Client &client, Message& msg);
-void	closeChannel(Server *server, Client &client, Message& msg);
-void	info(Server *server, Client &client, Message& msg);
-void	whois(Server *server, Client &client, Message& msg);
-void	nick(Server *server, Client &client, Message& msg);
-void	privmsg(Server *server, Client &client, Message& msg);
-void	displayNames(Server *server, Client &client, Message& msg);
-void	pass_cmd(Server *server, Client &client, Message& msg);
-void	user(Server *server, Client &client, Message& msg);
-void	quit(Server *server, Client &client, Message& msg);
 
 #endif

@@ -1,6 +1,6 @@
 #include "server.hpp"
 
-Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _noAuthorization(false), _clientMapChanged(false)
+Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _oper_password("operator"), _noAuthorization(false), _clientMapChanged(false), _died(false)
 {
 	if (this->_password.empty() == true)
 		this->_noAuthorization = true;
@@ -51,19 +51,28 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _n
 
 	// functions
 	std::map<std::string, FuncPtr> cmd;
-	cmd["CONNECT"] = &connect;
+	cmd["NICK"] = &nick;
+	cmd["PASS"] = &pass_cmd;
+	cmd["USER"] = &user;
+	cmd["QUIT"] = &quit;
+	cmd["OPER"] = &oper;
+
+	cmd["MOTD"] = &oper;
+
+	cmd["PRIVMSG"] = &privmsg;
+	cmd["NOTICE"] = &notice;
+
+	cmd["PING"] = &ping;
+	cmd["PONG"] = &pong;
+
+	cmd["DIE"] = &die;
+
 	cmd["JOIN"] = &join;
 	cmd["HELP"] = &help;
 	cmd["CLOSE"] = &closeChannel;
 	cmd["PART"] = &closeChannel;
-	cmd["INFO"] = &info;
 	cmd["WHOIS"] = &whois;
-	cmd["NICK"] = &nick;
-	cmd["PRIVMSG"] = &privmsg;
 	cmd["NAMES"] = &displayNames;
-	cmd["PASS"] = &pass_cmd;
-	cmd["USER"] = &user;
-	cmd["QUIT"] = &quit;
 
 	_cmdMap = cmd;
 }
@@ -78,6 +87,11 @@ std::string	Server::getPass() const
 	return _password;
 }
 
+std::string	Server::getOperPass() const
+{
+	return _oper_password;
+}
+
 int		Server::getServerSoc() const
 {
 	return _sockfd;
@@ -88,19 +102,24 @@ std::string	Server::getHostname() const
 	return this->_hostname;
 }
 
-Server::ClientMap	Server::getClientMap() const
+Server::ClientMap	&Server::getClientMap()
 {
 	return _clients;
 }
 
-Server::ClientMap	Server::getAuthorizedClientMap() const
+Server::ClientMap	&Server::getAuthorizedClientMap()
 {
 	return _authorizedClients;
 }
 
-Server::ChannelMap	Server::getChannelMap() const
+Server::ChannelMap	&Server::getChannelMap()
 {
 	return _channels;
+}
+
+void	Server::setHasDied(bool status)
+{
+	this->_died = status;
 }
 
 void	Server::eraseFromClientMap(Client &client)
@@ -165,6 +184,9 @@ void	Server::run()
 
 		//check for POLLIN on listening socket -> pending connections
 		this->checkListeningSocket(pollfds);
+
+		if (this->_died == true)
+			break;
 	}
 }
 
@@ -227,14 +249,14 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				msg = currentClient.getRecvBuffer().substr(0, msg_end);
 				//clear the message from the buffer (potentially keeping content that follows \r\n)
 				currentClient.clearRecvBuffer(msg_end);
-				std::cout << "Full message received from " << currentClient.getNick() << " :" << std::endl << msg << std::endl;
+				std::cout << YELLOW << currentClient.getNick() << ": " RESET << msg << std::endl;
 				//process the message (further parse it and execute the according command)
 				this->process_request(currentClient, msg);
-				if (this->_clientMapChanged == true)
+				if (this->_clientMapChanged == true || this->_died == true)
 					break ;
 			}
 		}
-		if (this->_clientMapChanged == true)
+		if (this->_clientMapChanged == true || this->_died == true)
 		{
 			this->_clientMapChanged = false;
 			break ;
@@ -288,7 +310,7 @@ void	Server::process_request(Client &client, std::string msg)
 	if (message.isValid() == false)
 	{
 		//send error message to client
-		return ;
+		return ; 
 	}
 	this->execCmd(client, message);
 }
@@ -311,6 +333,7 @@ void	Server::execCmd(Client &client, Message& msg)
 	if (client.getHasPass() == false && msg.getCommand() != "PASS")//PASS has to be used before any other command can be used
 	{
 		client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
+		std::cout << "CASE 1" << std::endl;
 		return ;
 	}
 	else if (client.getHasPass() == true && client.getIsAuthorized() == false)
@@ -321,7 +344,10 @@ void	Server::execCmd(Client &client, Message& msg)
 		else if (msg.getCommand() == "USER" && client.getName().empty() == true)
 			(*it->second)(this, client, msg);
 		else
+		{
 			client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
+			std::cout << "CASE 2" << std::endl;
+		}
 		return ;
 	}
 	(*it->second)(this, client, msg);

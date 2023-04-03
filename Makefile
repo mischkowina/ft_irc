@@ -6,7 +6,7 @@
 #    By: smischni <smischni@student.42wolfsburg.de> +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/02 12:40:43 by pdolinar          #+#    #+#              #
-#    Updated: 2023/03/28 14:09:47 by smischni         ###   ########.fr        #
+#    Updated: 2023/04/03 14:20:52 by smischni         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,11 @@ SRC			:=	main.cpp \
 				channel.cpp \
 				utils.cpp \
 				cmds.cpp \
-				cmds_connection.cpp
+				cmds_connection.cpp \
+				cmds_message.cpp \
+				cmds_misc.cpp \
+				cmds_server.cpp \
+				cmds_optional.cpp
 
 SRC_DIR		:=	srcs/
 OBJ_DIR		:=	build/
