@@ -51,24 +51,26 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 
 	// functions
 	std::map<std::string, FuncPtr> cmd;
-	cmd["CONNECT"] = &connect;
-	cmd["JOIN"] = &join;
-	cmd["HELP"] = &help;
-	cmd["CLOSE"] = &closeChannel;
-	cmd["PART"] = &closeChannel;
-	cmd["INFO"] = &info;
-	cmd["WHOIS"] = &whois;
 	cmd["NICK"] = &nick;
-	cmd["PRIVMSG"] = &privmsg;
-	cmd["NAMES"] = &displayNames;
 	cmd["PASS"] = &pass_cmd;
 	cmd["USER"] = &user;
 	cmd["QUIT"] = &quit;
 	cmd["OPER"] = &oper;
+
+	cmd["MOTD"] = &oper;
+
+	cmd["PRIVMSG"] = &privmsg;
 	cmd["NOTICE"] = &notice;
-	cmd["MOTD"] = &motd;
+
 	cmd["PING"] = &ping;
 	cmd["PONG"] = &pong;
+
+	cmd["JOIN"] = &join;
+	cmd["HELP"] = &help;
+	cmd["CLOSE"] = &closeChannel;
+	cmd["PART"] = &closeChannel;
+	cmd["WHOIS"] = &whois;
+	cmd["NAMES"] = &displayNames;
 
 	_cmdMap = cmd;
 }

@@ -9,16 +9,6 @@ void	displayNames(Server *server, Client &client, Message& msg)
 		// go through the channel's list of users
 }
 
-// ahhh .... check the documentation
-void	connect(Server *server, Client &client, Message& msg)
-{
-	(void)server;
-	(void)client;
-	(void)msg;
-	// establish initial connection -> server should add this new client
-	// and enable him to open/manage new channels and usage of general functions
-}
-
 void	join(Server *server, Client &client, Message& msg)
 {
 	(void)server;
@@ -43,15 +33,6 @@ void	closeChannel(Server *server, Client &client, Message& msg)
 	(void)client;
 	(void)msg;
 	// leave channel, and if it's empty, remove it
-}
-
-void	info(Server *server, Client &client, Message& msg)
-{
-	(void)server;
-	(void)client;
-	(void)msg;
-	// display standard stuff ...
-
 }
 
 void	whois(Server *server, Client &client, Message& msg)

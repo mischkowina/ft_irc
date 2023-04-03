@@ -92,14 +92,15 @@ Channel Operation: //MUSTHAVES
 
 Server Queries:
 - motd - done
-- version - nope?
-- stats - nope?
+- lusers - maybe?
+- version - nope
+- stats - nope
 - links - nope
-- time - todo?
+- time - maybe?
 - connect - nope
 - trace - nope
-- admin - nope?
-- info - todo?
+- admin - maybe?
+- info - nope
 
 Send Messages: //MUSTHAVES - DONE
 - privmsg - done
@@ -108,20 +109,21 @@ Send Messages: //MUSTHAVES - DONE
 User-based queries:
 - who - todo?
 - whois - todo?
-- whowas - nope?
+- whowas - nope
 
 Misc.:
-- kill - todo?
-- ping - todo // ELSE PROBLEM WITH SOME CLIENTS
-- pong - todo //ELSE PROBLEM WITH SOME CLIENTS
-- error - nope?
+- kill - maybe?
+- ping - done // ELSE PROBLEM WITH SOME CLIENTS
+- pong - done //ELSE PROBLEM WITH SOME CLIENTS
+- error - nope
 
 Optional:
-- away - todo?
+- away - maybe?
 - rehash - nope
-- restart - todo?
+- die - maybe?
+- restart - nope
 - summon - nope
-- users - todo?
+- users - nope
 - wallops - nope
-- userhost - nope?
-- ison - todo?
+- userhost - nope
+- ison - maybe?
