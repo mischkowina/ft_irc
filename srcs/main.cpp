@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 
 	IRCserver.run();
 
-	//TO-DO: close all client sockets
+	std::cout << "Server shutting down." << std::endl;
 
 	return 0;
 }

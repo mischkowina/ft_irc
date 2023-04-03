@@ -10,3 +10,4 @@ ircserv
 client
 cli
 *.c
+ircserv.dSYM/*

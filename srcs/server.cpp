@@ -74,6 +74,11 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 
 Server::~Server(void)
 {
+	std::cout << "Closing all active connections ..." << std::endl;
+
+	for (ClientMap::iterator it = _clients.begin(); it != _clients.end(); it++)
+		close(it->second.getSocket());
+
 	close(_sockfd);
 }
 
@@ -176,11 +181,11 @@ void	Server::run()
 		//check all client sockets (of the clients) for events
 		this->checkAllClientSockets(pollfds);
 
-		//check for POLLIN on listening socket -> pending connections
-		this->checkListeningSocket(pollfds);
-
 		if (this->_died == true)
 			break;
+
+		//check for POLLIN on listening socket -> pending connections
+		this->checkListeningSocket(pollfds);
 	}
 }
 
@@ -248,6 +253,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				this->process_request(currentClient, msg);
 				if (this->_clientMapChanged == true || this->_died == true)
 					break ;
+					
 			}
 		}
 		if (this->_clientMapChanged == true || this->_died == true)
@@ -327,7 +333,6 @@ void	Server::execCmd(Client &client, Message& msg)
 	if (client.getHasPass() == false && msg.getCommand() != "PASS")//PASS has to be used before any other command can be used
 	{
 		client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
-		std::cout << "CASE 1" << std::endl;
 		return ;
 	}
 	else if (client.getHasPass() == true && client.getIsAuthorized() == false)
@@ -338,10 +343,7 @@ void	Server::execCmd(Client &client, Message& msg)
 		else if (msg.getCommand() == "USER" && client.getName().empty() == true)
 			(*it->second)(this, client, msg);
 		else
-		{
 			client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
-			std::cout << "CASE 2" << std::endl;
-		}
 		return ;
 	}
 	(*it->second)(this, client, msg);
