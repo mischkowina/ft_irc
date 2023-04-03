@@ -29,6 +29,9 @@ class Server
 		bool		addClient(Client &client);
 		void		addAuthorizedClient(Client &client);
 
+		void		addClientToChannel(Client &client);
+		void		createNewChannel(std::string name, Client &client);
+
 		void	run();
 
 		void	checkAllClientSockets(std::vector<pollfd> pollfds);

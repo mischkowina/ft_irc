@@ -22,10 +22,11 @@ class Channel
 		Channel(std::string name);
 
 		void	setName(std::string channelName);
+		void	setNewChannel(Client& client);
 
-		std::string  getChannelName() const;
-		std::list<Client> getChannelOperator() const;
-		std::list<Client> getChannelUsers() const;
+		std::string			getChannelName() const;
+		std::list<Client>	getChannelOperator() const;
+		std::list<Client>	getChannelUsers() const;
 };
 
 #endif

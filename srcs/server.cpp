@@ -72,7 +72,6 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["CLOSE"] = &closeChannel;
 	cmd["PART"] = &closeChannel;
 	cmd["WHOIS"] = &whois;
-	cmd["NAMES"] = &displayNames;
 
 	_cmdMap = cmd;
 }
@@ -148,7 +147,6 @@ void	Server::addAuthorizedClient(Client &client)
 void	Server::run()
 {
 	//create struct pollfd[] with the appropriate size (number of connected clients + 1 for the listening socket)
-	// struct pollfd pollfds[_clients.size() + 1];
 	std::vector<pollfd> pollfds(1);
 
 	//initalize the first struct pollfd[0] to the listening socket

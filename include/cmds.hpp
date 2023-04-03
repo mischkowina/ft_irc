@@ -29,7 +29,14 @@ void	join(Server *server, Client &client, Message& msg);
 void	help(Server *server, Client &client, Message& msg);
 void	closeChannel(Server *server, Client &client, Message& msg);
 void	whois(Server *server, Client &client, Message& msg);
+<<<<<<< HEAD
 void	displayNames(Server *server, Client &client, Message& msg);
 
+=======
+void	nick(Server *server, Client &client, Message& msg);
+void	privmsg(Server *server, Client &client, Message& msg);
+void	names(Server *server, Client &client, Message& msg);
+void	pass_cmd(Server *server, Client &client, Message& msg);
+>>>>>>> new
 
 #endif
