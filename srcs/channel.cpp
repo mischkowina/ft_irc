@@ -4,6 +4,7 @@ Channel::Channel()
 	: _channelbuffer("null")
 	, _password("null")
 	, _inviteOnly(false)
+	, _topic("")
 {}
 
 Channel::~Channel() {}

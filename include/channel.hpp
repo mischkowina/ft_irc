@@ -15,6 +15,7 @@ class Channel
 		std::string			_channelbuffer;
 		std::string			_password;
 		bool				_inviteOnly;
+		std::string			_topic;
 
 	public:
 		Channel();

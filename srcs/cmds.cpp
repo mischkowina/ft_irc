@@ -105,6 +105,32 @@ void	part(Server *server, Client &client, Message& msg)
 	}
 }
 
+void	topic(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string>	parameters = msg.getParameters();
+
+	if (parameters.empty() == true)
+	{
+		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, "TOPIC");
+		return ;
+	}
+
+	// if only one parameter, TOPIC is requested
+	if (parameters.size() == 1)
+	{
+		//check if channel exists
+		//else ERR_NOSUCHCHANNEL????
+		//check if channel is private/secret and if so, if client is on that channel
+		// if yes (or if channel is public), return topic
+		// if no, ERR_NOTONCHANNEL
+	}
+	
+	//if two parameters, topic shall be changed
+	//ERR: check if only chanops can change topic and client is chanop
+
+	//OPEN: RPL_TOPIC is send whens someone JOINs a channel
+}
+
 void	names(Server *server, Client &client, Message& msg)
 {
 	(void)server;

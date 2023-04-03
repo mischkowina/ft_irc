@@ -67,8 +67,6 @@ void	pass_cmd(Server *server, Client &client, Message& msg)
 	if (parameters[0] == server->getPass())
 	{
 		client.setHasPass(true);
-		std::string tmp = server->getHostname() + " NOTICE GoodPass\r\n";
-		send(client.getSocket(), tmp.data(), tmp.length(), 0);
 	}
 }
 

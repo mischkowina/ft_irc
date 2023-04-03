@@ -75,12 +75,12 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 
 Server::~Server(void)
 {
-	std::cout << "Closing all active connections ..." << std::endl;
-
 	for (ClientMap::iterator it = _clients.begin(); it != _clients.end(); it++)
 		close(it->second.getSocket());
 
 	close(_sockfd);
+
+	std::cout << "Closed all active connections." << std::endl;
 }
 
 std::string	Server::getPass() const
