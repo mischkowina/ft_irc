@@ -80,6 +80,6 @@
 
 # define ERR_PASSWDMISMATCH "464 :Password incorrect"
 
-#define IGN "null"	// tmp macro-> replace with valid one
+#define ERR_NAME "invalid channel name"	// tmp macro-> replace with valid one
 
 #endif

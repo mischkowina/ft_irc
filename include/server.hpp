@@ -29,7 +29,7 @@ class Server
 		bool		addClient(Client &client);
 		void		addAuthorizedClient(Client &client);
 
-		void		createNewChannel(Server *server, std::string name, Client &client);
+		void		createNewChannel(std::string name, Client &client);
 
 		void	run();
 

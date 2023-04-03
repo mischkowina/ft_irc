@@ -12,6 +12,8 @@ class Channel
 	private:
 		std::list<Client>	_channelOperator;
 		std::list<Client>	_channelUsers;
+		std::list<Client>	_bannedUsers;
+		std::list<Client>	_invitedUsers;
 		std::string			_channelName;
 		std::string			_channelbuffer;
 		std::string			_password;
@@ -26,7 +28,7 @@ class Channel
 		void	setChannelUsers(Client &client);
 		void	setName(std::string channelName);
 		
-		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> keys);
+		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
 
 		std::string			getChannelName() const;
 		std::list<Client>	getChannelOperator() const;
