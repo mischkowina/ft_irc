@@ -43,7 +43,7 @@
 #define ERR_INVITEONLYCHAN	"<channel> :Cannot join channel (+i)"
 #define ERR_BANNEDFROMCHAN	"<channel> :Cannot join channel (+b)"
 #define ERR_BADCHANNELKEY	"<channel> :Cannot join channel (+k)"
-#define ERR_NOSUCHCHANNEL	"<channel name> :No such channel"	// 403 code
+#define ERR_NOSUCHCHANNEL	"<channel name> :No such channel"
 #define ERR_TOOMANYCHANNELS	"<channel name> :You have joined too many channels"	//have joined the maximum number of allowed channels and they try to join another channel
 #define RPL_NOTOPIC			"<channel> :No topic is set"
 #define ERR_USERONCHANNEL	"<user> <channel> :is already on channel" // - Returned when a client tries to invite a user to a channel they are already on.
@@ -79,5 +79,7 @@
 // #define ERR_NEEDMOREPARAMS	""
 
 # define ERR_PASSWDMISMATCH "464 :Password incorrect"
+
+#define IGN "null"	// tmp macro-> replace with valid one
 
 #endif

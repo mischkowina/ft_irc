@@ -1,70 +1,70 @@
 #include "cmds.hpp"
 
 //////////////////////////////  CHANNEL  ////////////////////////////////////////
-void	Server::createNewChannel(std::string name, Client &client)
+void	Server::createNewChannel(Server *server, std::string name, Client &client)
 {
-	(void)client;
 	// error.hpp -> include all needed macros
 	if ((name[0] != '#' && name[0] != '&') || name.length() > 199 || name.find_first_of(' ') != std::string::npos) {
-		// sendErrMsg();
-		// return;
+		client.sendErrMsg(server, IGN, NULL);	// replace macro
+		return;
 	}
-	_channels.insert(std::make_pair(name, Channel(name)));
-	// set client as op
-	// _channelOperator.push_back(client);
-
-	// set password if there's one
-	// set modes (invate, private, etc.) if needed
-	(void)client;
+	Channel tmp(name);
+	tmp.setChannelOp(client);
+	tmp.setChannelUsers(client);
+	_channels.insert(std::make_pair(name, tmp));
 }
 
-void	Server::addClientToChannel(Client& client)
+void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> keys)
 {
-	// wip
-	(void)client;
-	// check any invalid conditions to add a new client to the channel -> throw exception
-			// the correct key (password) must be given if it is set.
-			// a client can be a member of 10 channels max
-			// user's nick/username/hostname must not match any active bans;
-			// the user must be invited if the channel is invite-only;
+	// check any invalid conditions before adding a new client to the channel
+		// the correct key (password) must be given if it is set.
+	if (keys.empty() == false) {
+	
+	}
+		// a client can be a member of 10 channels max
+	if (client.maxNumOfChannels() == true) {
+		client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
+		return;
+	}
+		// user's nick/username/hostname must not match any active bans;
+
+		// the user must be invited if the channel is invite-only;
+	_channelUsers.push_back(client);
+}
+
+void	splitParam(std::vector<std::string> &input, std::vector<std::string> &output, int pos)
+{
+	std::stringstream ss(input[pos]);
+	std::string token;
+	while (std::getline(ss, token, ',')) {
+		output.push_back(token);
+		token.clear();
+	}
 }
 
 void	join(Server *server, Client &client, Message& msg)
 {
-	(void)client;
-
 	std::vector<std::string>	parameters = msg.getParameters();
-	std::vector<std::string>	keys;
-	// if (parameters[1].empty() == false) {
-	// 	keys = parameters[1];
-	// set var to later check for pass
-	// }
 
 	std::vector<std::string> channelNames;
+	std::vector<std::string> keys;
+	splitParam(parameters, channelNames, 0);
+	splitParam(parameters, keys, 1);
 
-	//parse first parameter by commas to get all channel names
-	std::stringstream ss(parameters[0]);
-	std::string token;
-	while (std::getline(ss, token, ',')) {
-		channelNames.push_back(token); // or std::pair<std::string, bool>(token, validName)
-		token.clear();
-	}
-
-	Server::ChannelMap mapOfChannels = server->getChannelMap();			// channel -> <#name, Channel()>
-	for (std::vector<std::string>::const_iterator iterChannelName = channelNames.begin();
+	Server::ChannelMap& mapOfChannels = server->getChannelMap();
+	for (std::vector<std::string>::iterator iterChannelName = channelNames.begin();
 		iterChannelName != channelNames.end(); iterChannelName++) {
 
 		// find the existing channel
-		Server::ChannelMap::const_iterator itChannel = mapOfChannels.find(*iterChannelName);	
+		Server::ChannelMap::iterator itChannel = mapOfChannels.find(*iterChannelName);	
 		if (itChannel != mapOfChannels.end())
 		{
 			// add client to the channel
-			server->addClientToChannel(client);
+			itChannel->second.addClientToChannel(server, client, keys);
 		}
-	
 		else {
 			// else add new channel to the server
-			server->createNewChannel(*iterChannelName, client);
+			server->createNewChannel(server, *iterChannelName, client);
 		}
 	}
 	// send msg to channel's participants < <nick> joined the channel ...>

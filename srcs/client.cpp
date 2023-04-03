@@ -173,3 +173,8 @@ void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
 	msg.append("\r\n");
 	send(this->_socket, msg.data(), msg.size(), 0);
 }
+
+bool	Client::maxNumOfChannels()
+{
+	return ((_channelCounter++) < 11);
+}

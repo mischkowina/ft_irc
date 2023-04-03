@@ -5,6 +5,7 @@
 #include "irc.hpp"
 
 class Client;
+class Server;
 
 class Channel
 {
@@ -21,8 +22,11 @@ class Channel
 		~Channel();
 		Channel(std::string name);
 
+		void	setChannelOp(Client &client);
+		void	setChannelUsers(Client &client);
 		void	setName(std::string channelName);
-		void	setNewChannel(Client& client);
+		
+		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> keys);
 
 		std::string			getChannelName() const;
 		std::list<Client>	getChannelOperator() const;

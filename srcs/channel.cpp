@@ -15,11 +15,6 @@ Channel::Channel(std::string name)
 	, _inviteOnly(false)
 {_inviteOnly = false;}//for compiling with unused variable
 
-void	Channel::setName(std::string channelName)
-{
-	_channelName = channelName;
-}
-
 std::list<Client> Channel::getChannelUsers() const
 {
 	return _channelUsers;
@@ -33,4 +28,19 @@ std::list<Client> Channel::getChannelOperator() const
 std::string  Channel::getChannelName() const
 {
 	return _channelName;
+}
+
+void	Channel::setName(std::string channelName)
+{
+	_channelName = channelName;
+}
+
+void	Channel::setChannelOp(Client &client)
+{
+	_channelOperator.push_back(client);
+}
+
+void	Channel::setChannelUsers(Client &client)
+{
+	_channelUsers.push_back(client);
 }
