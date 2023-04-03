@@ -67,6 +67,8 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["OPER"] = &oper;
 	cmd["NOTICE"] = &notice;
 	cmd["MOTD"] = &motd;
+	cmd["PING"] = &ping;
+	cmd["PONG"] = &pong;
 
 	_cmdMap = cmd;
 }

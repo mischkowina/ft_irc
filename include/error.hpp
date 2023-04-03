@@ -5,6 +5,10 @@
 
 # define ERR_NOSUCHNICK "401 <nickname> :No such nick/channel"
 
+# define ERR_NOSUCHSERVER "402 <server name> :No such server"
+
+# define ERR_NOORIGIN "409 :No origin specified"
+
 # define ERR_NORECIPIENT "411 :No recipient given (<command>)"
 
 # define ERR_NOTEXTTOSEND " 412 :No text to send"
