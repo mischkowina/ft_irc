@@ -1,6 +1,6 @@
 #include "server.hpp"
 
-Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _oper_password("operator"), _noAuthorization(false), _clientMapChanged(false)
+Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _oper_password("operator"), _noAuthorization(false), _clientMapChanged(false), _died(false)
 {
 	if (this->_password.empty() == true)
 		this->_noAuthorization = true;
@@ -64,6 +64,8 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 
 	cmd["PING"] = &ping;
 	cmd["PONG"] = &pong;
+
+	cmd["DIE"] = &die;
 
 	cmd["JOIN"] = &join;
 	cmd["HELP"] = &help;
@@ -177,6 +179,9 @@ void	Server::run()
 
 		//check for POLLIN on listening socket -> pending connections
 		this->checkListeningSocket(pollfds);
+
+		if (this->_died == true)
+			break;
 	}
 }
 
@@ -242,11 +247,11 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				std::cout << YELLOW << currentClient.getNick() << ": " RESET << msg << std::endl;
 				//process the message (further parse it and execute the according command)
 				this->process_request(currentClient, msg);
-				if (this->_clientMapChanged == true)
+				if (this->_clientMapChanged == true || this->_died == true)
 					break ;
 			}
 		}
-		if (this->_clientMapChanged == true)
+		if (this->_clientMapChanged == true || this->_died == true)
 		{
 			this->_clientMapChanged = false;
 			break ;

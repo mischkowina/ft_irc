@@ -29,4 +29,6 @@
 
 # define ERR_PASSWDMISMATCH "464 :Password incorrect"
 
+# define ERR_NOPRIVILEGES "481 :Permission Denied- You're not an IRC operator"
+
 #endif

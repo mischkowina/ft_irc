@@ -49,6 +49,7 @@ class Server
 		std::map<std::string, FuncPtr> _cmdMap;
 		bool			_noAuthorization;
 		bool			_clientMapChanged;
+		bool			_died;
 };
 
 #endif
