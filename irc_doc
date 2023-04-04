@@ -120,10 +120,33 @@ Misc.:
 Optional:
 - away - maybe?
 - rehash - nope
-- die - maybe?
+- die - done
 - restart - nope
 - summon - nope
 - users - nope
 - wallops - nope
 - userhost - nope
 - ison - maybe?
+
+
+
+
+MODE:
+USER MODES: 
+i -> invisible user - Client Attribute / Member variable
+s -> recipient for Server Notices - Client Attribute / Member variable
+w -> receives WALLOPS - irrelevant if we dont implement WALLOPS, else Client Attribute / Member variable
+o -> operator flag; added by OPER; only de-oping allowed - Client Attribute / Member variable already implemented
+
+CHANNEL MODES:
+o -> chanop privilges - ChannelUser Attribute 
+p -> private channel - Channel Attribute
+s -> secret channel - Channel Attribute
+i -> invite only - Channel Attribute
+t -> topic settable only by chanops - Channel Attribute
+n -> no message from Clients outside channel - Channel Attribute
+m -> moderated channel - Channel Attribute
+l -> user limit - Channel Attribute
+b -> ban mask - Channel Attribute?, needs to be checked for every user who wants to join
+v -> allowed to speak on moderated channel - ChannelUser Attribute
+k -> channel password - Channel Attribute
