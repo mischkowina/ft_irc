@@ -1,6 +1,6 @@
 #include "cmds.hpp"
 
-//////////////////////////////  CHANNEL  ////////////////////////////////////////
+//////////////////////////////  JOIN  ////////////////////////////////////////
 void	Server::createNewChannel(std::string name, Client &client)
 {
 	(void)client;
@@ -105,6 +105,8 @@ void	part(Server *server, Client &client, Message& msg)
 	}
 }
 
+/////////////////////////////////// TOPIC ////////////////////////////////////
+
 void	topic(Server *server, Client &client, Message& msg)
 {
 	std::vector<std::string>	parameters = msg.getParameters();
@@ -151,6 +153,8 @@ void	topic(Server *server, Client &client, Message& msg)
 
 	//OPEN: RPL_TOPIC is send whens someone JOINs a channel
 }
+
+/////////////////////////////////// NAMES ////////////////////////////////////
 
 void	names_per_channel(Server *server, Client &client, Channel &channel)
 {
@@ -233,4 +237,60 @@ void	names(Server *server, Client &client, Message& msg)
 		}
 		client.sendErrMsg(server, RPL_ENDOFNAMES, it->c_str());
 	}
+}
+
+/////////////////////////////////// LIST ////////////////////////////////////
+
+void	list(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string>	parameters = msg.getParameters();
+
+	if (parameters.empty() == true)
+	{
+		client.sendErrMsg(server, RPL_LISTSTART, NULL);
+		for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
+		{
+			std::vector<std::string>	params;
+			//TO-DO: check if channel is secret or private and if client is in there 
+			//TO-DO: "continue" if secret and client is not in there
+			params.push_back(it->second.getChannelName());
+			//TO-DO: if private or secret, push back identifier
+			//TO-DO: if no, push back empty string
+			params.push_back("");
+			//TO-DO: if private and client not on there, push back empty string for topic
+			params.push_back(it->second.getTopic());
+			client.sendErrMsg(server, RPL_LIST, params);
+		}
+		client.sendErrMsg(server, RPL_LISTEND, NULL);
+		return ;
+	}
+	
+	//parse first parameter by commas to get all channel names
+	std::vector<std::string> channelNames;
+	std::stringstream ss(parameters[0]);
+	std::string token;
+	while (std::getline(ss, token, ',')) {
+		channelNames.push_back(token);
+		token.clear();
+	}
+
+	client.sendErrMsg(server, RPL_LISTSTART, NULL);
+	for (std::vector<std::string>::iterator itParam = channelNames.begin(); itParam != channelNames.end(); itParam++)
+	{
+		Server::ChannelMap::iterator itChan = server->getChannelMap().find(*itParam);
+		if (itChan != server->getChannelMap().end())
+		{
+			std::vector<std::string>	params;
+			//TO-DO: check if channel is secret or private and if client is in there 
+			//TO-DO: "continue" if secret and client is not in there
+			params.push_back(itChan->second.getChannelName());
+			//TO-DO: if private or secret, push back identifier
+			//TO-DO: if no, push back empty string
+			params.push_back("");
+			//TO-DO: if private and client not on there, push back empty string for topic
+			params.push_back(itChan->second.getTopic());
+			client.sendErrMsg(server, RPL_LIST, params);
+		}
+	}
+	client.sendErrMsg(server, RPL_LISTEND, NULL);
 }
