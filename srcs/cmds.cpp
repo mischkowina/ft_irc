@@ -152,13 +152,55 @@ void	topic(Server *server, Client &client, Message& msg)
 	//OPEN: RPL_TOPIC is send whens someone JOINs a channel
 }
 
+void	names_per_channel(Server *server, Client &client, Channel &channel)
+{
+	std::vector<std::string>	params;
+	std::string					param2 = "";
+	std::list<Client>			channelClients = channel.getChannelUsers();
+	params.push_back(channel.getChannelName());//TO-DO: add = / * / @ in front of channel depending on modes
+	for (std::list<Client>::iterator itClien = channelClients.begin(); itClien != channelClients.end(); itClien++)
+	{
+		//TO-DO: check if invisible & add @ / + to nickname or dont display
+		if (param2.empty() == false)
+			param2.push_back(' ');
+		param2.append(itClien->getNick());
+	}
+	params.push_back(param2);
+	client.sendErrMsg(server, RPL_NAMREPLY, params);
+}
+
 void	names_all(Server *server, Client &client)
 {
 	std::set<std::string>	nicksInChannels;
-	
-	for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
+
+	for (Server::ChannelMap::iterator itChan = server->getChannelMap().begin(); itChan != server->getChannelMap().end(); itChan++)
 	{
-		
+		//TO-DO: check if channel is secret / private for the client
+		names_per_channel(server, client, itChan->second);
+		std::list<Client>			channelClients = itChan->second.getChannelUsers();
+		for (std::list<Client>::iterator itClien = channelClients.begin(); itClien != channelClients.end(); itChan++)
+			nicksInChannels.insert(itClien->getNick());
+		client.sendErrMsg(server, RPL_ENDOFNAMES, itChan->second.getChannelName().c_str());
+	}
+
+	std::vector<std::string> params;
+	params.push_back("*");
+	std::string	param2 = "";
+	for (Server::ClientMap::iterator it = server->getAuthorizedClientMap().begin(); it != server->getAuthorizedClientMap().end(); it++)
+	{
+		if (nicksInChannels.find(it->second.getNick()) == nicksInChannels.end())
+		{
+			//TO-DO: check if invisible & add @ / + to nickname or dont display
+			if (param2.empty() == false)
+				param2.push_back(' ');
+			param2.append(it->second.getNick());
+		}
+	}
+	if (param2.empty() == false)
+	{
+		params.push_back(param2);
+		client.sendErrMsg(server, RPL_NAMREPLY, params);
+		client.sendErrMsg(server, RPL_ENDOFNAMES, "*");
 	}
 }
 
@@ -168,7 +210,8 @@ void	names(Server *server, Client &client, Message& msg)
 
 	if (parameters.empty() == true)
 	{
-		//TO-DO: LIST OF ALL CHANNELS AND THEIR OCCUPANTS
+		names_all(server, client);
+		return ;
 	}
 
 	//parse first parameter by commas to get all channel names
@@ -185,9 +228,8 @@ void	names(Server *server, Client &client, Message& msg)
 		Server::ChannelMap::iterator itChan = server->getChannelMap().find(*it);
 		if (itChan !=  server->getChannelMap().end())
 		{
-			std::vector<std::string> params;
-			//TO-DO: FORMATTING according to RPL_NAMREPLY
-			//RPL_NAMREPLY
+			//TO-DO: check if channel is secret / private for the client
+			names_per_channel(server, client, itChan->second);
 		}
 		client.sendErrMsg(server, RPL_ENDOFNAMES, it->c_str());
 	}
