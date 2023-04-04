@@ -115,27 +115,80 @@ void	topic(Server *server, Client &client, Message& msg)
 		return ;
 	}
 
+	//check if channel exists
+	Server::ChannelMap::iterator it = server->getChannelMap().find(parameters[0]);
+	if (it == server->getChannelMap().end())
+	{
+		client.sendErrMsg(server, ERR_NOTONCHANNEL, parameters[0].c_str());
+		return;
+	}
+
 	// if only one parameter, TOPIC is requested
 	if (parameters.size() == 1)
 	{
-		//check if channel exists
-		//else ERR_NOSUCHCHANNEL????
-		//check if channel is private/secret and if so, if client is on that channel
-		// if yes (or if channel is public), return topic
-		// if no, ERR_NOTONCHANNEL
+		//TO-DO: check if channel is private/secret and if so, if client is on that channel
+		//TO-DOif yes (or if channel is public), return topic
+		if (it->second.getTopic() != "")
+		{
+			std::vector<std::string>	msg_input;
+			msg_input.push_back(parameters[0]);
+			msg_input.push_back(it->second.getTopic());
+			client.sendErrMsg(server, RPL_TOPIC, msg_input);
+		}
+		else
+			client.sendErrMsg(server, RPL_NOTOPIC, parameters[0].c_str());
+			
+		//TO-DO: if no, ERR_NOTONCHANNEL
 	}
-	
+
 	//if two parameters, topic shall be changed
-	//ERR: check if only chanops can change topic and client is chanop
+	else
+	{
+		//TO-DO: check if only chanops can change topic and client is chanop
+		it->second.setTopic(parameters[1]);
+		//TO-DO: else err
+	}
 
 	//OPEN: RPL_TOPIC is send whens someone JOINs a channel
 }
 
+void	names_all(Server *server, Client &client)
+{
+	std::set<std::string>	nicksInChannels;
+	
+	for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
+	{
+		
+	}
+}
+
 void	names(Server *server, Client &client, Message& msg)
 {
-	(void)server;
-	(void)client;
-	(void)msg;
-	// display all users of a specific channel(s)
-		// go through the channel's list of users
+	std::vector<std::string>	parameters = msg.getParameters();
+
+	if (parameters.empty() == true)
+	{
+		//TO-DO: LIST OF ALL CHANNELS AND THEIR OCCUPANTS
+	}
+
+	//parse first parameter by commas to get all channel names
+	std::vector<std::string> channelNames;
+	std::stringstream ss(parameters[0]);
+	std::string token;
+	while (std::getline(ss, token, ',')) {
+		channelNames.push_back(token);
+		token.clear();
+	}
+
+	for (std::vector<std::string>::iterator it = channelNames.begin(); it != channelNames.end(); it++)
+	{
+		Server::ChannelMap::iterator itChan = server->getChannelMap().find(*it);
+		if (itChan !=  server->getChannelMap().end())
+		{
+			std::vector<std::string> params;
+			//TO-DO: FORMATTING according to RPL_NAMREPLY
+			//RPL_NAMREPLY
+		}
+		client.sendErrMsg(server, RPL_ENDOFNAMES, it->c_str());
+	}
 }

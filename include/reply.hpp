@@ -13,6 +13,12 @@
 
 # define RPL_NOTOPIC "331 <channel> :No topic is set"
 
+# define RPL_TOPIC "332 <channel> :<topic>"
+
+# define RPL_NAMREPLY "353 <channel> :<list of names>"
+
+# define RPL_ENDOFNAMES "366 <channel> :End of NAMES list"
+
 # define RPL_MOTDSTART "375 :- <server> Message of the day - "
 
 # define RPL_MOTD "372 :- <text>"

@@ -42,8 +42,10 @@ class Client {
 		std::string	getRecvBuffer() const;
 
 		void		clearRecvBuffer(int end);
-		void		sendErrMsg(Server *server, std::string const err_code, char const *err_param);
 		void		sendMsg(Client &sender, std::string msg, std::string type) const;
+		void		sendErrMsg(Server *server, std::string const err_code, char const *err_param);
+		void		sendErrMsg(Server *server, std::string const err_code, std::vector<std::string> err_param);
+		
 };
 
 #endif

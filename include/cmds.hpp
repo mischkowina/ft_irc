@@ -15,6 +15,7 @@ void	sendWelcome(Server *server, Client &client);
 
 void	join(Server *server, Client &client, Message& msg);
 void	part(Server *server, Client &client, Message& msg);
+void	topic(Server *server, Client &client, Message& msg);
 
 void	motd(Server *server, Client &client, Message& msg);
 

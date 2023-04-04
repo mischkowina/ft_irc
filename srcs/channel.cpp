@@ -21,6 +21,11 @@ void	Channel::setName(std::string channelName)
 	_channelName = channelName;
 }
 
+void	Channel::setTopic(std::string topic)
+{
+	this->_topic = topic;
+}
+
 std::list<Client> Channel::getChannelUsers() const
 {
 	return _channelUsers;
@@ -29,6 +34,11 @@ std::list<Client> Channel::getChannelUsers() const
 std::list<Client> Channel::getChannelOperator() const
 {
 	return _channelOperator;
+}
+
+std::string	Channel::getTopic() const
+{
+	return _topic;
 }
 
 std::string  Channel::getChannelName() const

@@ -135,24 +135,6 @@ void	Client::clearRecvBuffer(int end)
 		this->_recvBuffer.erase(0, 1);
 }
 
-void	Client::sendErrMsg(Server *server, std::string const err_code, char const *err_param)
-{
-	std::string	err_msg = err_code;
-
-	if (err_msg.find("<") && err_param != NULL && err_msg.find(">"))
-	{
-		int pos1 = err_msg.find("<");
-		int pos2 = err_msg.find(">");
-		err_msg.erase(pos1, pos2 - pos1 + 1);
-		err_msg.insert(pos1, err_param);
-	}
-	err_msg.insert(4, _nick + " ");
-	err_msg.insert(0, ":" + server->getHostname() + " ");
-	std::cout << RED "Sending to " << this->_nick << ": " RESET << err_msg << std::endl;
-	err_msg.append("\r\n");
-	send(this->_socket, err_msg.data(), err_msg.length(), 0);
-}
-
 void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
 {
 	if (msg.find(" ", 0) != std::string::npos)
@@ -172,4 +154,46 @@ void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
 	std::cout << BLUE "Sending to " << this->_nick << ": " RESET << msg << std::endl;
 	msg.append("\r\n");
 	send(this->_socket, msg.data(), msg.size(), 0);
+}
+
+void	Client::sendErrMsg(Server *server, std::string const err_code, char const *err_param)
+{
+	std::string	err_msg = err_code;
+
+	if (err_msg.find("<") && err_param != NULL && err_msg.find(">"))
+	{
+		int pos1 = err_msg.find("<");
+		int pos2 = err_msg.find(">");
+		err_msg.erase(pos1, pos2 - pos1 + 1);
+		err_msg.insert(pos1, err_param);
+	}
+	err_msg.insert(4, _nick + " ");
+	err_msg.insert(0, ":" + server->getHostname() + " ");
+	std::cout << RED "Sending to " << this->_nick << ": " RESET << err_msg << std::endl;
+	err_msg.append("\r\n");
+	send(this->_socket, err_msg.data(), err_msg.length(), 0);
+}
+
+void	Client::sendErrMsg(Server *server, std::string const err_code, std::vector<std::string> err_param)
+{
+	std::string	err_msg = err_code;
+
+	for (size_t i = 0; i < err_param.size(); i++)
+	{
+		size_t pos1 = err_msg.find("<");
+		size_t pos2 = err_msg.find(">");
+		if (pos1 != std::string::npos && pos2 != std::string::npos && pos1 < pos2)
+		{
+			
+			err_msg.erase(pos1, pos2 - pos1 + 1);
+			err_msg.insert(pos1, err_param[i]);
+		}
+		else
+			break ;
+	}
+	err_msg.insert(4, _nick + " ");
+	err_msg.insert(0, ":" + server->getHostname() + " ");
+	std::cout << RED "Sending to " << this->_nick << ": " RESET << err_msg << std::endl;
+	err_msg.append("\r\n");
+	send(this->_socket, err_msg.data(), err_msg.length(), 0);
 }

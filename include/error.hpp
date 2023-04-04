@@ -45,7 +45,7 @@
 
 # define ERR_CHANNELISFULL	"471 <channel> :Cannot join channel (+l)"
 
-# define ERR_UNKNOWNMODE		"472 <char> :is unknown mode char to this server"//TBD -> wording
+# define ERR_UNKNOWNMODE	"472 <char> :is unknown mode char to this server"//TBD -> wording
 
 # define ERR_INVITEONLYCHAN	"473 <channel> :Cannot join channel (+i)"
 

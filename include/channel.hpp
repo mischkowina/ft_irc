@@ -24,11 +24,13 @@ class Channel
 
 		void	setName(std::string channelName);
 		void	setNewChannel(Client& client);
+		void	setTopic(std::string topic);
 		bool	removeUser(Client& client);
 
 		std::string			getChannelName() const;
 		std::list<Client>	getChannelOperator() const;
 		std::list<Client>	getChannelUsers() const;
+		std::string			getTopic() const;
 };
 
 #endif

@@ -59,6 +59,7 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 
 	cmd["JOIN"] = &join;
 	cmd["PART"] = &part;
+	cmd["TOPIC"] = &topic;
 
 	cmd["MOTD"] = &oper;
 

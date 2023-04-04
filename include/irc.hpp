@@ -13,6 +13,7 @@
 # include <utility>
 # include <iterator>
 # include <sstream>
+# include <set>
 
 # include <fcntl.h>
 # include <unistd.h>
