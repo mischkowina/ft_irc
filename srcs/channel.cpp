@@ -66,3 +66,41 @@ bool	Channel::removeUser(Client& client)
 	}
 	return false;
 }
+
+bool	Channel::isInviteOnly() const
+{
+	return _inviteOnly;
+}
+
+bool	Channel::clientIsChannelOperator(std::string nick) const
+{
+	std::list<Client>::const_iterator	it = _channelOperator.begin();
+	while (it != _channelOperator.end() && it->getNick() != nick)
+		it++;
+	if (it == _channelOperator.end())
+		return false;
+	return true;
+}
+
+bool	Channel::clientIsChannelUser(std::string nick) const
+{
+	std::list<Client>::const_iterator	it = _channelUsers.begin();
+	while (it != _channelUsers.end() && it->getNick() != nick)
+		it++;
+	if (it == _channelUsers.end())
+		return false;
+	return true;
+}
+
+void	Channel::addClientToInviteList(std::string nick)
+{
+	_inviteList.insert(nick);
+}
+
+std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
+{
+	std::list<Client>::iterator	it = _channelUsers.begin();
+	while (it != _channelUsers.end() || it->getNick() != nick)
+		it++;
+	return (it);
+}

@@ -31,7 +31,7 @@
 
 # define ERR_NOTONCHANNEL "442 <channel> :You're not on that channel"
 
-# define ERR_USERONCHANNEL	"443 <user> <channel> :is already on channel" // - Returned when a client tries to invite a user to a channel they are already on.
+# define ERR_USERONCHANNEL	"443 <user> <channel> :is already on channel"
 
 # define ERR_NOTREGISTERED "451 :You have not registered"
 

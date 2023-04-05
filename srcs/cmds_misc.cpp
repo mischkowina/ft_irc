@@ -10,7 +10,9 @@ void	ping(Server *server, Client &client, Message& msg)
 		return ;
 	}
 
-	std::string message = ":" + server->getHostname() + " PONG " + msg.getParameters().at(0) + "\r\n";
+	std::string message = ":" + server->getHostname() + " PONG " + msg.getParameters().at(0);
+	std::cout << RED "Sending to " << client.getNick() << ": " RESET << message << std::endl;
+	message.append("\r\n");
 	send(client.getSocket(), message.data(), message.length(), 0);
 }
 

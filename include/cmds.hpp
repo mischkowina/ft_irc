@@ -17,6 +17,8 @@ void	join(Server *server, Client &client, Message& msg);
 void	part(Server *server, Client &client, Message& msg);
 void	topic(Server *server, Client &client, Message& msg);
 void	names(Server *server, Client &client, Message& msg);
+void	list(Server *server, Client &client, Message& msg);
+void	invite(Server *server, Client &client, Message& msg);
 
 void	motd(Server *server, Client &client, Message& msg);
 

@@ -11,15 +11,15 @@
 
 # define RPL_MYINFO "004 :<servername> ft_irc 1.0 iswo opsitnmlbvk"
 
-# define RPL_LISTSTART "321 Channel :Users  Name"
-
 # define RPL_LIST "322 <channel> <# visible> :<topic>"
 
-# define RPL_LISTEND " 323 :End of /LIST"
+# define RPL_LISTEND "323 :End of /LIST"
 
 # define RPL_NOTOPIC "331 <channel> :No topic is set"
 
 # define RPL_TOPIC "332 <channel> :<topic>"
+
+# define RPL_INVITING "341 <channel> <nick>"
 
 # define RPL_NAMREPLY "353 <channel> :<list of names>"
 
