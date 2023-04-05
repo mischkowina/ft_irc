@@ -63,6 +63,7 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["NAMES"] = &names;
 	cmd["LIST"] = &list;
 	cmd["INVITE"] = &invite;
+	cmd["KICK"] = &kick;
 
 	cmd["MOTD"] = &oper;
 

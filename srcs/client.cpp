@@ -137,9 +137,11 @@ void	Client::clearRecvBuffer(int end)
 
 void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
 {
-	if (msg.find(" ", 0) != std::string::npos)
+	if (msg.find(" ", 0) != std::string::npos && type != "KICK")
 		msg.insert(0, ":");
-	msg.insert(0, " " + this->_nick + " ");
+	msg.insert(0, " ");
+	if (type != "KICK")
+		msg.insert(0, " " + this->_nick);
 	//insert command name
 	msg.insert(0, type);
 

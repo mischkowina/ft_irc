@@ -29,6 +29,8 @@
 
 # define ERR_NICKNAMEINUSE	"433 <nick> :Nickname is already in use"
 
+# define ERR_USERNOTINCHANNEL "441 <nick> <channel> :They aren't on that channel"
+
 # define ERR_NOTONCHANNEL "442 <channel> :You're not on that channel"
 
 # define ERR_USERONCHANNEL	"443 <user> <channel> :is already on channel"
