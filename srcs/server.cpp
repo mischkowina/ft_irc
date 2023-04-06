@@ -109,6 +109,11 @@ std::string	Server::getHostname() const
 	return this->_hostname;
 }
 
+sockaddr_in Server::getServerAddr() const
+{
+	return this->_server_addr;
+}
+
 Server::ClientMap	&Server::getClientMap()
 {
 	return _clients;

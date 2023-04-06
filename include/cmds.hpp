@@ -31,6 +31,7 @@ void	pong(Server *server, Client &client, Message& msg);
 
 void	away(Server *server, Client &client, Message& msg);
 void	die(Server *server, Client &client, Message& msg);
+void	horoscope(Server *server, Client &client, std::string msg);
 
 
 

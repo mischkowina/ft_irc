@@ -34,6 +34,7 @@
 # include "reply.hpp"
 # include "cmds.hpp"
 # include "server.hpp"
+# include "horoscope.hpp"
 
 #define RED     "\033[1m\033[31m"      /* Bold Red */
 #define BLUE "\033[1m\033[36m"      /* Bold Cyan */

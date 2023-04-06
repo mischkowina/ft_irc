@@ -6,7 +6,7 @@
 #    By: smischni <smischni@student.42wolfsburg.de> +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/02 12:40:43 by pdolinar          #+#    #+#              #
-#    Updated: 2023/04/03 16:04:44 by smischni         ###   ########.fr        #
+#    Updated: 2023/04/06 13:53:16 by smischni         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,8 @@ HEADER	:=		$(INC)/server.hpp \
 				$(INC)/irc.hpp \
 				$(INC)/error.hpp \
 				$(INC)/cmds.hpp \
-				$(INC)/reply.hpp
+				$(INC)/reply.hpp \
+				$(INC)/horoscope.hpp
 
 CC			:=	c++
 CPP_FLAGS	:=	-Wall -Wextra -Werror -std=c++98 -g -Wfatal-errors

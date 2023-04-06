@@ -4,13 +4,17 @@
 Client::Client(int socket, bool hasPass) : _socket(socket), _username(""), _hasPass(hasPass)
 {
 	// set new socket to non blocking
-	int fcntl_return = fcntl(this->_socket, F_SETFL, O_NONBLOCK);
-	if (fcntl_return == -1)
+	if (_socket != -1)
 	{
-		std::cerr << "ERROR on fcntl" << std::endl;
-		close(this->_socket);
-		exit(1);
+		int fcntl_return = fcntl(this->_socket, F_SETFL, O_NONBLOCK);
+		if (fcntl_return == -1)
+		{
+			std::cerr << "ERROR on fcntl" << std::endl;
+			close(this->_socket);
+			exit(1);
+		}
 	}
+	
 
 	this->_recvBuffer = "";
 	this->_isAuthorized = false;
@@ -34,9 +38,9 @@ void	Client::setNick(std::string nick)
 void	Client::setUserData(std::vector<std::string> &parameters)
 {
 	this->_username = parameters[0];
-	this->_hostname = parameters[0];
-	this->_servername = parameters[0];
-	this->_realname = parameters[0];
+	this->_hostname = parameters[1];
+	this->_servername = parameters[2];
+	this->_realname = parameters[3];
 }
 
 void	Client::setIsAuthorized(bool status)

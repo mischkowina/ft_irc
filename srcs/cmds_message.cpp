@@ -30,6 +30,12 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 				itChannelRecv->sendMsg(sender, msg, "PRIVMSG");
 			continue ;
 		}
+		//check if message is directed at horoscope bot
+		if (*itRecv == "horoscope")
+		{
+			horoscope(server, sender, msg);
+			continue;
+		}
 		sender.sendErrMsg(server, ERR_NOSUCHNICK, itRecv->c_str());
 	}
 }
