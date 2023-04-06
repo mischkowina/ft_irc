@@ -22,6 +22,12 @@ void	Server::createNewChannel(std::string name, Client &client)
 void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex)
 {
 	// check any invalid conditions before adding a new client to the channel
+		// if client has already joined to the channel -> stop
+	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
+		if (it->getNick() == client.getNick() || it->getName() == client.getName() || it->getIP() == client.getIP()) {
+			return;
+		}
+	}
 		// the correct key (password) must be given if it is set.
 	if (keys.empty() != false && keys[keyIndex] != _password) {
 		client.sendErrMsg(server, ERR_BADCHANNELKEY, NULL);
@@ -61,8 +67,6 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 
 void	join(Server *server, Client &client, Message& msg)
 {
-	std::cout << "  ***** --------------------- *****\n";
-
 	std::vector<std::string>	parameters = msg.getParameters();
 	std::vector<std::string> channelNames;
 	std::vector<std::string> keys;
@@ -92,8 +96,6 @@ void	join(Server *server, Client &client, Message& msg)
 		}
 	}
 /////////////////////////////////////////
-
-	std::cout << "  ***** ----------  END  ----------- *****\n";
 	int index = 0;
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
 	for (std::vector<std::string>::iterator iterChannelName = channelNames.begin();
