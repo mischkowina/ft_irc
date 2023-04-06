@@ -17,6 +17,7 @@ class Client {
 		bool		_hasPass;
 		bool		_isAuthorized;
 		bool		_isOperator;
+		std::string	_awayMsg;
 		std::string	_recvBuffer;
 
 	public:
@@ -31,6 +32,7 @@ class Client {
 		void		setIsAuthorized(bool status);
 		void		setHasPass(bool status);
 		void		setIsOperator(bool status);
+		void		setAwayMsg(std::string msg);
 		void		addToRecvBuffer(char *buffer, int len);
 		int			getSocket() const;
 		std::string	getIP() const;
@@ -39,6 +41,7 @@ class Client {
 		bool		getIsAuthorized() const;
 		bool		getHasPass() const;
 		bool		getIsOperator() const;
+		std::string	getAwayMsg() const;
 		std::string	getRecvBuffer() const;
 
 		void		clearRecvBuffer(int end);

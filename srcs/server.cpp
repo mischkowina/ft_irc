@@ -73,6 +73,7 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["PING"] = &ping;
 	cmd["PONG"] = &pong;
 
+	cmd["AWAY"] = &away;
 	cmd["DIE"] = &die;
 
 	_cmdMap = cmd;

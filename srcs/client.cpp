@@ -15,6 +15,7 @@ Client::Client(int socket, bool hasPass) : _socket(socket), _username(""), _hasP
 	this->_recvBuffer = "";
 	this->_isAuthorized = false;
 	this->_isOperator = false;
+	this->_awayMsg = "";
 }
 
 Client::Client(Client const &rhs)
@@ -62,8 +63,8 @@ Client	&Client::operator=(Client const &rhs)
 		this->_hasPass = rhs._hasPass;
 		this->_isAuthorized = rhs._isAuthorized;
 		this->_isOperator = rhs._isOperator;
+		this->_awayMsg = rhs._awayMsg;
 		this->_recvBuffer = rhs._recvBuffer;
-		//TBD
 	}
 	return (*this);
 }
@@ -78,6 +79,11 @@ void	Client::setIP(sockaddr_in *client_addr)
 void	Client::setIsOperator(bool status)
 {
 	this->_isOperator = status;
+}
+
+void	Client::setAwayMsg(std::string msg)
+{
+	this->_awayMsg = msg;
 }
 
 void	Client::addToRecvBuffer(char *buffer, int len)
@@ -119,6 +125,11 @@ bool	Client::getIsAuthorized() const
 bool	Client::getIsOperator() const
 {
 	return this->_isOperator;
+}
+
+std::string	Client::getAwayMsg() const
+{
+	return this->_awayMsg;
 }
 
 std::string	Client::getRecvBuffer() const

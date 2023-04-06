@@ -81,38 +81,38 @@ Connection: //MUSTHAVES - DONE
 - squit - nope
 
 Channel Operation: //MUSTHAVES
-- join - todo 
-- part - todo 
+- join - done? 
+- part - done 
 - mode - todo 
-- topic - todo 
-- names - todo 
-- list - todo 
-- invite - todo
-- kick - todo
+- topic - halfway 
+- names - halfway 
+- list - halfway 
+- invite - done
+- kick - done
 
-Server Queries:
+Server Queries: //DONE
 - motd - done
-- lusers - maybe?
+- lusers - nope
 - version - nope
 - stats - nope
 - links - nope
-- time - maybe?
+- time - nope
 - connect - nope
 - trace - nope
-- admin - maybe?
+- admin - nope
 - info - nope
 
 Send Messages: //MUSTHAVES - DONE
 - privmsg - done
 - notice - done
 
-User-based queries:
-- who - todo?
-- whois - todo?
+User-based queries: //NOPE
+- who - nope
+- whois - nope
 - whowas - nope
 
-Misc.:
-- kill - nope?
+Misc.: //DONE
+- kill - nope
 - ping - done // ELSE PROBLEM WITH SOME CLIENTS
 - pong - done //ELSE PROBLEM WITH SOME CLIENTS
 - error - nope

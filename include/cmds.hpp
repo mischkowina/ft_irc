@@ -29,6 +29,7 @@ void	notice(Server *server, Client &client, Message& msg);
 void	ping(Server *server, Client &client, Message& msg);
 void	pong(Server *server, Client &client, Message& msg);
 
+void	away(Server *server, Client &client, Message& msg);
 void	die(Server *server, Client &client, Message& msg);
 
 
