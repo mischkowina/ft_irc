@@ -55,12 +55,10 @@
 
 # define ERR_BADCHANNELKEY		"475 <channel> :Cannot join channel (+k)"
 
+# define ERR_BADCHANMASK		"476 <channel> :Invalid channel name"
+
 # define ERR_NOPRIVILEGES		"481 :Permission Denied- You're not an IRC operator"
 
 # define ERR_CHANOPRIVSNEEDED	"482 <channel> :You're not channel operator"
-
-
-/* channel */
-#define ERR_NAME "invalid channel name"	// tmp macro-> replace with valid one
 
 #endif

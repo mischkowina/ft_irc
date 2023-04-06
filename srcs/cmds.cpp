@@ -5,20 +5,10 @@
 bool validChannelName(Server *server, std::string name, Client &client)
 {
 	if ((name[0] != '#' && name[0] != '&') || name.length() > 199 || name.find_first_of(' ') != std::string::npos) {
-		client.sendErrMsg(server, ERR_NAME, NULL);	// find correct macro
+		client.sendErrMsg(server, ERR_BADCHANMASK, NULL);
 		return false;
 	}
 	return true;
-}
-
-void	splitParam(std::vector<std::string> &input, std::vector<std::string> &output, int pos)
-{
-	std::stringstream ss(input[pos]);
-	std::string token;
-	while (std::getline(ss, token, ',')) {
-		output.push_back(token);
-		token.clear();
-	}
 }
 
 void	Server::createNewChannel(std::string name, Client &client)
@@ -49,18 +39,13 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 			return;
 		}
 	}
-
-		// user must be invited if the channel is invite-only; -> check docs for implementation
-	// std::list<Client>::const_iterator It = std::find(_invitedUsers.begin(), _invitedUsers.end(), client);
-	// if (It == _invitedUsers.end()) {
-	// 	client.sendErrMsg(server, ERR_INVITEONLYCHAN, NULL);
-	// 	return;
-	// }
-
+		// if channel is invite only
 	bool inv = false;
 	for (std::list<Client>::const_iterator it = _invitedUsers.begin(); it != _invitedUsers.end(); ++it) {
-		if (it->getNick() == client.getNick())
+		if (it->getNick() == client.getNick()) {
 			inv = true;
+			break;
+		}
 	}
 	if (_inviteOnly == true && inv == false)
 	{
@@ -76,13 +61,39 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 
 void	join(Server *server, Client &client, Message& msg)
 {
-	std::vector<std::string>	parameters = msg.getParameters();
+	std::cout << "  ***** --------------------- *****\n";
 
+	std::vector<std::string>	parameters = msg.getParameters();
 	std::vector<std::string> channelNames;
 	std::vector<std::string> keys;
-	splitParam(parameters, channelNames, 0);
-	splitParam(parameters, keys, 1);
+/////////////////////////////////////////
+	if (parameters.empty() == true)
+	{
+		std::cout << "  parameters.empty()\n";
+		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
+		return;
+	}
+	std::stringstream ss(parameters[0]);
+	std::string token;
 
+	while (std::getline(ss, token, ',')) {
+		channelNames.push_back(token);
+		std::cout << "  // channelNames = " << channelNames.back() << std::endl;
+		token.clear();
+	}
+
+	if (parameters.size() > 1)
+	{
+		std::stringstream ss(parameters[1]);
+		while (std::getline(ss, token, ',')) {
+			keys.push_back(token);
+			std::cout << "  // keys = " << keys.back() << std::endl;
+			token.clear();
+		}
+	}
+/////////////////////////////////////////
+
+	std::cout << "  ***** ----------  END  ----------- *****\n";
 	int index = 0;
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
 	for (std::vector<std::string>::iterator iterChannelName = channelNames.begin();

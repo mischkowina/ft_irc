@@ -77,7 +77,7 @@ void	privmsg(Server *server, Client &client, Message& msg)
 	try {
 		findReceivers(server, client, receivers, textToBeSend);
 	} catch (const std::exception& e) {
-		std::cerr << "Error: " << e.what() << std::endl;	// adjust appropriate response here
+		std::cerr << "--- Error --- : " << e.what() << std::endl;	// adjust appropriate response here
 	}
 }
 
