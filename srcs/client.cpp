@@ -4,17 +4,22 @@
 Client::Client(int socket, bool hasPass) : _socket(socket), _username(""), _hasPass(hasPass)
 {
 	// set new socket to non blocking
-	int fcntl_return = fcntl(this->_socket, F_SETFL, O_NONBLOCK);
-	if (fcntl_return == -1)
+	if (_socket != -1)
 	{
-		std::cerr << "ERROR on fcntl" << std::endl;
-		close(this->_socket);
-		exit(1);
+		int fcntl_return = fcntl(this->_socket, F_SETFL, O_NONBLOCK);
+		if (fcntl_return == -1)
+		{
+			std::cerr << "ERROR on fcntl" << std::endl;
+			close(this->_socket);
+			exit(1);
+		}
 	}
+	
 
 	this->_recvBuffer = "";
 	this->_isAuthorized = false;
 	this->_isOperator = false;
+	this->_awayMsg = "";
 }
 
 Client::Client(Client const &rhs)
@@ -33,9 +38,9 @@ void	Client::setNick(std::string nick)
 void	Client::setUserData(std::vector<std::string> &parameters)
 {
 	this->_username = parameters[0];
-	this->_hostname = parameters[0];
-	this->_servername = parameters[0];
-	this->_realname = parameters[0];
+	this->_hostname = parameters[1];
+	this->_servername = parameters[2];
+	this->_realname = parameters[3];
 }
 
 void	Client::setIsAuthorized(bool status)
@@ -62,8 +67,8 @@ Client	&Client::operator=(Client const &rhs)
 		this->_hasPass = rhs._hasPass;
 		this->_isAuthorized = rhs._isAuthorized;
 		this->_isOperator = rhs._isOperator;
+		this->_awayMsg = rhs._awayMsg;
 		this->_recvBuffer = rhs._recvBuffer;
-		//TBD
 	}
 	return (*this);
 }
@@ -78,6 +83,11 @@ void	Client::setIP(sockaddr_in *client_addr)
 void	Client::setIsOperator(bool status)
 {
 	this->_isOperator = status;
+}
+
+void	Client::setAwayMsg(std::string msg)
+{
+	this->_awayMsg = msg;
 }
 
 void	Client::addToRecvBuffer(char *buffer, int len)
@@ -121,6 +131,11 @@ bool	Client::getIsOperator() const
 	return this->_isOperator;
 }
 
+std::string	Client::getAwayMsg() const
+{
+	return this->_awayMsg;
+}
+
 std::string	Client::getRecvBuffer() const
 {
 	return this->_recvBuffer;
@@ -133,6 +148,29 @@ void	Client::clearRecvBuffer(int end)
 		this->_recvBuffer.erase(0, 1);
 	if (this->_recvBuffer[0] == '\n')
 		this->_recvBuffer.erase(0, 1);
+}
+
+void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
+{
+	if (msg.find(" ", 0) != std::string::npos && type != "KICK")
+		msg.insert(0, ":");
+	msg.insert(0, " ");
+	if (type != "KICK")
+		msg.insert(0, " " + this->_nick);
+	//insert command name
+	msg.insert(0, type);
+
+	msg.insert(0, " ");
+	//insert full prefix of sender - :<nick>!<username>@<IP>
+	msg.insert(0, sender.getIP());
+	msg.insert(0, "@");
+	msg.insert(0, sender.getName());
+	msg.insert(0, "!");
+	msg.insert(0, sender.getNick());
+	msg.insert(0, ":");
+	std::cout << BLUE "Sending to " << this->_nick << ": " RESET << msg << std::endl;
+	msg.append("\r\n");
+	send(this->_socket, msg.data(), msg.size(), 0);
 }
 
 void	Client::sendErrMsg(Server *server, std::string const err_code, char const *err_param)
@@ -153,25 +191,28 @@ void	Client::sendErrMsg(Server *server, std::string const err_code, char const *
 	send(this->_socket, err_msg.data(), err_msg.length(), 0);
 }
 
-void	Client::sendMsg(Client &sender, std::string msg, std::string type) const
+void	Client::sendErrMsg(Server *server, std::string const err_code, std::vector<std::string> err_param)
 {
-	if (msg.find(" ", 0) != std::string::npos)
-		msg.insert(0, ":");
-	msg.insert(0, " " + this->_nick + " ");
-	//insert command name
-	msg.insert(0, type);
+	std::string	err_msg = err_code;
 
-	msg.insert(0, " ");
-	//insert full prefix of sender - :<nick>!<username>@<IP>
-	msg.insert(0, sender.getIP());
-	msg.insert(0, "@");
-	msg.insert(0, sender.getName());
-	msg.insert(0, "!");
-	msg.insert(0, sender.getNick());
-	msg.insert(0, ":");
-	std::cout << BLUE "Sending to " << this->_nick << ": " RESET << msg << std::endl;
-	msg.append("\r\n");
-	send(this->_socket, msg.data(), msg.size(), 0);
+	for (size_t i = 0; i < err_param.size(); i++)
+	{
+		size_t pos1 = err_msg.find("<");
+		size_t pos2 = err_msg.find(">");
+		if (pos1 != std::string::npos && pos2 != std::string::npos && pos1 < pos2)
+		{
+			
+			err_msg.erase(pos1, pos2 - pos1 + 1);
+			err_msg.insert(pos1, err_param[i]);
+		}
+		else
+			break ;
+	}
+	err_msg.insert(4, _nick + " ");
+	err_msg.insert(0, ":" + server->getHostname() + " ");
+	std::cout << RED "Sending to " << this->_nick << ": " RESET << err_msg << std::endl;
+	err_msg.append("\r\n");
+	send(this->_socket, err_msg.data(), err_msg.length(), 0);
 }
 
 bool	Client::maxNumOfChannels()

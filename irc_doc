@@ -81,49 +81,90 @@ Connection: //MUSTHAVES - DONE
 - squit - nope
 
 Channel Operation: //MUSTHAVES
-- join - todo 
-- part - todo 
+- join - done? 
+- part - done 
 - mode - todo 
-- topic - todo 
-- names - todo 
-- list - todo 
-- invite - todo
-- kick - todo
+- topic - halfway 
+- names - halfway 
+- list - halfway 
+- invite - done
+- kick - done
 
-Server Queries:
+Server Queries: //DONE
 - motd - done
-- lusers - maybe?
+- lusers - nope
 - version - nope
 - stats - nope
 - links - nope
-- time - maybe?
+- time - nope
 - connect - nope
 - trace - nope
-- admin - maybe?
+- admin - nope
 - info - nope
 
 Send Messages: //MUSTHAVES - DONE
 - privmsg - done
 - notice - done
 
-User-based queries:
-- who - todo?
-- whois - todo?
+User-based queries: 
+- who - nope
+- whois - maybe?
 - whowas - nope
 
-Misc.:
-- kill - nope?
+Misc.: //DONE
+- kill - nope
 - ping - done // ELSE PROBLEM WITH SOME CLIENTS
 - pong - done //ELSE PROBLEM WITH SOME CLIENTS
 - error - nope
 
-Optional:
-- away - maybe?
+Optional: //DONE
+- away - done
 - rehash - nope
-- die - maybe?
+- die - done
 - restart - nope
 - summon - nope
 - users - nope
 - wallops - nope
 - userhost - nope
-- ison - maybe?
+- ison - nope
+
+
+############################################################################
+
+MODE:
+USER MODES: 
+i -> invisible user - Client Attribute / Member variable
+s -> recipient for Server Notices - Client Attribute / Member variable
+w -> receives WALLOPS - irrelevant if we dont implement WALLOPS, else Client Attribute / Member variable
+o -> operator flag; added by OPER; only de-oping allowed - Client Attribute / Member variable already implemented
+
+CHANNEL MODES:
+o -> chanop privilges - ChannelUser Attribute 
+p -> private channel - Channel Attribute
+s -> secret channel - Channel Attribute
+i -> invite only - Channel Attribute
+t -> topic settable only by chanops - Channel Attribute
+n -> no message from Clients outside channel - Channel Attribute
+m -> moderated channel - Channel Attribute
+l -> user limit - Channel Attribute
+b -> ban mask - Channel Attribute?, needs to be checked for every user who wants to join
+v -> allowed to speak on moderated channel - ChannelUser Attribute
+k -> channel password - Channel Attribute
+
+Approach:
+- check if first parameter is a channel or a client -> call the according function
+- if user: set the according attributes
+- if channel: set the according attributes
+
+Attributes of Channel Users:
+- idea: add user struct in Channel class
+- contains: reference to original client (so changes in attributes are synced), chanop attribute, voice attribute
+- concept:
+struct ChannelUser
+	{
+		public:
+			bool		chanop;
+			bool		voice;
+			Client&     client; ##reference to client, so nick, operator status etc. are always up to date
+			ChannelUser(Client& client);
+	};

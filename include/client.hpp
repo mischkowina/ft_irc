@@ -18,6 +18,7 @@ class Client {
 		bool		_isAuthorized;
 		bool		_isOperator;
 		int 		_channelCounter;
+		std::string	_awayMsg;
 		std::string	_recvBuffer;
 
 	public:
@@ -32,6 +33,7 @@ class Client {
 		void		setIsAuthorized(bool status);
 		void		setHasPass(bool status);
 		void		setIsOperator(bool status);
+		void		setAwayMsg(std::string msg);
 		void		addToRecvBuffer(char *buffer, int len);
 		int			getSocket() const;
 		std::string	getIP() const;
@@ -40,13 +42,15 @@ class Client {
 		bool		getIsAuthorized() const;
 		bool		getHasPass() const;
 		bool		getIsOperator() const;
+		std::string	getAwayMsg() const;
 		std::string	getRecvBuffer() const;
 
 		void		clearRecvBuffer(int end);
-		void		sendErrMsg(Server *server, std::string const err_code, char const *err_param);
 		void		sendMsg(Client &sender, std::string msg, std::string type) const;
 		
 		bool		maxNumOfChannels();
+		void		sendErrMsg(Server *server, std::string const err_code, char const *err_param);
+		void		sendErrMsg(Server *server, std::string const err_code, std::vector<std::string> err_param);
 };
 
 #endif

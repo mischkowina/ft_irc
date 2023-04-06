@@ -27,7 +27,7 @@ void	nick(Server *server, Client &client, Message& msg)
 	if (changedClient.getName().empty() == false)
 		changedClient.setIsAuthorized(true);
 
-	if (server->addClient(changedClient) == false)
+	if (parameters[0] == "horoscope" || server->addClient(changedClient) == false)
 		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
 	else
 	{
@@ -67,8 +67,6 @@ void	pass_cmd(Server *server, Client &client, Message& msg)
 	if (parameters[0] == server->getPass())
 	{
 		client.setHasPass(true);
-		std::string tmp = server->getHostname() + " NOTICE GoodPass\r\n";
-		send(client.getSocket(), tmp.data(), tmp.length(), 0);
 	}
 }
 

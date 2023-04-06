@@ -20,6 +20,7 @@ class Server
 		std::string	getHostname() const;
 		std::string	getPass(void) const;
 		std::string	getOperPass() const;
+		sockaddr_in getServerAddr() const;
 		ClientMap	&getClientMap();
 		ClientMap	&getAuthorizedClientMap();
 		ChannelMap	&getChannelMap();
