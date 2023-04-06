@@ -106,9 +106,9 @@ Send Messages: //MUSTHAVES - DONE
 - privmsg - done
 - notice - done
 
-User-based queries: //NOPE
+User-based queries: 
 - who - nope
-- whois - nope
+- whois - maybe?
 - whowas - nope
 
 Misc.: //DONE
@@ -117,8 +117,8 @@ Misc.: //DONE
 - pong - done //ELSE PROBLEM WITH SOME CLIENTS
 - error - nope
 
-Optional:
-- away - maybe?
+Optional: //DONE
+- away - done
 - rehash - nope
 - die - done
 - restart - nope
@@ -126,7 +126,7 @@ Optional:
 - users - nope
 - wallops - nope
 - userhost - nope
-- ison - maybe?
+- ison - nope
 
 
 ############################################################################
