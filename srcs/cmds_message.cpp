@@ -8,21 +8,38 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 	// iterate through receivers, try to find a matching channel or client to send the messag eto
 	for (std::vector<std::string>::const_iterator itRecv = listOfRecv.begin(); itRecv != listOfRecv.end(); itRecv++)
 	{
-		Server::ClientMap::const_iterator itClien = tmpClient.find(*itRecv);
+		Server::ClientMap::iterator itClien = tmpClient.find(*itRecv);
 		if (itClien != tmpClient.end())
 		{
-			(*itClien).second.sendMsg(sender, msg, "PRIVMSG");
+			itClien->second.sendMsg(sender, msg, "PRIVMSG");
+			if (itClien->second.getAwayMsg().empty() == false)
+			{
+				std::vector<std::string> params;
+				params.push_back(itClien->second.getNick());
+				params.push_back(itClien->second.getAwayMsg());
+				sender.sendErrMsg(server, RPL_AWAY, params);
+			}
 			continue ;
 		}
 		Server::ChannelMap::const_iterator itChannel = tmpChannel.find(*itRecv);
 		if (itChannel != tmpChannel.end())
 		{
 			std::list<Client> tmpChannelUsers = itChannel->second.getChannelUsers();
+			//TO-DO: check if client is authorized to send message in that channel
 			for (std::list<Client>::const_iterator itChannelRecv = tmpChannelUsers.begin(); itChannelRecv != tmpChannelUsers.end(); itChannelRecv++)
-				(*itChannelRecv).sendMsg(sender, msg, "PRIVMSG");
+			{
+				if (itChannelRecv->getNick() != sender.getNick())//don't send message to the sender himself
+					itChannelRecv->sendMsg(sender, msg, "PRIVMSG");
+			}
 			continue ;
 		}
-		sender.sendErrMsg(server, ERR_NOSUCHNICK, (*itRecv).c_str());
+		//check if message is directed at horoscope bot
+		if (*itRecv == "horoscope")
+		{
+			horoscope(server, sender, msg);
+			continue;
+		}
+		sender.sendErrMsg(server, ERR_NOSUCHNICK, itRecv->c_str());
 	}
 }
 

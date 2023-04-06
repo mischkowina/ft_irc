@@ -57,6 +57,14 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["QUIT"] = &quit;
 	cmd["OPER"] = &oper;
 
+	cmd["JOIN"] = &join;
+	cmd["PART"] = &part;
+	cmd["TOPIC"] = &topic;
+	cmd["NAMES"] = &names;
+	cmd["LIST"] = &list;
+	cmd["INVITE"] = &invite;
+	cmd["KICK"] = &kick;
+
 	cmd["MOTD"] = &oper;
 
 	cmd["PRIVMSG"] = &privmsg;
@@ -65,16 +73,20 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["PING"] = &ping;
 	cmd["PONG"] = &pong;
 
+	cmd["AWAY"] = &away;
 	cmd["DIE"] = &die;
-
-	cmd["JOIN"] = &join;
 
 	_cmdMap = cmd;
 }
 
 Server::~Server(void)
 {
+	for (ClientMap::iterator it = _clients.begin(); it != _clients.end(); it++)
+		close(it->second.getSocket());
+
 	close(_sockfd);
+
+	std::cout << "Closed all active connections." << std::endl;
 }
 
 std::string	Server::getPass() const
@@ -95,6 +107,11 @@ int		Server::getServerSoc() const
 std::string	Server::getHostname() const
 {
 	return this->_hostname;
+}
+
+sockaddr_in Server::getServerAddr() const
+{
+	return this->_server_addr;
 }
 
 Server::ClientMap	&Server::getClientMap()
@@ -176,11 +193,11 @@ void	Server::run()
 		//check all client sockets (of the clients) for events
 		this->checkAllClientSockets(pollfds);
 
-		//check for POLLIN on listening socket -> pending connections
-		this->checkListeningSocket(pollfds);
-
 		if (this->_died == true)
 			break;
+
+		//check for POLLIN on listening socket -> pending connections
+		this->checkListeningSocket(pollfds);
 	}
 }
 
@@ -248,6 +265,7 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 				this->process_request(currentClient, msg);
 				if (this->_clientMapChanged == true || this->_died == true)
 					break ;
+					
 			}
 		}
 		if (this->_clientMapChanged == true || this->_died == true)
@@ -327,7 +345,6 @@ void	Server::execCmd(Client &client, Message& msg)
 	if (client.getHasPass() == false && msg.getCommand() != "PASS")//PASS has to be used before any other command can be used
 	{
 		client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
-		std::cout << "CASE 1" << std::endl;
 		return ;
 	}
 	else if (client.getHasPass() == true && client.getIsAuthorized() == false)
@@ -338,10 +355,7 @@ void	Server::execCmd(Client &client, Message& msg)
 		else if (msg.getCommand() == "USER" && client.getName().empty() == true)
 			(*it->second)(this, client, msg);
 		else
-		{
 			client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
-			std::cout << "CASE 2" << std::endl;
-		}
 		return ;
 	}
 	(*it->second)(this, client, msg);
