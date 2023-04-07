@@ -33,11 +33,6 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		client.sendErrMsg(server, ERR_BADCHANNELKEY, NULL);
 		return;
 	}
-		// a client can be a member of 10 channels max
-	if (client.maxNumOfChannels() == true) {
-		client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
-		return;
-	}
 		// user's nick/username/hostname must not match any active bans;
 	for (std::list<Client>::const_iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); ++it) {
 		if (it->getNick() == client.getNick() || it->getName() == client.getName() || it->getIP() == client.getIP()) {
@@ -71,23 +66,19 @@ void	join(Server *server, Client &client, Message& msg)
 	std::vector<std::string> channelNames;
 	std::vector<std::string> keys;
 /////////////////////////////////////////
-	if (parameters.empty() == true)
-	{
-		std::cout << "  parameters.empty()\n";
+	if (parameters.empty() == true) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
 	std::stringstream ss(parameters[0]);
 	std::string token;
-
 	while (std::getline(ss, token, ',')) {
 		channelNames.push_back(token);
 		std::cout << "  // channelNames = " << channelNames.back() << std::endl;
 		token.clear();
 	}
 
-	if (parameters.size() > 1)
-	{
+	if (parameters.size() > 1) {
 		std::stringstream ss(parameters[1]);
 		while (std::getline(ss, token, ',')) {
 			keys.push_back(token);
@@ -104,8 +95,13 @@ void	join(Server *server, Client &client, Message& msg)
 		// check channelName
 		if (validChannelName(server, *iterChannelName, client) == false)
 			continue;
+			// a client can be a member of 10 channels max
+		if (client.maxNumOfChannels() == false) {
+			client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
+			continue;
+		}
 		// find the existing channel
-		Server::ChannelMap::iterator itChannel = mapOfChannels.find(*iterChannelName);	
+		Server::ChannelMap::iterator itChannel = mapOfChannels.find(*iterChannelName);
 		if (itChannel != mapOfChannels.end())
 		{
 			// add client to the channel

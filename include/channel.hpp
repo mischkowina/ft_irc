@@ -44,6 +44,7 @@ class Channel
 		bool				clientIsChannelUser(std::string nick) const;
 		bool				clientIsChannelOperator(std::string nick) const;
 		std::list<Client>::iterator	getChannelUser(std::string nick);
+
 };
 
 #endif

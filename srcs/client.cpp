@@ -15,7 +15,7 @@ Client::Client(int socket, bool hasPass) : _socket(socket), _username(""), _hasP
 		}
 	}
 	
-
+	this->_channelCounter = 0;
 	this->_recvBuffer = "";
 	this->_isAuthorized = false;
 	this->_isOperator = false;
@@ -69,6 +69,7 @@ Client	&Client::operator=(Client const &rhs)
 		this->_isOperator = rhs._isOperator;
 		this->_awayMsg = rhs._awayMsg;
 		this->_recvBuffer = rhs._recvBuffer;
+		this->_channelCounter = rhs._channelCounter;
 	}
 	return (*this);
 }
@@ -217,5 +218,5 @@ void	Client::sendErrMsg(Server *server, std::string const err_code, std::vector<
 
 bool	Client::maxNumOfChannels()
 {
-	return ((_channelCounter++) < 11);
+	return ((_channelCounter++) < 10);
 }

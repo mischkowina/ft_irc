@@ -51,6 +51,7 @@ class Client {
 		bool		maxNumOfChannels();
 		void		sendErrMsg(Server *server, std::string const err_code, char const *err_param);
 		void		sendErrMsg(Server *server, std::string const err_code, std::vector<std::string> err_param);
+
 };
 
 #endif
