@@ -360,4 +360,13 @@ void	Server::execCmd(Client &client, Message& msg)
 	}
 	(*it->second)(this, client, msg);
 }
+
+void	Server::createNewChannel(std::string name, Client &client)
+{
+	Channel tmp(name);
+	tmp.setChannelOp(client);
+	tmp.setChannelUsers(client);
+	_channels.insert(std::make_pair(name, tmp));
+}
+
 //////////////////////////////////////////////////////////////////////////////////

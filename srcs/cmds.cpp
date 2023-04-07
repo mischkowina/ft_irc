@@ -11,14 +11,6 @@ bool validChannelName(Server *server, std::string name, Client &client)
 	return true;
 }
 
-void	Server::createNewChannel(std::string name, Client &client)
-{
-	Channel tmp(name);
-	tmp.setChannelOp(client);
-	tmp.setChannelUsers(client);
-	_channels.insert(std::make_pair(name, tmp));
-}
-
 void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex)
 {
 	// check any invalid conditions before adding a new client to the channel
@@ -55,9 +47,11 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	}
 
 	_channelUsers.push_back(client);
-	// send msg to other clients
-	// sendMsg();
-	std::cout << client.getNick() << " joined the channel\n"; //TODO
+	// send msg to other clients 		// TODO
+	std::string msg = client.getNick() + " has joined the channel\n";
+	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
+		send(it->getSocket(), msg.data(), msg.length(), 0);
+	}
 }
 
 void	join(Server *server, Client &client, Message& msg)
