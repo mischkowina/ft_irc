@@ -56,6 +56,7 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	cmd["USER"] = &user;
 	cmd["QUIT"] = &quit;
 	cmd["OPER"] = &oper;
+	cmd["MODE"] = &mode;
 
 	cmd["JOIN"] = &join;
 	cmd["PART"] = &part;

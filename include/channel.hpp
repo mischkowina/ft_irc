@@ -29,12 +29,17 @@ class Channel
 		void	setChannelOp(Client &client);
 		void	setChannelUsers(Client &client);
 		void	setName(std::string channelName);
-		
-		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
 		void	setNewChannel(Client& client);
 		void	setTopic(std::string topic);
+		
+		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
 		void	addClientToInviteList(std::string nick);
+		void	addClientToOperatorList(Client &client);
+		void	addToBannedList(Client& client);
+
 		bool	removeUser(Client& client);
+		void	removeFromOperatorList(std::string nick);
+		void	removeFromBannedList(std::string nick);
 
 		std::string			getChannelName() const;
 		std::list<Client>	getChannelOperator() const;

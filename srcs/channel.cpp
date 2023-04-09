@@ -118,3 +118,35 @@ std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 		it++;
 	return (it);
 }
+
+void	Channel::addClientToOperatorList(Client &client)
+{
+	_channelOperator.push_back(client);
+}
+
+void	Channel::removeFromOperatorList(std::string nick)
+{
+	for (std::list<Client>::iterator it = _channelOperator.begin(); it != _channelOperator.end(); it++)
+	{
+		if (it->getNick() == nick) {
+			_channelOperator.erase(it);
+			return;
+		}
+	}	
+}
+
+void	Channel::addToBannedList(Client &client)
+{
+	_bannedUsers.push_back(client);
+}
+
+void	Channel::removeFromBannedList(std::string nick)
+{
+	for (std::list<Client>::iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); it++)
+	{
+		if (it->getNick() == nick) {
+			_bannedUsers.erase(it);
+			return;
+		}
+	}	
+}

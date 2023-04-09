@@ -56,7 +56,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 
 void	join(Server *server, Client &client, Message& msg)
 {
-	std::vector<std::string>	parameters = msg.getParameters();
+	std::vector<std::string> parameters = msg.getParameters();
 	std::vector<std::string> channelNames;
 	std::vector<std::string> keys;
 /////////////////////////////////////////
@@ -99,6 +99,7 @@ void	join(Server *server, Client &client, Message& msg)
 		if (itChannel != mapOfChannels.end())
 		{
 			// add client to the channel
+			std::cout << RED "//channel location: " << &itChannel->second << " --\n";
 			itChannel->second.addClientToChannel(server, client, keys, index);
 		}
 		else {
@@ -517,5 +518,78 @@ void	kick(Server *server, Client &client, Message& msg)
 		//send message with KICK information to victim
 		Client victim = *(channel.getChannelUser(clientNames[i]));
 		kick_client_from_channel(server, client, channel, parameters, victim);
+	}
+}
+
+void	mode(Server *server, Client &client, Message& msg)
+{
+	std::vector<std::string>	parameters = msg.getParameters();
+
+	if (parameters.size() < 3) {
+
+		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
+		return;
+	}
+	if (client.getIsOperator() == false) {
+		client.sendErrMsg(server, ERR_NOPRIVILEGES, NULL);
+		return;
+	}
+	std::string channel = parameters[0];
+	std::string options = parameters[1];
+	std::string tmp = options.substr(1);
+	if ((options.at(0) != '+' && options.at(0) != '-') || tmp.find_first_not_of("opsitnbv") != std::string::npos) {
+
+		client.sendErrMsg(server, ERR_UNKNOWNMODE, tmp.data());
+		return;
+	}
+	///////////////////////////////////////
+
+	// [<limit>] [<user>] [<ban mask>]
+
+	std::string args = parameters[2];
+	// int	limit = atoi(args.c_str());
+
+	// MODE #mychannel +o userName
+	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
+
+	// execute mode cmd
+	const char* tmpCstr = tmp.c_str();
+	for (unsigned int i = 0; i < tmp.length(); i++)
+	{
+		switch (tmpCstr[i])
+		{
+			case 'o':
+				if (options.at(0) == '+') {
+					itChannel->second.addClientToOperatorList(client);
+				} else {
+					itChannel->second.removeFromOperatorList(client.getNick());
+				}
+				break;
+			case 'b':
+				if (options.at(0) == '+') {
+					itChannel->second.addToBannedList(client);
+				} else {
+					itChannel->second.removeFromBannedList(client.getNick());
+				}
+				break;
+			case 'p':
+				// run function for 'p'
+				break;
+			case 's':
+				// run function for 's'
+				break;
+			case 'i':
+				// run function for 'i'
+				break;
+			case 't':
+				// run function for 't'
+				break;
+			case 'n':
+				// run function for 'n'
+				break;
+			case 'v':
+				// run function for 'v'
+				break;
+		}
 	}
 }

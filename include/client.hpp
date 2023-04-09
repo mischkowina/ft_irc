@@ -35,6 +35,7 @@ class Client {
 		void		setIsOperator(bool status);
 		void		setAwayMsg(std::string msg);
 		void		addToRecvBuffer(char *buffer, int len);
+	
 		int			getSocket() const;
 		std::string	getIP() const;
 		std::string	getNick() const;
@@ -45,10 +46,10 @@ class Client {
 		std::string	getAwayMsg() const;
 		std::string	getRecvBuffer() const;
 
-		void		clearRecvBuffer(int end);
-		void		sendMsg(Client &sender, std::string msg, std::string type) const;
-		
 		bool		maxNumOfChannels();
+		void		clearRecvBuffer(int end);
+
+		void		sendMsg(Client &sender, std::string msg, std::string type) const;
 		void		sendErrMsg(Server *server, std::string const err_code, char const *err_param);
 		void		sendErrMsg(Server *server, std::string const err_code, std::vector<std::string> err_param);
 

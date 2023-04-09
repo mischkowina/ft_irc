@@ -34,7 +34,6 @@ bool	ft::isValidNick(std::string &nick)
 	return true;
 }
 
-
 bool	ft::isSpecial(char c)
 {
 	if (c < 91 || c > 125)
