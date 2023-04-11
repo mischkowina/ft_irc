@@ -36,7 +36,7 @@ void	Channel::setTopic(std::string topic)
 
 void	Channel::setChannelOp(Client &client)
 {
-	_channelOperator.push_back(client);
+	_channelOperator.insert(client.getNick());
 }
 
 void	Channel::setChannelUsers(Client &client)
@@ -51,7 +51,7 @@ std::list<Client> Channel::getChannelUsers() const
 	return _channelUsers;
 }
 
-std::list<Client> Channel::getChannelOperator() const
+std::set<std::string> Channel::getChannelOperators() const
 {
 	return _channelOperator;
 }
@@ -72,14 +72,11 @@ bool	Channel::removeUser(Client& client)
 	{
 		if (it->getNick() == client.getNick())
 		{
-			for (std::list<Client>::iterator it2 = _channelOperator.begin(); it2 != _channelOperator.end(); it2++)
-			{
-				if (it2->getNick() == client.getNick())
-				{
-					_channelOperator.erase(it2);
-					break ;
-				}
-			}
+			//remove nick from channel operator list aswell (erase can be called for the string value in a set :-))
+			_channelOperator.erase(client.getNick());
+			//remove nick from voiced user list aswell (erase can be called for the string value in a set :-))
+			_voiceUsers.erase(client.getNick());
+			//remove nick from user list
 			_channelUsers.erase(it);
 			return true;
 		}
@@ -94,9 +91,7 @@ bool	Channel::isInviteOnly() const
 
 bool	Channel::clientIsChannelOperator(std::string nick) const
 {
-	std::list<Client>::const_iterator	it = _channelOperator.begin();
-	while (it != _channelOperator.end() && it->getNick() != nick)
-		it++;
+	std::set<std::string>::const_iterator it = _channelOperator.find(nick);
 	if (it == _channelOperator.end())
 		return false;
 	return true;
@@ -112,10 +107,6 @@ bool	Channel::clientIsChannelUser(std::string nick) const
 	return true;
 }
 
-void	Channel::addClientToInviteList(std::string nick)
-{
-	_inviteList.insert(nick);
-}
 
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
@@ -125,20 +116,14 @@ std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 	return (it);
 }
 
-void	Channel::addClientToOperatorList(Client &client)
+void	Channel::addToOperatorList(Client &client)
 {
-	_channelOperator.push_back(client);
+	_channelOperator.insert(client.getNick());
 }
 
 void	Channel::removeFromOperatorList(std::string nick)
 {
-	for (std::list<Client>::iterator it = _channelOperator.begin(); it != _channelOperator.end(); it++)
-	{
-		if (it->getNick() == nick) {
-			_channelOperator.erase(it);
-			return;
-		}
-	}	
+	_channelOperator.erase(nick);
 }
 
 void	Channel::addToBannedList(Client &client)
@@ -150,27 +135,27 @@ void	Channel::removeFromBannedList(std::string nick)
 {
 	for (std::list<Client>::iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); it++)
 	{
-		if (it->getNick() == nick) {
+		if (it->getNick() == nick)
+		{
 			_bannedUsers.erase(it);
-			return;
+			return ;
 		}
-	}	
+	}
 }
 
 void	Channel::addToVoiceList(Client &client)
 {
-	_voiceUsers.push_back(client);
+	_voiceUsers.insert(client.getNick());
+}
+
+void	Channel::addToInviteList(std::string nick)
+{
+	_invitedUsers.insert(nick);
 }
 
 void	Channel::removeFromVoiceList(std::string nick)
 {
-	for (std::list<Client>::iterator it = _voiceUsers.begin(); it != _voiceUsers.end(); it++)
-	{
-		if (it->getNick() == nick) {
-			_voiceUsers.erase(it);
-			return;
-		}
-	}	
+	_voiceUsers.erase(nick);	
 }
 
 bool	Channel::supportChannelModes() const

@@ -34,15 +34,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		}
 	}
 		// if channel is invite only
-	bool inv = false;
-	for (std::list<Client>::const_iterator it = _invitedUsers.begin(); it != _invitedUsers.end(); ++it) {
-		if (it->getNick() == client.getNick()) {
-			inv = true;
-			break;
-		}
-	}
-	if (_inviteOnly == true && inv == false)
-	{
+	if (_inviteOnly == true && _invitedUsers.find(client.getNick()) == _invitedUsers.end()) {
 		client.sendErrMsg(server, ERR_INVITEONLYCHAN, NULL);
 		return;
 	}
@@ -383,7 +375,7 @@ void	invite(Server *server, Client &client, Message& msg)
 	}
 
 	//add the name of the invited client to the invite list of the channel - to be checked for the nick while joining when the channel is invite only
-	itChan->second.addClientToInviteList(parameters[0]);
+	itChan->second.addToInviteList(parameters[0]);
 
 	//send message to client that has been invited
 	receiver->second.sendMsg(client, parameters[1], "INVITE");
@@ -568,7 +560,7 @@ void	mode(Server *server, Client &client, Message& msg)
 		{
 			case 'o':
 				if (options.at(0) == '+') {
-					itChannel->second.addClientToOperatorList(client);
+					itChannel->second.addToOperatorList(client);
 				} else {
 					itChannel->second.removeFromOperatorList(client.getNick());
 				}

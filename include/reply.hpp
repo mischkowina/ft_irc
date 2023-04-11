@@ -17,7 +17,7 @@
 
 # define RPL_NOWAWAY	"306 :You have been marked as being away"
 
-# define RPL_LIST		"322 <channel> <# visible> :<topic>"
+# define RPL_LIST		"322 <channel> <# visible>:<topic>"
 
 # define RPL_LISTEND	"323 :End of /LIST"
 

@@ -10,14 +10,14 @@ class Server;
 class Channel
 {
 	private:
-		std::list<Client>	_channelOperator;
-		std::list<Client>	_channelUsers;
-		std::list<Client>	_bannedUsers;
-		std::list<Client>	_invitedUsers;
-		std::list<Client>	_voiceUsers;
-		std::string			_channelName;
-		std::string			_channelbuffer;
-		std::string			_password;
+		std::list<Client>		_channelUsers;
+		std::set<std::string>	_channelOperator;
+		std::list<Client>		_bannedUsers;
+		std::set<std::string>	_invitedUsers;
+		std::set<std::string>	_voiceUsers;
+		std::string				_channelName;
+		std::string				_channelbuffer;
+		std::string				_password;
 		bool					_inviteOnly;
 		bool					_secretChannel;
 		bool					_privateChannel;
@@ -27,7 +27,6 @@ class Channel
 		bool					_changeTopic;
 		int						_userLimit;
 		std::string				_topic;
-		std::set<std::string>	_inviteList;
 
 	public:
 		Channel();
@@ -48,24 +47,25 @@ class Channel
 		void	setLimit(int limit);
 
 		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
-		void	addClientToInviteList(std::string nick);
-		void	addClientToOperatorList(Client &client);
+		void	addToOperatorList(Client &client);
 		void	addToBannedList(Client& client);
 		void	addToVoiceList(Client& client);
+		void	addToInviteList(std::string nick);
 
 		bool	removeUser(Client& client);
 		void	removeFromOperatorList(std::string nick);
 		void	removeFromBannedList(std::string nick);
 		void	removeFromVoiceList(std::string nick);
+		void	removeFromInviteList(std::string nick);
 
-		std::string			getTopic() const;
-		std::string			getChannelName() const;
-		std::list<Client>	getChannelOperator() const;
-		std::list<Client>	getChannelUsers() const;
-		bool				isInviteOnly() const;
-		bool				supportChannelModes() const;
-		bool				clientIsChannelUser(std::string nick) const;
-		bool				clientIsChannelOperator(std::string nick) const;
+		std::string				getTopic() const;
+		std::string				getChannelName() const;
+		std::set<std::string>	getChannelOperators() const;
+		std::list<Client>		getChannelUsers() const;
+		bool					isInviteOnly() const;
+		bool					supportChannelModes() const;
+		bool					clientIsChannelUser(std::string nick) const;
+		bool					clientIsChannelOperator(std::string nick) const;
 		std::list<Client>::iterator	getChannelUser(std::string nick);
 
 };
