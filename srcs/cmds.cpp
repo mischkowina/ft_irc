@@ -227,7 +227,7 @@ void	names_all(Server *server, Client &client)
 		//TO-DO: check if channel is secret / private for the client
 		names_per_channel(server, client, itChan->second);
 		std::list<Client>			channelClients = itChan->second.getChannelUsers();
-		for (std::list<Client>::iterator itClien = channelClients.begin(); itClien != channelClients.end(); itChan++)
+		for (std::list<Client>::iterator itClien = channelClients.begin(); itClien != channelClients.end(); itClien++)
 			nicksInChannels.insert(itClien->getNick());
 		client.sendErrMsg(server, RPL_ENDOFNAMES, itChan->second.getChannelName().c_str());
 	}
