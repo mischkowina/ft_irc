@@ -63,6 +63,7 @@ class Channel
 		std::set<std::string>	getChannelOperators() const;
 		std::list<Client>		getChannelUsers() const;
 		bool					isInviteOnly() const;
+		bool					ifQuietChannel() const;
 		bool					supportChannelModes() const;
 		bool					clientIsChannelUser(std::string nick) const;
 		bool					clientIsChannelOperator(std::string nick) const;

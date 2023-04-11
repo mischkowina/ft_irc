@@ -40,7 +40,9 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	}
 
 	_channelUsers.push_back(client);
-	// send msg to other clients 		// TODO
+	// send msg to other clients
+	if (this->ifQuietChannel() == true)
+		return;
 	std::string msg = client.getNick() + " has joined the channel\n";
 	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
 		send(it->getSocket(), msg.data(), msg.length(), 0);
@@ -516,17 +518,19 @@ void	kick(Server *server, Client &client, Message& msg)
 
 void	mode(Server *server, Client &client, Message& msg)
 {
-	std::vector<std::string>	parameters = msg.getParameters();
+	std::vector<std::string>		parameters = msg.getParameters();
+	std::string 					channel = parameters[0];
+	Server::ChannelMap::iterator	itChannel = server->getChannelMap().find(channel);
+	std::set<std::string> 			operators = itChannel->second.getChannelOperators();
 
-	if (parameters.size() < 3) {
+	if (parameters.size() < 2) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
-	if (client.getIsOperator() == false) {	// getChannelOperator
+	if (operators.find(client.getNick()) == operators.end()) {
 		client.sendErrMsg(server, ERR_NOPRIVILEGES, NULL);
 		return;
 	}
-	std::string channel = parameters[0];
 	std::string options = parameters[1];
 	std::string tmp = options.substr(1);
 	if ((options.at(0) != '+' && options.at(0) != '-') || tmp.length() > 3
@@ -543,7 +547,6 @@ void	mode(Server *server, Client &client, Message& msg)
 	int	limit = atoi(args.c_str());
 
 	// MODE #mychannel +o userName
-	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
 
 	if (itChannel->second.supportChannelModes() == false && options == "t")
 	{

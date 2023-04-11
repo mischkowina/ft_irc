@@ -15,7 +15,13 @@ Channel::Channel(std::string name)
 	, _channelbuffer("null")
 	, _password("")
 	, _inviteOnly(false)
+	, _secretChannel(false)
+	, _privateChannel(false)
+	, _quietChannel(false)
+	, _moderatedChannel(false)
 	, _supportChannelModes(true)
+	, _changeTopic(true)
+	, _userLimit(0)
 {
 	_inviteOnly = false;	//for compiling with unused variable
 	if (name.at(0) == '+')
@@ -64,6 +70,11 @@ std::string	Channel::getTopic() const
 std::string  Channel::getChannelName() const
 {
 	return _channelName;
+}
+
+bool  Channel::ifQuietChannel() const
+{
+	return _quietChannel;
 }
 
 bool	Channel::removeUser(Client& client)
