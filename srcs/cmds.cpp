@@ -530,7 +530,7 @@ void	mode(Server *server, Client &client, Message& msg)
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
-	if (client.getIsOperator() == false) {
+	if (client.getIsOperator() == false) {	// getChannelOperator
 		client.sendErrMsg(server, ERR_NOPRIVILEGES, NULL);
 		return;
 	}
@@ -658,10 +658,5 @@ void	mode(Server *server, Client &client, Message& msg)
         n - toggle the no messages to channel from clients on the
             outside;
         q - toggle the quiet channel flag;
-
-        O - give "channel creator" status;
-        e - set/remove an exception mask to override a ban mask;
-        I - set/remove an invitation mask to automatically override
-            the invite-only flag;
 
  */
