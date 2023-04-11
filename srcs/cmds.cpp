@@ -4,7 +4,8 @@
 
 bool validChannelName(Server *server, std::string name, Client &client)
 {
-	if ((name[0] != '#' && name[0] != '&') || name.length() > 199 || name.find_first_of(' ') != std::string::npos) {
+	if ((name[0] != '#' && name[0] != '&' && name[0] != '+' && name[0] != '!') || name == ""
+		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos) {
 		client.sendErrMsg(server, ERR_BADCHANMASK, NULL);
 		return false;
 	}
@@ -21,7 +22,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		}
 	}
 		// the correct key (password) must be given if it is set.
-	if (keys.empty() != false && keys[keyIndex] != _password) {
+	if (_password != "" && keys[keyIndex] != _password) {
 		client.sendErrMsg(server, ERR_BADCHANNELKEY, NULL);
 		return;
 	}
@@ -526,7 +527,6 @@ void	mode(Server *server, Client &client, Message& msg)
 	std::vector<std::string>	parameters = msg.getParameters();
 
 	if (parameters.size() < 3) {
-
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
@@ -537,7 +537,8 @@ void	mode(Server *server, Client &client, Message& msg)
 	std::string channel = parameters[0];
 	std::string options = parameters[1];
 	std::string tmp = options.substr(1);
-	if ((options.at(0) != '+' && options.at(0) != '-') || tmp.find_first_not_of("opsitnbv") != std::string::npos) {
+	if ((options.at(0) != '+' && options.at(0) != '-') || tmp.length() > 3
+		|| tmp.find_first_not_of("aopsitmnbvkl") != std::string::npos) {
 
 		client.sendErrMsg(server, ERR_UNKNOWNMODE, tmp.data());
 		return;
@@ -547,10 +548,17 @@ void	mode(Server *server, Client &client, Message& msg)
 	// [<limit>] [<user>] [<ban mask>]
 
 	std::string args = parameters[2];
-	// int	limit = atoi(args.c_str());
+	int	limit = atoi(args.c_str());
 
 	// MODE #mychannel +o userName
 	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
+
+	if (itChannel->second.supportChannelModes() == false && options == "t")
+	{
+		/* should only exec -/+t */
+		itChannel->second.setTopic(args);
+		return;
+	}
 
 	// execute mode cmd
 	const char* tmpCstr = tmp.c_str();
@@ -572,24 +580,88 @@ void	mode(Server *server, Client &client, Message& msg)
 					itChannel->second.removeFromBannedList(client.getNick());
 				}
 				break;
-			case 'p':
-				// run function for 'p'
-				break;
-			case 's':
-				// run function for 's'
-				break;
 			case 'i':
-				// run function for 'i'
+				if (options.at(0) == '+') {
+					itChannel->second.setInvite(true);
+				} else {
+					itChannel->second.setInvite(false);
+				}
+				break;
+			case 'k':
+				if (options.at(0) == '+') {
+					itChannel->second.setPassWD(args);	// parse the key
+				} else {
+					itChannel->second.setPassWD("");
+				}
+				break;
+			case 'p':
+				if (options.at(0) == '+') {
+					itChannel->second.setPrivate(true);
+				} else {
+					itChannel->second.setPrivate(false);
+				}
+				break;
+			case 's':						// e.g. don't display using LIST etc.
+				if (options.at(0) == '+') {
+					itChannel->second.setSecret(true);
+				} else {
+					itChannel->second.setSecret(false);
+				}
 				break;
 			case 't':
-				// run function for 't'
+				if (options.at(0) == '+') {
+					itChannel->second.setChangeTopic(true);
+				} else {
+					itChannel->second.setChangeTopic(false);
+				}
+				break;
+			case 'm':
+				if (options.at(0) == '+') {
+					itChannel->second.setModeratedChannel(true);
+				} else {
+					itChannel->second.setModeratedChannel(false);
+				}
+				break;
+			case 'v':
+				if (options.at(0) == '+') {
+					itChannel->second.addToVoiceList(client);
+				} else {
+					itChannel->second.removeFromVoiceList(client.getNick());
+				}
+				break;
+			case 'l':
+				if (options.at(0) == '+') {
+					itChannel->second.setLimit(limit);
+				} else {
+					itChannel->second.setLimit(0);
+				}
 				break;
 			case 'n':
 				// run function for 'n'
 				break;
-			case 'v':
-				// run function for 'v'
+			case 'q':
+				// run function for 'q'
 				break;
+			case 'a':
+				// run function for 'a'
+				break;
+
 		}
 	}
 }
+
+// TODO
+  // case insensitive channel names !
+
+/*
+        a - toggle the anonymous channel flag;
+        n - toggle the no messages to channel from clients on the
+            outside;
+        q - toggle the quiet channel flag;
+
+        O - give "channel creator" status;
+        e - set/remove an exception mask to override a ban mask;
+        I - set/remove an invitation mask to automatically override
+            the invite-only flag;
+
+ */

@@ -2,8 +2,9 @@
 
 Channel::Channel()
 	: _channelbuffer("null")
-	, _password("null")
+	, _password("")
 	, _inviteOnly(false)
+	, _supportChannelModes(true)
 	, _topic("")
 {}
 
@@ -14,7 +15,12 @@ Channel::Channel(std::string name)
 	, _channelbuffer("null")
 	, _password("")
 	, _inviteOnly(false)
-{_inviteOnly = false;}//for compiling with unused variable
+	, _supportChannelModes(true)
+{
+	_inviteOnly = false;	//for compiling with unused variable
+	if (name.at(0) == '+')
+		_supportChannelModes = false;
+}
 
 /* setters */
 
@@ -149,4 +155,61 @@ void	Channel::removeFromBannedList(std::string nick)
 			return;
 		}
 	}	
+}
+
+void	Channel::addToVoiceList(Client &client)
+{
+	_voiceUsers.push_back(client);
+}
+
+void	Channel::removeFromVoiceList(std::string nick)
+{
+	for (std::list<Client>::iterator it = _voiceUsers.begin(); it != _voiceUsers.end(); it++)
+	{
+		if (it->getNick() == nick) {
+			_voiceUsers.erase(it);
+			return;
+		}
+	}	
+}
+
+bool	Channel::supportChannelModes() const
+{
+	return _supportChannelModes;
+}
+
+void	Channel::setPassWD(std::string pass)
+{
+	_password = pass;
+}
+
+void	Channel::setInvite(bool arg)
+{
+	_inviteOnly = arg;
+}
+
+void	Channel::setPrivate(bool arg)
+{
+	// only +p or +s ??
+	_privateChannel = arg;
+}
+
+void	Channel::setSecret(bool arg)
+{
+	_secretChannel = arg;
+}
+
+void	Channel::setChangeTopic(bool arg)
+{
+	_changeTopic = arg;
+}
+
+void	Channel::setModeratedChannel(bool arg)
+{
+	_moderatedChannel = arg;
+}
+
+void	Channel::setLimit(int limit)
+{
+	_userLimit = limit;
 }

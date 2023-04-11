@@ -365,7 +365,8 @@ void	Server::execCmd(Client &client, Message& msg)
 void	Server::createNewChannel(std::string name, Client &client)
 {
 	Channel tmp(name);
-	tmp.setChannelOp(client);
+	if (name.at(0) != '+')
+		tmp.setChannelOp(client);
 	tmp.setChannelUsers(client);
 	_channels.insert(std::make_pair(name, tmp));
 }
