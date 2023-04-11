@@ -2,13 +2,15 @@
 
 //////////////////////////////  JOIN  ////////////////////////////////////////
 
-bool validChannelName(Server *server, std::string name, Client &client)
+bool validChannelName(Server *server, std::string& name, Client &client)
 {
 	if ((name[0] != '#' && name[0] != '&' && name[0] != '+' && name[0] != '!') || name == ""
 		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos) {
 		client.sendErrMsg(server, ERR_BADCHANMASK, NULL);
 		return false;
 	}
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+	std::cout << BLUE "__Name test:" << name << std::endl;
 	return true;
 }
 
@@ -427,7 +429,7 @@ void	kick(Server *server, Client &client, Message& msg)
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, "KICK");
 		return ;
 	}
-	
+
 	std::vector<std::string> channelNames;
 	std::stringstream ss(parameters[0]);
 	std::string token;
@@ -534,7 +536,7 @@ void	mode(Server *server, Client &client, Message& msg)
 	std::string options = parameters[1];
 	std::string tmp = options.substr(1);
 	if ((options.at(0) != '+' && options.at(0) != '-') || tmp.length() > 3
-		|| tmp.find_first_not_of("aopsitmnbvkl") != std::string::npos) {
+		|| tmp.find_first_not_of("aopsitqmnbvkl") != std::string::npos) {
 
 		client.sendErrMsg(server, ERR_UNKNOWNMODE, tmp.data());
 		return;
