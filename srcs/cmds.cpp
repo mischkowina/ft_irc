@@ -161,8 +161,13 @@ void	topic(Server *server, Client &client, Message& msg)
 	// if only one parameter, TOPIC is requested
 	if (parameters.size() == 1)
 	{
-		//TO-DO: check if channel is private/secret and if so, if client is on that channel
-		//TO-DOif yes (or if channel is public), return topic
+		//if channel is private/secret and client is not on, return ERR_NOTONCHANNEL
+		if ((it->second.isPrivate() || it->second.isSecret()) && it->second.clientIsChannelUser(client.getNick()) == false)
+		{
+			client.sendErrMsg(server, ERR_NOTONCHANNEL, parameters[0].c_str());
+			return ;
+		}
+		//if there is a topic, return RPL_TOPIC
 		if (it->second.getTopic() != "")
 		{
 			std::vector<std::string>	msg_input;
@@ -170,21 +175,28 @@ void	topic(Server *server, Client &client, Message& msg)
 			msg_input.push_back(it->second.getTopic());
 			client.sendErrMsg(server, RPL_TOPIC, msg_input);
 		}
+		//else return RPL_NOTOPIC
 		else
 			client.sendErrMsg(server, RPL_NOTOPIC, parameters[0].c_str());
-			
-		//TO-DO: if no, ERR_NOTONCHANNEL
 	}
 
 	//if two parameters, topic shall be changed
 	else
 	{
-		//TO-DO: check if only chanops can change topic and client is chanop
+		//can only change topic if on the channel
+		if (it->second.clientIsChannelUser(client.getNick()) == false)
+		{
+			client.sendErrMsg(server, ERR_NOTONCHANNEL, parameters[0].c_str());
+			return ;
+		}
+		//if channelmode +t, only chanops can change the topic
+		if (it->second.isTopicChangeOnlyByChanop() && it->second.clientIsChannelOperator(client.getNick()) == false)
+		{
+			client.sendErrMsg(server, ERR_CHANOPRIVSNEEDED, it->second.getChannelName().c_str());
+			return ;
+		}
 		it->second.setTopic(parameters[1]);
-		//TO-DO: else err
 	}
-
-	//OPEN: RPL_TOPIC is send whens someone JOINs a channel
 }
 
 /////////////////////////////////// NAMES ////////////////////////////////////
@@ -602,9 +614,9 @@ void	mode(Server *server, Client &client, Message& msg)
 				break;
 			case 't':
 				if (options.at(0) == '+') {
-					itChannel->second.setChangeTopic(true);
+					itChannel->second.setTopicChangeOnlyByChanop(true);
 				} else {
-					itChannel->second.setChangeTopic(false);
+					itChannel->second.setTopicChangeOnlyByChanop(false);
 				}
 				break;
 			case 'm':

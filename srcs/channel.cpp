@@ -4,6 +4,10 @@ Channel::Channel()
 	: _channelbuffer("null")
 	, _password("")
 	, _inviteOnly(false)
+	, _secretChannel(false)
+	, _privateChannel(false)
+	, _quietChannel(false)
+	, _moderatedChannel(false)
 	, _supportChannelModes(true)
 	, _topic("")
 {}
@@ -15,7 +19,12 @@ Channel::Channel(std::string name)
 	, _channelbuffer("null")
 	, _password("")
 	, _inviteOnly(false)
+	, _secretChannel(false)
+	, _privateChannel(false)
+	, _quietChannel(false)
+	, _moderatedChannel(false)
 	, _supportChannelModes(true)
+	, _topic("")
 {
 	_inviteOnly = false;	//for compiling with unused variable
 	if (name.at(0) == '+')
@@ -87,6 +96,31 @@ bool	Channel::removeUser(Client& client)
 bool	Channel::isInviteOnly() const
 {
 	return _inviteOnly;
+}
+
+bool	Channel::isSecret() const
+{
+	return _secretChannel;
+}
+
+bool	Channel::isPrivate() const
+{
+	return _privateChannel;
+}
+
+bool	Channel::isQuiet() const
+{
+	return _quietChannel;
+}
+
+bool	Channel::isModerated() const
+{
+	return _moderatedChannel;
+}
+
+bool	Channel::isTopicChangeOnlyByChanop() const
+{
+	return _topicChangeOnlyByChanop;
 }
 
 bool	Channel::clientIsChannelOperator(std::string nick) const
@@ -184,9 +218,9 @@ void	Channel::setSecret(bool arg)
 	_secretChannel = arg;
 }
 
-void	Channel::setChangeTopic(bool arg)
+void	Channel::setTopicChangeOnlyByChanop(bool arg)
 {
-	_changeTopic = arg;
+	_topicChangeOnlyByChanop = arg;
 }
 
 void	Channel::setModeratedChannel(bool arg)

@@ -24,7 +24,7 @@ class Channel
 		bool					_quietChannel;
 		bool					_moderatedChannel;
 		bool					_supportChannelModes;
-		bool					_changeTopic;
+		bool					_topicChangeOnlyByChanop;
 		int						_userLimit;
 		std::string				_topic;
 
@@ -41,7 +41,7 @@ class Channel
 		void	setInvite(bool arg);
 		void	setSecret(bool arg);
 		void	setPrivate(bool arg);
-		void	setChangeTopic(bool arg);
+		void	setTopicChangeOnlyByChanop(bool arg);
 		void	setModeratedChannel(bool arg);
 		void	setPassWD(std::string pass);
 		void	setLimit(int limit);
@@ -63,6 +63,11 @@ class Channel
 		std::set<std::string>	getChannelOperators() const;
 		std::list<Client>		getChannelUsers() const;
 		bool					isInviteOnly() const;
+		bool					isSecret() const;
+		bool					isPrivate() const;
+		bool					isQuiet() const;
+		bool					isModerated() const;
+		bool					isTopicChangeOnlyByChanop() const;
 		bool					supportChannelModes() const;
 		bool					clientIsChannelUser(std::string nick) const;
 		bool					clientIsChannelOperator(std::string nick) const;
