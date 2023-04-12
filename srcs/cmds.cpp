@@ -203,19 +203,37 @@ void	topic(Server *server, Client &client, Message& msg)
 
 void	names_per_channel(Server *server, Client &client, Channel &channel)
 {
+	//if it's a secret or a private channel that the client is not on, it is not displayed
+	if ((channel.isSecret() || channel.isPrivate()) && channel.clientIsChannelUser(client.getNick()) == false)
+		return;
+	
 	std::vector<std::string>	params;
+	std::string					param1 = channel.getChannelName();
 	std::string					param2 = "";
 	std::list<Client>			channelClients = channel.getChannelUsers();
-	params.push_back(channel.getChannelName());//TO-DO: add = / * / @ in front of channel depending on modes
+
+	//channel name is first parameters for RPL_NAMREPLY
+	params.push_back(param1);
+
+	//second parameter gets filled with list of clients on that channel
 	for (std::list<Client>::iterator itClien = channelClients.begin(); itClien != channelClients.end(); itClien++)
 	{
-		//TO-DO: check if invisible & add @ / + to nickname or dont display
+		//if the respective user is invisible and the client is not on the same channel, it doesn't get displayed
+		if (itClien->IsInvisible() && channel.clientIsChannelUser(client.getNick()) == false)
+			continue;
+		//separate nicknames by space
 		if (param2.empty() == false)
 			param2.push_back(' ');
+		//if the user is a chanop or a voiced user in a moderated channel, it gets a prefix
+		if (channel.clientIsChannelOperator(itClien->getNick()))
+			param2.push_back('@');
+		else if (channel.isModerated() && channel.clientIsVoicedUser(itClien->getNick()))
+			param2.push_back('+');
 		param2.append(itClien->getNick());
 	}
 	params.push_back(param2);
 	client.sendErrMsg(server, RPL_NAMREPLY, params);
+	client.sendErrMsg(server, RPL_ENDOFNAMES, channel.getChannelName().c_str());
 }
 
 void	names_all(Server *server, Client &client)
@@ -224,12 +242,10 @@ void	names_all(Server *server, Client &client)
 
 	for (Server::ChannelMap::iterator itChan = server->getChannelMap().begin(); itChan != server->getChannelMap().end(); itChan++)
 	{
-		//TO-DO: check if channel is secret / private for the client
 		names_per_channel(server, client, itChan->second);
 		std::list<Client>			channelClients = itChan->second.getChannelUsers();
 		for (std::list<Client>::iterator itClien = channelClients.begin(); itClien != channelClients.end(); itClien++)
 			nicksInChannels.insert(itClien->getNick());
-		client.sendErrMsg(server, RPL_ENDOFNAMES, itChan->second.getChannelName().c_str());
 	}
 
 	std::vector<std::string> params;
@@ -239,7 +255,8 @@ void	names_all(Server *server, Client &client)
 	{
 		if (nicksInChannels.find(it->second.getNick()) == nicksInChannels.end())
 		{
-			//TO-DO: check if invisible & add @ / + to nickname or dont display
+			if (it->second.IsInvisible())
+				continue; 
 			if (param2.empty() == false)
 				param2.push_back(' ');
 			param2.append(it->second.getNick());
@@ -257,6 +274,7 @@ void	names(Server *server, Client &client, Message& msg)
 {
 	std::vector<std::string>	parameters = msg.getParameters();
 
+	//if no parameters, list every channel
 	if (parameters.empty() == true)
 	{
 		names_all(server, client);
@@ -276,11 +294,7 @@ void	names(Server *server, Client &client, Message& msg)
 	{
 		Server::ChannelMap::iterator itChan = server->getChannelMap().find(*it);
 		if (itChan !=  server->getChannelMap().end())
-		{
-			//TO-DO: check if channel is secret / private for the client
 			names_per_channel(server, client, itChan->second);
-		}
-		client.sendErrMsg(server, RPL_ENDOFNAMES, it->c_str());
 	}
 }
 

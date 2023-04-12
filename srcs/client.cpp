@@ -19,6 +19,7 @@ Client::Client(int socket, bool hasPass) : _socket(socket), _username(""), _hasP
 	this->_recvBuffer = "";
 	this->_isAuthorized = false;
 	this->_isOperator = false;
+	this->_isInvisible = false;
 	this->_awayMsg = "";
 }
 
@@ -130,6 +131,11 @@ bool	Client::getIsAuthorized() const
 bool	Client::getIsOperator() const
 {
 	return this->_isOperator;
+}
+
+bool	Client::IsInvisible() const
+{
+	return this->_isInvisible;
 }
 
 std::string	Client::getAwayMsg() const

@@ -141,6 +141,12 @@ bool	Channel::clientIsChannelUser(std::string nick) const
 	return true;
 }
 
+bool	Channel::clientIsVoicedUser(std::string nick) const
+{
+	if (_voiceUsers.find(nick) != _voiceUsers.end())
+		return true;
+	return false;
+}
 
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {

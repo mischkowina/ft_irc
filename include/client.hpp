@@ -18,6 +18,7 @@ class Client {
 		bool		_isAuthorized;
 		bool		_isOperator;
 		int 		_channelCounter;
+		bool		_isInvisible;
 		std::string	_awayMsg;
 		std::string	_recvBuffer;
 
@@ -43,6 +44,7 @@ class Client {
 		bool		getIsAuthorized() const;
 		bool		getHasPass() const;
 		bool		getIsOperator() const;
+		bool		IsInvisible() const;
 		std::string	getAwayMsg() const;
 		std::string	getRecvBuffer() const;
 
