@@ -74,6 +74,7 @@ class Channel
 		bool					clientIsVoicedUser(std::string nick) const;
 		std::list<Client>::iterator	getChannelUser(std::string nick);
 
+		void	sendMsgToChannel(Client &sender, std::string msg, std::string type) const;
 };
 
 #endif

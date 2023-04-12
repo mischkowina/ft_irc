@@ -24,13 +24,9 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 		Server::ChannelMap::const_iterator itChannel = tmpChannel.find(*itRecv);
 		if (itChannel != tmpChannel.end())
 		{
-			std::list<Client> tmpChannelUsers = itChannel->second.getChannelUsers();
 			//TO-DO: check if client is authorized to send message in that channel
-			for (std::list<Client>::const_iterator itChannelRecv = tmpChannelUsers.begin(); itChannelRecv != tmpChannelUsers.end(); itChannelRecv++)
-			{
-				if (itChannelRecv->getNick() != sender.getNick())//don't send message to the sender himself
-					itChannelRecv->sendMsg(sender, msg, "PRIVMSG");
-			}
+			
+			itChannel->second.sendMsgToChannel(sender, msg, "PRIVMSG");
 			continue ;
 		}
 		//check if message is directed at horoscope bot

@@ -124,6 +124,12 @@ void	part(Server *server, Client &client, Message& msg)
 		token.clear();
 	}
 
+	std::string	message;
+	if (parameters.size() > 1)
+		message = parameters[1];
+	else
+		message = "";
+
 	Server::ChannelMap::iterator it;
 	for (size_t i = 0; i < channelNames.size(); i++)
 	{
@@ -132,6 +138,8 @@ void	part(Server *server, Client &client, Message& msg)
 		{
 			if (it->second.removeUser(client) == false)
 				client.sendErrMsg(server, ERR_NOTONCHANNEL, channelNames[i].c_str());
+			else
+				it->second.sendMsgToChannel(client, message, "PART");
 		}
 		else 
 			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, channelNames[i].c_str());
@@ -446,10 +454,7 @@ void	kick_client_from_channel(Server *server, Client &client, Channel &channel, 
 	part(server, victim, part_message);
 
 	//send message to the whole channel that the user got kicked from
-
-	std::list<Client> channelUsers = channel.getChannelUsers();
-	for (std::list<Client>::iterator itChannelRecv = channelUsers.begin(); itChannelRecv != channel.getChannelUsers().end(); itChannelRecv++)
-		itChannelRecv->sendMsg(client, channel.getChannelName() + " " + victim.getNick(), "KICK");
+	channel.sendMsgToChannel(client, channel.getChannelName() + " " + victim.getNick(), "KICK");
 }
 
 void	kick(Server *server, Client &client, Message& msg)
@@ -549,6 +554,8 @@ void	kick(Server *server, Client &client, Message& msg)
 		kick_client_from_channel(server, client, channel, parameters, victim);
 	}
 }
+
+/////////////////////////////////// MODE ////////////////////////////////////
 
 void	mode(Server *server, Client &client, Message& msg)
 {
