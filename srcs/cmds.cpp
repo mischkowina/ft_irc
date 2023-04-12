@@ -10,7 +10,6 @@ bool validChannelName(Server *server, std::string& name, Client &client)
 		return false;
 	}
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-	std::cout << BLUE "__Name test:" << name << std::endl;
 	return true;
 }
 
@@ -19,9 +18,14 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	// check any invalid conditions before adding a new client to the channel
 		// if client has already joined to the channel -> stop
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
-		if (it->getNick() == client.getNick() || it->getName() == client.getName() || it->getIP() == client.getIP()) {
+		if (it->getNick() == client.getNick() || it->getName() == client.getName()/* ignore while testing on localhost! || it->getIP() == client.getIP()*/)
 			return;
-		}
+	}
+		// max limit of users on a channel 
+	if (_userCounter++ == _userLimit) {
+		client.sendErrMsg(server, ERR_CHANNELISFULL, NULL);
+		--_userCounter;
+		return;
 	}
 		// the correct key (password) must be given if it is set.
 	if (_password != "" && keys[keyIndex] != _password) {
@@ -43,7 +47,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 
 	_channelUsers.push_back(client);
 	// send msg to other clients
-	if (this->ifQuietChannel() == true)
+	if (_quietChannel == true)
 		return;
 	std::string msg = client.getNick() + " has joined the channel\n";
 	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
@@ -56,7 +60,7 @@ void	join(Server *server, Client &client, Message& msg)
 	std::vector<std::string> parameters = msg.getParameters();
 	std::vector<std::string> channelNames;
 	std::vector<std::string> keys;
-/////////////////////////////////////////
+
 	if (parameters.empty() == true) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
@@ -65,7 +69,6 @@ void	join(Server *server, Client &client, Message& msg)
 	std::string token;
 	while (std::getline(ss, token, ',')) {
 		channelNames.push_back(token);
-		std::cout << "  // channelNames = " << channelNames.back() << std::endl;
 		token.clear();
 	}
 
@@ -73,11 +76,9 @@ void	join(Server *server, Client &client, Message& msg)
 		std::stringstream ss(parameters[1]);
 		while (std::getline(ss, token, ',')) {
 			keys.push_back(token);
-			std::cout << "  // keys = " << keys.back() << std::endl;
 			token.clear();
 		}
 	}
-/////////////////////////////////////////
 	int index = 0;
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
 	for (std::vector<std::string>::iterator iterChannelName = channelNames.begin();
@@ -87,21 +88,18 @@ void	join(Server *server, Client &client, Message& msg)
 		if (validChannelName(server, *iterChannelName, client) == false)
 			continue;
 			// a client can be a member of 10 channels max
-		if (client.maxNumOfChannels() == false) {
+		if (client.maxNumOfChannels() == true) {
 			client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
 			continue;
 		}
-		// find the existing channel
 		Server::ChannelMap::iterator itChannel = mapOfChannels.find(*iterChannelName);
-		if (itChannel != mapOfChannels.end())
-		{
-			// add client to the channel
-			std::cout << RED "//channel location: " << &itChannel->second << " --\n";
-			itChannel->second.addClientToChannel(server, client, keys, index);
+		if (itChannel == mapOfChannels.end()) {
+			// add new channel to the server
+			server->createNewChannel(*iterChannelName, client);
 		}
 		else {
-			// else add new channel to the server
-			server->createNewChannel(*iterChannelName, client);
+			// add client to the channel
+			itChannel->second.addClientToChannel(server, client, keys, index);
 		}
 	}
 }
@@ -550,7 +548,7 @@ void	mode(Server *server, Client &client, Message& msg)
 
 	// MODE #mychannel +o userName
 
-	if (itChannel->second.supportChannelModes() == false && options == "t")
+	if (itChannel->second.supportedChannelModes() == false && options == "t")
 	{
 		/* should only exec -/+t */
 		itChannel->second.setTopic(args);
@@ -648,12 +646,11 @@ void	mode(Server *server, Client &client, Message& msg)
 }
 
 // TODO
-  // case insensitive channel names !
 
 /*
-        a - toggle the anonymous channel flag;
-        n - toggle the no messages to channel from clients on the
-            outside;
-        q - toggle the quiet channel flag;
+	a - toggle the anonymous channel flag;
+	n - toggle the no messages to channel from clients on the
+	    outside;
+	q - toggle the quiet channel flag;
 
  */

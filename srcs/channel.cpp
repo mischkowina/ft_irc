@@ -1,7 +1,7 @@
 #include "channel.hpp"
 
 Channel::Channel()
-	: _channelbuffer("null")
+	: _channelName("default")
 	, _password("")
 	, _inviteOnly(false)
 	, _supportChannelModes(true)
@@ -12,7 +12,6 @@ Channel::~Channel() {}
 
 Channel::Channel(std::string name)
 	: _channelName(name)
-	, _channelbuffer("null")
 	, _password("")
 	, _inviteOnly(false)
 	, _secretChannel(false)
@@ -22,6 +21,7 @@ Channel::Channel(std::string name)
 	, _supportChannelModes(true)
 	, _changeTopic(true)
 	, _userLimit(0)
+	, _userCounter(1)
 {
 	_inviteOnly = false;	//for compiling with unused variable
 	if (name.at(0) == '+')
@@ -72,23 +72,22 @@ std::string  Channel::getChannelName() const
 	return _channelName;
 }
 
-bool  Channel::ifQuietChannel() const
-{
-	return _quietChannel;
-}
-
 bool	Channel::removeUser(Client& client)
 {
 	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
 		if (it->getNick() == client.getNick())
 		{
-			//remove nick from channel operator list aswell (erase can be called for the string value in a set :-))
+			//remove nick from channel operator list as well (erase can be called for the string value in a set :-))
 			_channelOperator.erase(client.getNick());
-			//remove nick from voiced user list aswell (erase can be called for the string value in a set :-))
+			//remove nick from voiced user list as well (erase can be called for the string value in a set :-))
 			_voiceUsers.erase(client.getNick());
 			//remove nick from user list
 			_channelUsers.erase(it);
+			// decrease userCounter
+			--_userCounter;
+			// decrease channelCounter
+			client.decreaseCount();
 			return true;
 		}
 	}
@@ -117,7 +116,6 @@ bool	Channel::clientIsChannelUser(std::string nick) const
 		return false;
 	return true;
 }
-
 
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
@@ -169,7 +167,7 @@ void	Channel::removeFromVoiceList(std::string nick)
 	_voiceUsers.erase(nick);	
 }
 
-bool	Channel::supportChannelModes() const
+bool	Channel::supportedChannelModes() const
 {
 	return _supportChannelModes;
 }

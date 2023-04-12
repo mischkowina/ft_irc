@@ -48,6 +48,7 @@ class Client {
 
 		bool		maxNumOfChannels();
 		void		clearRecvBuffer(int end);
+		void		decreaseCount();
 
 		void		sendMsg(Client &sender, std::string msg, std::string type) const;
 		void		sendErrMsg(Server *server, std::string const err_code, char const *err_param);
