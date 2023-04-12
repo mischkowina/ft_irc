@@ -219,7 +219,7 @@ void	names_per_channel(Server *server, Client &client, Channel &channel)
 	for (std::list<Client>::iterator itClien = channelClients.begin(); itClien != channelClients.end(); itClien++)
 	{
 		//if the respective user is invisible and the client is not on the same channel, it doesn't get displayed
-		if (itClien->IsInvisible() && channel.clientIsChannelUser(client.getNick()) == false)
+		if (itClien->isInvisible() && channel.clientIsChannelUser(client.getNick()) == false)
 			continue;
 		//separate nicknames by space
 		if (param2.empty() == false)
@@ -255,7 +255,7 @@ void	names_all(Server *server, Client &client)
 	{
 		if (nicksInChannels.find(it->second.getNick()) == nicksInChannels.end())
 		{
-			if (it->second.IsInvisible())
+			if (it->second.isInvisible())
 				continue; 
 			if (param2.empty() == false)
 				param2.push_back(' ');
@@ -300,6 +300,31 @@ void	names(Server *server, Client &client, Message& msg)
 
 /////////////////////////////////// LIST ////////////////////////////////////
 
+void	list_channel(Server *server, Client &client, Channel &channel)
+{
+	std::vector<std::string>	params;
+	//if the channel is secret and the client is not on there, it is not displayed
+	if (channel.isSecret() && channel.clientIsChannelUser(client.getNick()) == false)
+		return;
+
+	//channel name is first parameter
+	params.push_back(channel.getChannelName());
+	
+	//second parameter is "Prv" if the channel is private and the client is not on there - else empty
+	if (channel.isPrivate() && channel.clientIsChannelUser(client.getNick()) == false)
+		params.push_back("Prv");
+	else
+		params.push_back("");
+	
+	//third parameter is the topic, unless the channel is private and the client is not on there
+	if (channel.isPrivate() && channel.clientIsChannelUser(client.getNick()) == false)
+		params.push_back("");
+	else
+		params.push_back(channel.getTopic());
+	
+	client.sendErrMsg(server, RPL_LIST, params);
+}
+
 void	list(Server *server, Client &client, Message& msg)
 {
 	std::vector<std::string>	parameters = msg.getParameters();
@@ -307,18 +332,7 @@ void	list(Server *server, Client &client, Message& msg)
 	if (parameters.empty() == true)
 	{
 		for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
-		{
-			std::vector<std::string>	params;
-			//TO-DO: check if channel is secret or private and if client is in there 
-			//TO-DO: "continue" if secret and client is not in there
-			params.push_back(it->second.getChannelName());
-			//TO-DO: if private or secret, push back identifier
-			//TO-DO: if no, push back empty string
-			params.push_back("");
-			//TO-DO: if private and client not on there, push back empty string for topic
-			params.push_back(it->second.getTopic());
-			client.sendErrMsg(server, RPL_LIST, params);
-		}
+			list_channel(server, client, it->second);
 		client.sendErrMsg(server, RPL_LISTEND, NULL);
 		return ;
 	}
@@ -336,18 +350,7 @@ void	list(Server *server, Client &client, Message& msg)
 	{
 		Server::ChannelMap::iterator itChan = server->getChannelMap().find(*itParam);
 		if (itChan != server->getChannelMap().end())
-		{
-			std::vector<std::string>	params;
-			//TO-DO: check if channel is secret or private and if client is in there 
-			//TO-DO: "continue" if secret and client is not in there
-			params.push_back(itChan->second.getChannelName());
-			//TO-DO: if private or secret, push back identifier
-			//TO-DO: if no, push back empty string
-			params.push_back("");
-			//TO-DO: if private and client not on there, push back empty string for topic
-			params.push_back(itChan->second.getTopic());
-			client.sendErrMsg(server, RPL_LIST, params);
-		}
+			list_channel(server, client, itChan->second);
 	}
 	client.sendErrMsg(server, RPL_LISTEND, NULL);
 }
@@ -411,6 +414,13 @@ void	invite(Server *server, Client &client, Message& msg)
 	params.push_back(parameters[1]);
 	params.push_back(parameters[0]);
 	client.sendErrMsg(server, RPL_INVITING, params);
+	if (receiver->second.getAwayMsg().empty() == false)
+	{
+		std::vector<std::string> params;
+		params.push_back(receiver->second.getNick());
+		params.push_back(receiver->second.getAwayMsg());
+		client.sendErrMsg(server, RPL_AWAY, params);
+	}
 }
 
 /////////////////////////////////// KICK ////////////////////////////////////

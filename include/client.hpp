@@ -44,7 +44,7 @@ class Client {
 		bool		getIsAuthorized() const;
 		bool		getHasPass() const;
 		bool		getIsOperator() const;
-		bool		IsInvisible() const;
+		bool		isInvisible() const;
 		std::string	getAwayMsg() const;
 		std::string	getRecvBuffer() const;
 

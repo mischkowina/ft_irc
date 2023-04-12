@@ -133,7 +133,7 @@ bool	Client::getIsOperator() const
 	return this->_isOperator;
 }
 
-bool	Client::IsInvisible() const
+bool	Client::isInvisible() const
 {
 	return this->_isInvisible;
 }
