@@ -23,13 +23,10 @@ Channel::Channel(std::string name)
 	, _quietChannel(false)
 	, _moderatedChannel(false)
 	, _supportChannelModes(true)
-<<<<<<< HEAD
-	, _topic("")
-=======
-	, _changeTopic(true)
+	, _topicChangeOnlyByChanop(true)
 	, _userLimit(0)
 	, _userCounter(1)
->>>>>>> new
+	, _topic("")
 {
 	_inviteOnly = false;	//for compiling with unused variable
 	if (name.at(0) == '+')
