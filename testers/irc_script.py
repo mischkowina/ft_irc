@@ -22,8 +22,17 @@ def recv_msg(sock):
 # tests
 def join_limit(sock, msg):
 	while i < 12:
-		sock.send(f"JOIN #42 r\n".encode())
+		sock.send(f"{msg}\r\n".encode())
 
+def gen_testing(sock):
+    sock.send(f"JOIN #42\r\n".encode())
+    sock.send(f"JOIN &42\r\n".encode())
+    sock.send(f"JOIN +42\r\n".encode())
+    sock.send(f"JOIN $42\r\n".encode())
+    sock.send(f"JOIN 42\r\n".encode())
+    sock.send(f"INVALID CMD\r\n".encode())
+    sock.send(f"JOIN #42,#twotwo pass\r\n".encode())
+    sock.send(f"LIST\r\n".encode())
 
 
 def main():
@@ -48,7 +57,7 @@ def main():
     send_msg(client2, f"JOIN {CHANNEL}")
     send_msg(client2, f"PRIVMSG {CHANNEL} :Hello from {NICK2}!")
     recv_msg(client2)  # Wait for server response
+    gen_testing(client2)
 
 if __name__ == '__main__':
     main()
-

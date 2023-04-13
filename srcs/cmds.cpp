@@ -590,7 +590,7 @@ void	mode(Server *server, Client &client, Message& msg)
 	if (itChannel->second.supportedChannelModes() == false && options == "t")
 	{
 		/* should only exec -/+t */
-		itChannel->second.setTopic(args);
+		itChannel->second.toggleTopic(options[0]);
 		return;
 	}
 
@@ -615,46 +615,22 @@ void	mode(Server *server, Client &client, Message& msg)
 				}
 				break;
 			case 'i':
-				if (options.at(0) == '+') {
-					itChannel->second.setInvite(true);
-				} else {
-					itChannel->second.setInvite(false);
-				}
+				itChannel->second.setInvite(options[0]);
 				break;
 			case 'k':
-				if (options.at(0) == '+') {
-					itChannel->second.setPassWD(args);	// parse the key
-				} else {
-					itChannel->second.setPassWD("");
-				}
+				itChannel->second.setPassWD(options[0], args);	// parse the key
 				break;
 			case 'p':
-				if (options.at(0) == '+') {
-					itChannel->second.setPrivate(true);
-				} else {
-					itChannel->second.setPrivate(false);
-				}
+				itChannel->second.setPrivate(options[0]);
 				break;
-			case 's':						// e.g. don't display using LIST etc.
-				if (options.at(0) == '+') {
-					itChannel->second.setSecret(true);
-				} else {
-					itChannel->second.setSecret(false);
-				}
+			case 's':
+				itChannel->second.setSecret(options[0]);
 				break;
 			case 't':
-				if (options.at(0) == '+') {
-					itChannel->second.setTopicChangeOnlyByChanop(true);
-				} else {
-					itChannel->second.setTopicChangeOnlyByChanop(false);
-				}
+				itChannel->second.setTopicChangeOnlyByChanop(options[0]);
 				break;
 			case 'm':
-				if (options.at(0) == '+') {
-					itChannel->second.setModeratedChannel(true);
-				} else {
-					itChannel->second.setModeratedChannel(false);
-				}
+				itChannel->second.setModeratedChannel(options[0]);
 				break;
 			case 'v':
 				if (options.at(0) == '+') {
@@ -671,25 +647,14 @@ void	mode(Server *server, Client &client, Message& msg)
 				}
 				break;
 			case 'n':
-				// run function for 'n'
+				itChannel->second.noOutsideMsg(options[0]);
 				break;
 			case 'q':
-				// run function for 'q'
+				itChannel->second.setQuiet(options[0]);
 				break;
 			case 'a':
-				// run function for 'a'
+				itChannel->second.setAnonymous(options[0]);
 				break;
-
 		}
 	}
 }
-
-// TODO
-
-/*
-	a - toggle the anonymous channel flag;
-	n - toggle the no messages to channel from clients on the
-	    outside;
-	q - toggle the quiet channel flag;
-
- */
