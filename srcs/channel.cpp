@@ -9,6 +9,11 @@ Channel::Channel()
 	, _quietChannel(false)
 	, _moderatedChannel(false)
 	, _supportChannelModes(true)
+	, _topicChangeOnlyByChanop(false)
+	, _anonymousChannel(false)
+	, _noOutsideMessages(false)
+	, _userLimit(0)
+	, _userCounter(1)
 	, _topic("")
 {}
 
@@ -23,12 +28,13 @@ Channel::Channel(std::string name)
 	, _quietChannel(false)
 	, _moderatedChannel(false)
 	, _supportChannelModes(true)
-	, _topicChangeOnlyByChanop(true)
+	, _topicChangeOnlyByChanop(false)
+	, _anonymousChannel(false)
+	, _noOutsideMessages(false)
 	, _userLimit(0)
 	, _userCounter(1)
 	, _topic("")
 {
-	_inviteOnly = false;	//for compiling with unused variable
 	if (name.at(0) == '+')
 		_supportChannelModes = false;
 }
@@ -127,6 +133,16 @@ bool	Channel::isModerated() const
 bool	Channel::isTopicChangeOnlyByChanop() const
 {
 	return _topicChangeOnlyByChanop;
+}
+
+bool	Channel::isAnonymous() const
+{
+	return _anonymousChannel;
+}
+
+bool	Channel::allowsNoOutsideMessages() const
+{
+	return _noOutsideMessages;
 }
 
 bool	Channel::clientIsChannelOperator(std::string nick) const
