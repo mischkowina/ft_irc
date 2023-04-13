@@ -170,6 +170,16 @@ bool	Channel::clientIsVoicedUser(std::string nick) const
 	return false;
 }
 
+bool	Channel::clientIsBanned(std::string nick) const
+{
+	std::list<Client>::const_iterator	it = _bannedUsers.begin();
+	while (it != _bannedUsers.end() && it->getNick() != nick)
+		it++;
+	if (it == _bannedUsers.end())
+		return false;
+	return true;
+}
+
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
 	std::list<Client>::iterator	it = _channelUsers.begin();
@@ -275,12 +285,17 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 		msg.insert(0, type);
 
 		msg.insert(0, " ");
-		//insert full prefix of sender - :<nick>!<username>@<IP>
-		msg.insert(0, sender.getIP());
-		msg.insert(0, "@");
-		msg.insert(0, sender.getName());
-		msg.insert(0, "!");
-		msg.insert(0, sender.getNick());
+		//insert full prefix of sender - :<nick>!<username>@<IP> or anonymous for anonymous channels
+		if (_anonymousChannel == true)
+			msg.insert(0, "anonymous!anonymous@anonymous.");
+		else
+		{
+			msg.insert(0, sender.getIP());
+			msg.insert(0, "@");
+			msg.insert(0, sender.getName());
+			msg.insert(0, "!");
+			msg.insert(0, sender.getNick());
+		}
 		msg.insert(0, ":");
 		std::cout << BLUE "Sending to " << it->getNick() << ": " RESET << msg << std::endl;
 		msg.append("\r\n");

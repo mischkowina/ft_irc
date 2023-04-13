@@ -27,7 +27,7 @@ void	nick(Server *server, Client &client, Message& msg)
 	if (changedClient.getName().empty() == false)
 		changedClient.setIsAuthorized(true);
 
-	if (parameters[0] == "horoscope" || server->addClient(changedClient) == false)
+	if (parameters[0] == "horoscope" || parameters[0] == "anonymous" || server->addClient(changedClient) == false)
 		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
 	else
 	{
@@ -40,7 +40,6 @@ void	nick(Server *server, Client &client, Message& msg)
 		}
 		server->eraseFromClientMap(client);
 	}
-	//COMMENT: No implementation of ERR_NICKCOLLISION since it is only applicable for multi-server connections
 }
 
 /////////////////////////////////// PASS ////////////////////////////////////
