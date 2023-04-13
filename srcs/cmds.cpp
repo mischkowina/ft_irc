@@ -433,28 +433,21 @@ void	invite(Server *server, Client &client, Message& msg)
 
 /////////////////////////////////// KICK ////////////////////////////////////
 
-void	kick_client_from_channel(Server *server, Client &client, Channel &channel, std::vector<std::string>	parameters, Client &victim)
+void	kick_client_from_channel(Client &client, Channel &channel, std::vector<std::string>	parameters, Client &victim)
 {
-	//send message with KICK information to victim
-	std::string message = ":" + server->getHostname() + " KICK " + channel.getChannelName() + " ";
+	std::string	msg = victim.getNick() + " :";
+
+	//KICK message contains the victims name + the reason for getting kicked (if given) or the name of the person that kicked
 	if (parameters.size() > 2)
-	{
-		if (parameters[2].find(" ", 0) != std::string::npos)
-			message.push_back(':');
-		message.append(parameters[2]);
-	}
+		msg.append(parameters[2]);
 	else
-		message.append(client.getName());
-	std::cout << RED "Sending to " << victim.getNick() << ": " RESET << message << std::endl;	
-	message.append("\r\n");
-	send(victim.getSocket(), message.data(), message.length(), 0);
+		msg.append(client.getNick());
+	
+	//send message to the whole channel that the user got kicked from (still including that user)
+	channel.sendMsgToChannel(client, msg, "KICK");
 
-	//call PART for the victim
-	Message part_message("PART " + channel.getChannelName());
-	part(server, victim, part_message);
-
-	//send message to the whole channel that the user got kicked from
-	channel.sendMsgToChannel(client, channel.getChannelName() + " " + victim.getNick(), "KICK");
+	//actually remove the victim from the channel
+	channel.removeUser(victim);
 }
 
 void	kick(Server *server, Client &client, Message& msg)
@@ -532,7 +525,7 @@ void	kick(Server *server, Client &client, Message& msg)
 
 				//send message with KICK information to victim
 				Client victim = *(channel.getChannelUser(clientNames[j]));
-				kick_client_from_channel(server, client, channel, parameters, victim);
+				kick_client_from_channel(client, channel, parameters, victim);
 			}
 			return ;
 		}
@@ -551,7 +544,7 @@ void	kick(Server *server, Client &client, Message& msg)
 
 		//send message with KICK information to victim
 		Client victim = *(channel.getChannelUser(clientNames[i]));
-		kick_client_from_channel(server, client, channel, parameters, victim);
+		kick_client_from_channel(client, channel, parameters, victim);
 	}
 }
 

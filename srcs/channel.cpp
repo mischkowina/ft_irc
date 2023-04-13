@@ -248,8 +248,7 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 		if (msg.find(" ", 0) != std::string::npos && type != "KICK")
 			msg.insert(0, ":");
 		msg.insert(0, " ");
-		if (type != "KICK")
-			msg.insert(0, " " + _channelName);
+		msg.insert(0, " " + _channelName);
 		//insert command name
 		msg.insert(0, type);
 
