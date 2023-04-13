@@ -21,9 +21,10 @@ def recv_msg(sock):
 
 # tests
 def join_limit(sock, msg):
+	i = 0
 	while i < 12:
-		sock.send(f"JOIN #42 r\n".encode())
-
+		sock.send(f"{msg}\r\n".encode())
+		i += 1
 
 
 def main():
@@ -48,6 +49,9 @@ def main():
     send_msg(client2, f"JOIN {CHANNEL}")
     send_msg(client2, f"PRIVMSG {CHANNEL} :Hello from {NICK2}!")
     recv_msg(client2)  # Wait for server response
+    #testing
+    join_limit(client2, f"JOIN #test")
+
 
 if __name__ == '__main__':
     main()
