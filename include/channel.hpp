@@ -24,6 +24,8 @@ class Channel
 		bool					_moderatedChannel;
 		bool					_supportChannelModes;
 		bool					_topicChangeOnlyByChanop;
+		bool					_anonymousChannel;
+		bool					_noOutsideMessages;
 		int						_userLimit;
 		int						_userCounter;
 		std::string				_topic;
@@ -70,6 +72,8 @@ class Channel
 		bool					isModerated() const;
 		bool					isTopicChangeOnlyByChanop() const;
 		bool					supportedChannelModes() const;
+		bool					isAnonymous() const;
+		bool					allowsNoOutsideMessages() const;
 		bool					clientIsChannelUser(std::string nick) const;
 		bool					clientIsChannelOperator(std::string nick) const;
 		bool					clientIsVoicedUser(std::string nick) const;
