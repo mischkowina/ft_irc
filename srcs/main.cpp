@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 	// 	std::cerr << "Correct use: ./ircserv <port> <password>" << std::endl;
 
 	// Server IRCserver(atoi(argv[1]), std::string (argv[2]));
-	Server		IRCserver(6667, "P");
+	Server		IRCserver(6667, "password");
 	IRCserver.run();
 	std::cout << "Server shutting down." << std::endl;
 
