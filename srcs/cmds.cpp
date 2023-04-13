@@ -533,8 +533,8 @@ void	kick(Server *server, Client &client, Message& msg)
 				//send message with KICK information to victim
 				Client victim = *(channel.getChannelUser(clientNames[j]));
 				kick_client_from_channel(server, client, channel, parameters, victim);
-				return ;
 			}
+			return ;
 		}
 
 		//else kick out one user each from multiple channels
