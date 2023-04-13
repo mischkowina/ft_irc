@@ -370,5 +370,3 @@ void	Server::createNewChannel(std::string name, Client &client)
 	tmp.setChannelUsers(client);
 	_channels.insert(std::make_pair(name, tmp));
 }
-
-//////////////////////////////////////////////////////////////////////////////////

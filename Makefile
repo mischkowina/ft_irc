@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: smischni <smischni@student.42wolfsburg.de> +#+  +:+       +#+         #
+#    By: pdolinar <pdolinar@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/02 12:40:43 by pdolinar          #+#    #+#              #
-#    Updated: 2023/04/06 13:53:16 by smischni         ###   ########.fr        #
+#    Updated: 2023/04/12 23:11:36 by pdolinar         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -43,7 +43,6 @@ SRC_DIR		:=	srcs/
 OBJ_DIR		:=	build/
 
 OBJ = $(addprefix $(OBJ_DIR),$(notdir $(SRC:.cpp=.o)))
-#OBJ_BONUS = $(addprefix $(OBJ_DIR),$(notdir $(SRC_BONUS:.cpp=.o)))
 
 all: $(OBJ_DIR) $(NAME)
 
@@ -64,8 +63,6 @@ $(OBJ_DIR):
 $(OBJ_DIR)%.o:$(SRC_DIR)%.cpp $(HEADER)
 	$(CC) $(CPP_FLAGS) -I$(INC) -c $< -o $@
 
-#bonus: all $(OBJ_BONUS)
-
 clean:
 	@$(RM) $(OBJ_DIR)
 	@echo "$(PR)All object files deleted$(CLEAR)"
@@ -80,4 +77,4 @@ GR = \033[1;32m
 
 re:	fclean all
 
-.PHONY:	all bonus clean fclean re norm
+.PHONY:	all clean fclean re

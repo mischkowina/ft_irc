@@ -1,0 +1,23 @@
+JOIN 42
+JOIN &42
+JOIN #42
+JOIN #42
+
+JOIN #42 (10x)
+JOIN +42
+JOIN #42,#TWO pass
+
+MODE #42 +t
+MODE #42 -t
+MODE #42 +im	// moderated,invite only
+MODE #42 +v user1
+MODE #42 +l 3
+MODE #42 -l
+MODE #42 +o user1
+MODE #42 +p
+MODE #42 +s
+MODE #42 -p
+MODE #42 +k pass
+MODE #42 +b	// print ban masks for the cahhnel
+
+MODE #42 +lvb 3 user1 *!*@*.edu

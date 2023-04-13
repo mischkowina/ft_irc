@@ -11,12 +11,11 @@ class Channel
 {
 	private:
 		std::list<Client>		_channelUsers;
-		std::set<std::string>	_channelOperator;
 		std::list<Client>		_bannedUsers;
+		std::set<std::string>	_channelOperator;
 		std::set<std::string>	_invitedUsers;
 		std::set<std::string>	_voiceUsers;
 		std::string				_channelName;
-		std::string				_channelbuffer;
 		std::string				_password;
 		bool					_inviteOnly;
 		bool					_secretChannel;
@@ -26,6 +25,7 @@ class Channel
 		bool					_supportChannelModes;
 		bool					_topicChangeOnlyByChanop;
 		int						_userLimit;
+		int						_userCounter;
 		std::string				_topic;
 
 	public:
@@ -57,6 +57,7 @@ class Channel
 		void	removeFromBannedList(std::string nick);
 		void	removeFromVoiceList(std::string nick);
 		void	removeFromInviteList(std::string nick);
+		bool	validChannelName(Server *server, std::string& name, Client &client);
 
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
@@ -68,10 +69,11 @@ class Channel
 		bool					isQuiet() const;
 		bool					isModerated() const;
 		bool					isTopicChangeOnlyByChanop() const;
-		bool					supportChannelModes() const;
+		bool					supportedChannelModes() const;
 		bool					clientIsChannelUser(std::string nick) const;
 		bool					clientIsChannelOperator(std::string nick) const;
 		bool					clientIsVoicedUser(std::string nick) const;
+
 		std::list<Client>::iterator	getChannelUser(std::string nick);
 
 		void	sendMsgToChannel(Client &sender, std::string msg, std::string type) const;

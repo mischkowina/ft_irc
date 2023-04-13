@@ -2,24 +2,37 @@
 
 //////////////////////////////  JOIN  ////////////////////////////////////////
 
-bool validChannelName(Server *server, std::string name, Client &client)
+bool	Channel::validChannelName(Server *server, std::string& name, Client &client)
 {
-	if ((name[0] != '#' && name[0] != '&' && name[0] != '+' && name[0] != '!') || name == ""
-		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos) {
+	std::string tmp = name.substr(1);
+	if ((name[0] != '#' && name[0] != '&' && name[0] != '+') || name == ""
+		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos
+		|| tmp == _channelName) {
 		client.sendErrMsg(server, ERR_BADCHANMASK, NULL);
 		return false;
 	}
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 	return true;
 }
 
 void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex)
 {
 	// check any invalid conditions before adding a new client to the channel
-		// if client has already joined to the channel -> stop
+		// if client has already joined the channel -> stop
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
-		if (it->getNick() == client.getNick() || it->getName() == client.getName() || it->getIP() == client.getIP()) {
+		if (it->getNick() == client.getNick() || it->getName() == client.getName()/* ignore while testing on localhost! || it->getIP() == client.getIP()*/)
 			return;
-		}
+	}
+		// a client can be a member of 10 channels max
+	if (client.maxNumOfChannels() == true) {
+		client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
+		return;
+	}
+		// max limit of users on a channel 
+	if (_userCounter++ == _userLimit) {
+		client.sendErrMsg(server, ERR_CHANNELISFULL, NULL);
+		--_userCounter;
+		return;
 	}
 		// the correct key (password) must be given if it is set.
 	if (_password != "" && keys[keyIndex] != _password) {
@@ -40,7 +53,10 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	}
 
 	_channelUsers.push_back(client);
-	// send msg to other clients 		// TODO
+	client.increaseChannelCounter();
+	// send msg to other clients
+	if (_quietChannel == true)
+		return;
 	std::string msg = client.getNick() + " has joined the channel\n";
 	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
 		send(it->getSocket(), msg.data(), msg.length(), 0);
@@ -52,7 +68,7 @@ void	join(Server *server, Client &client, Message& msg)
 	std::vector<std::string> parameters = msg.getParameters();
 	std::vector<std::string> channelNames;
 	std::vector<std::string> keys;
-/////////////////////////////////////////
+
 	if (parameters.empty() == true) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
@@ -61,7 +77,6 @@ void	join(Server *server, Client &client, Message& msg)
 	std::string token;
 	while (std::getline(ss, token, ',')) {
 		channelNames.push_back(token);
-		std::cout << "  // channelNames = " << channelNames.back() << std::endl;
 		token.clear();
 	}
 
@@ -69,35 +84,25 @@ void	join(Server *server, Client &client, Message& msg)
 		std::stringstream ss(parameters[1]);
 		while (std::getline(ss, token, ',')) {
 			keys.push_back(token);
-			std::cout << "  // keys = " << keys.back() << std::endl;
 			token.clear();
 		}
 	}
-/////////////////////////////////////////
 	int index = 0;
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
 	for (std::vector<std::string>::iterator iterChannelName = channelNames.begin();
 		iterChannelName != channelNames.end(); iterChannelName++, index++) {
 
-		// check channelName
-		if (validChannelName(server, *iterChannelName, client) == false)
-			continue;
-			// a client can be a member of 10 channels max
-		if (client.maxNumOfChannels() == false) {
-			client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
-			continue;
-		}
-		// find the existing channel
 		Server::ChannelMap::iterator itChannel = mapOfChannels.find(*iterChannelName);
-		if (itChannel != mapOfChannels.end())
-		{
-			// add client to the channel
-			std::cout << RED "//channel location: " << &itChannel->second << " --\n";
-			itChannel->second.addClientToChannel(server, client, keys, index);
+		if (itChannel == mapOfChannels.end()) {
+			// check channelName
+			if (itChannel->second.validChannelName(server, *iterChannelName, client) == false)
+				continue;
+			// add new channel to the server
+			server->createNewChannel(*iterChannelName, client);
 		}
 		else {
-			// else add new channel to the server
-			server->createNewChannel(*iterChannelName, client);
+			// add client to the channel
+			itChannel->second.addClientToChannel(server, client, keys, index);
 		}
 	}
 }
@@ -459,7 +464,7 @@ void	kick(Server *server, Client &client, Message& msg)
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, "KICK");
 		return ;
 	}
-	
+
 	std::vector<std::string> channelNames;
 	std::stringstream ss(parameters[0]);
 	std::string token;
@@ -552,21 +557,23 @@ void	kick(Server *server, Client &client, Message& msg)
 
 void	mode(Server *server, Client &client, Message& msg)
 {
-	std::vector<std::string>	parameters = msg.getParameters();
+	std::vector<std::string>		parameters = msg.getParameters();
+	std::string 					channel = parameters[0];
+	Server::ChannelMap::iterator	itChannel = server->getChannelMap().find(channel);
+	std::set<std::string> 			operators = itChannel->second.getChannelOperators();
 
-	if (parameters.size() < 3) {
+	if (parameters.size() < 2) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
-	if (client.getIsOperator() == false) {	// getChannelOperator
+	if (operators.find(client.getNick()) == operators.end()) {
 		client.sendErrMsg(server, ERR_NOPRIVILEGES, NULL);
 		return;
 	}
-	std::string channel = parameters[0];
 	std::string options = parameters[1];
 	std::string tmp = options.substr(1);
 	if ((options.at(0) != '+' && options.at(0) != '-') || tmp.length() > 3
-		|| tmp.find_first_not_of("aopsitmnbvkl") != std::string::npos) {
+		|| tmp.find_first_not_of("aopsitqmnbvkl") != std::string::npos) {
 
 		client.sendErrMsg(server, ERR_UNKNOWNMODE, tmp.data());
 		return;
@@ -579,9 +586,8 @@ void	mode(Server *server, Client &client, Message& msg)
 	int	limit = atoi(args.c_str());
 
 	// MODE #mychannel +o userName
-	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
 
-	if (itChannel->second.supportChannelModes() == false && options == "t")
+	if (itChannel->second.supportedChannelModes() == false && options == "t")
 	{
 		/* should only exec -/+t */
 		itChannel->second.setTopic(args);
@@ -679,12 +685,11 @@ void	mode(Server *server, Client &client, Message& msg)
 }
 
 // TODO
-  // case insensitive channel names !
 
 /*
-        a - toggle the anonymous channel flag;
-        n - toggle the no messages to channel from clients on the
-            outside;
-        q - toggle the quiet channel flag;
+	a - toggle the anonymous channel flag;
+	n - toggle the no messages to channel from clients on the
+	    outside;
+	q - toggle the quiet channel flag;
 
  */

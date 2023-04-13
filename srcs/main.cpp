@@ -5,14 +5,11 @@ int main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 	// if (argc != 3)
-	// 		std::cerr << Correct use: ./ircserv <port> <password> << std::endl;
+	// 	std::cerr << "Correct use: ./ircserv <port> <password>" << std::endl;
 
-	// Server IRCserver(atoi(argv[1]), std::string str(argv[2]);
-	std::string	pass=  "password";
-	Server		IRCserver(6667, pass);
-
+	// Server IRCserver(atoi(argv[1]), std::string (argv[2]));
+	Server		IRCserver(6667, "password");
 	IRCserver.run();
-
 	std::cout << "Server shutting down." << std::endl;
 
 	return 0;

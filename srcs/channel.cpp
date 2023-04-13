@@ -1,7 +1,7 @@
 #include "channel.hpp"
 
 Channel::Channel()
-	: _channelbuffer("null")
+	: _channelName("default")
 	, _password("")
 	, _inviteOnly(false)
 	, _secretChannel(false)
@@ -16,7 +16,6 @@ Channel::~Channel() {}
 
 Channel::Channel(std::string name)
 	: _channelName(name)
-	, _channelbuffer("null")
 	, _password("")
 	, _inviteOnly(false)
 	, _secretChannel(false)
@@ -24,7 +23,13 @@ Channel::Channel(std::string name)
 	, _quietChannel(false)
 	, _moderatedChannel(false)
 	, _supportChannelModes(true)
+<<<<<<< HEAD
 	, _topic("")
+=======
+	, _changeTopic(true)
+	, _userLimit(0)
+	, _userCounter(1)
+>>>>>>> new
 {
 	_inviteOnly = false;	//for compiling with unused variable
 	if (name.at(0) == '+')
@@ -81,12 +86,16 @@ bool	Channel::removeUser(Client& client)
 	{
 		if (it->getNick() == client.getNick())
 		{
-			//remove nick from channel operator list aswell (erase can be called for the string value in a set :-))
+			//remove nick from channel operator list as well (erase can be called for the string value in a set :-))
 			_channelOperator.erase(client.getNick());
-			//remove nick from voiced user list aswell (erase can be called for the string value in a set :-))
+			//remove nick from voiced user list as well (erase can be called for the string value in a set :-))
 			_voiceUsers.erase(client.getNick());
 			//remove nick from user list
 			_channelUsers.erase(it);
+			// decrease userCounter
+			--_userCounter;
+			// decrease channelCounter
+			client.decreaseChannelCounter();
 			return true;
 		}
 	}
@@ -198,7 +207,7 @@ void	Channel::removeFromVoiceList(std::string nick)
 	_voiceUsers.erase(nick);	
 }
 
-bool	Channel::supportChannelModes() const
+bool	Channel::supportedChannelModes() const
 {
 	return _supportChannelModes;
 }
