@@ -57,6 +57,7 @@ class Channel
 		void	removeFromBannedList(std::string nick);
 		void	removeFromVoiceList(std::string nick);
 		void	removeFromInviteList(std::string nick);
+		bool	validChannelName(Server *server, std::string& name, Client &client);
 
 		std::string					getTopic() const;
 		std::string					getChannelName() const;

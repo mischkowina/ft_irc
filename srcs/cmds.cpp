@@ -2,10 +2,12 @@
 
 //////////////////////////////  JOIN  ////////////////////////////////////////
 
-bool validChannelName(Server *server, std::string& name, Client &client)
+bool	Channel::validChannelName(Server *server, std::string& name, Client &client)
 {
-	if ((name[0] != '#' && name[0] != '&' && name[0] != '+' && name[0] != '!') || name == ""
-		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos) {
+	std::string tmp = name.substr(1);
+	if ((name[0] != '#' && name[0] != '&' && name[0] != '+') || name == ""
+		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos
+		|| tmp == _channelName) {
 		client.sendErrMsg(server, ERR_BADCHANMASK, NULL);
 		return false;
 	}
@@ -16,10 +18,15 @@ bool validChannelName(Server *server, std::string& name, Client &client)
 void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex)
 {
 	// check any invalid conditions before adding a new client to the channel
-		// if client has already joined to the channel -> stop
+		// if client has already joined the channel -> stop
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
 		if (it->getNick() == client.getNick() || it->getName() == client.getName()/* ignore while testing on localhost! || it->getIP() == client.getIP()*/)
 			return;
+	}
+		// a client can be a member of 10 channels max
+	if (client.maxNumOfChannels() == true) {
+		client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
+		return;
 	}
 		// max limit of users on a channel 
 	if (_userCounter++ == _userLimit) {
@@ -46,6 +53,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	}
 
 	_channelUsers.push_back(client);
+	client.increaseChannelCounter();
 	// send msg to other clients
 	if (_quietChannel == true)
 		return;
@@ -84,16 +92,11 @@ void	join(Server *server, Client &client, Message& msg)
 	for (std::vector<std::string>::iterator iterChannelName = channelNames.begin();
 		iterChannelName != channelNames.end(); iterChannelName++, index++) {
 
-		// check channelName
-		if (validChannelName(server, *iterChannelName, client) == false)
-			continue;
-			// a client can be a member of 10 channels max
-		if (client.maxNumOfChannels() == true) {
-			client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
-			continue;
-		}
 		Server::ChannelMap::iterator itChannel = mapOfChannels.find(*iterChannelName);
 		if (itChannel == mapOfChannels.end()) {
+			// check channelName
+			if (itChannel->second.validChannelName(server, *iterChannelName, client) == false)
+				continue;
 			// add new channel to the server
 			server->createNewChannel(*iterChannelName, client);
 		}

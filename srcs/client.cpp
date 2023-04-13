@@ -218,13 +218,15 @@ void	Client::sendErrMsg(Server *server, std::string const err_code, std::vector<
 
 bool	Client::maxNumOfChannels()
 {
-	if (++_channelCounter < 11)
-		return false;
-	--_channelCounter;
-	return true;
+	return (_channelCounter > 10);
 }
 
-void	Client::decreaseCount()
+void	Client::decreaseChannelCounter()
 {
 	--_channelCounter;
+}
+
+void	Client::increaseChannelCounter()
+{
+	++_channelCounter;
 }

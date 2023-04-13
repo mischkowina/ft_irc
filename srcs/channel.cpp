@@ -87,7 +87,7 @@ bool	Channel::removeUser(Client& client)
 			// decrease userCounter
 			--_userCounter;
 			// decrease channelCounter
-			client.decreaseCount();
+			client.decreaseChannelCounter();
 			return true;
 		}
 	}
