@@ -26,6 +26,16 @@ def join_limit(sock, msg):
 		sock.send(f"{msg}\r\n".encode())
 		i += 1
 
+def gen_testing(sock):
+    sock.send(f"JOIN #42\r\n".encode())
+    sock.send(f"JOIN &42\r\n".encode())
+    sock.send(f"JOIN +42\r\n".encode())
+    sock.send(f"JOIN $42\r\n".encode())
+    sock.send(f"JOIN 42\r\n".encode())
+    sock.send(f"INVALID CMD\r\n".encode())
+    sock.send(f"JOIN #42,#twotwo pass\r\n".encode())
+    sock.send(f"LIST\r\n".encode())
+
 
 def main():
     # Connect first client
@@ -51,8 +61,7 @@ def main():
     recv_msg(client2)  # Wait for server response
     #testing
     join_limit(client2, f"JOIN #test")
-
+    gen_testing(client2)
 
 if __name__ == '__main__':
     main()
-

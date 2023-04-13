@@ -145,6 +145,11 @@ bool	Channel::allowsNoOutsideMessages() const
 	return _noOutsideMessages;
 }
 
+bool	Channel::supportedChannelModes() const
+{
+	return _supportChannelModes;
+}
+
 bool	Channel::clientIsChannelOperator(std::string nick) const
 {
 	std::set<std::string>::const_iterator it = _channelOperator.find(nick);
@@ -220,40 +225,54 @@ void	Channel::removeFromVoiceList(std::string nick)
 	_voiceUsers.erase(nick);	
 }
 
-bool	Channel::supportedChannelModes() const
+/* modes */
+
+void	Channel::setPassWD(char c, std::string pass)
 {
-	return _supportChannelModes;
+	if (c == '+')
+		_password = pass;
+	else
+		_password = "";
 }
 
-void	Channel::setPassWD(std::string pass)
+void	Channel::setInvite(char c)
 {
-	_password = pass;
+	if (c == '+')
+		_inviteOnly = true;
+	else
+		_inviteOnly = false;
 }
 
-void	Channel::setInvite(bool arg)
+void	Channel::setPrivate(char c)
 {
-	_inviteOnly = arg;
+	if (_secretChannel == false && c == '+')
+		_privateChannel = true;
+	else
+		_privateChannel = false;
 }
 
-void	Channel::setPrivate(bool arg)
+void	Channel::setSecret(char c)
 {
-	// only +p or +s ??
-	_privateChannel = arg;
+	if (_privateChannel == false && c == '+')
+		_secretChannel = true;
+	else
+		_secretChannel = false;
 }
 
-void	Channel::setSecret(bool arg)
+void	Channel::setTopicChangeOnlyByChanop(char c)
 {
-	_secretChannel = arg;
+	if (c == '+')
+		_topicChangeOnlyByChanop = true;
+	else
+		_topicChangeOnlyByChanop = false;
 }
 
-void	Channel::setTopicChangeOnlyByChanop(bool arg)
+void	Channel::setModeratedChannel(char c)
 {
-	_topicChangeOnlyByChanop = arg;
-}
-
-void	Channel::setModeratedChannel(bool arg)
-{
-	_moderatedChannel = arg;
+	if (c == '+')
+		_moderatedChannel = true;
+	else
+		_moderatedChannel = false;
 }
 
 void	Channel::setLimit(int limit)
@@ -286,4 +305,36 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 		msg.append("\r\n");
 		send(it->getSocket(), msg.data(), msg.size(), 0);
 	}
+}
+
+void	Channel::toggleTopic(char c)
+{
+	if (c == '+')
+		_topicChangeOnlyByChanop = true;
+	else
+		_topicChangeOnlyByChanop = false;
+}
+
+void	Channel::setAnonymous(char c)
+{
+	if (c == '+')
+		_anonymousChannel = true;
+	else
+		_anonymousChannel = false;
+}
+
+void	Channel::setQuiet(char c)
+{
+	if (c == '+')
+		_quietChannel = true;
+	else
+		_quietChannel = false;
+}
+
+void	Channel::noOutsideMsg(char c)
+{
+	if (c == '+')
+		_noOutsideMessages = true;
+	else
+		_noOutsideMessages = false;
 }

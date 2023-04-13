@@ -40,12 +40,12 @@ class Channel
 		void	setName(std::string channelName);
 		void	setNewChannel(Client& client);
 		void	setTopic(std::string topic);
-		void	setInvite(bool arg);
-		void	setSecret(bool arg);
-		void	setPrivate(bool arg);
-		void	setTopicChangeOnlyByChanop(bool arg);
-		void	setModeratedChannel(bool arg);
-		void	setPassWD(std::string pass);
+		void	setInvite(char c);
+		void	setSecret(char c);
+		void	setPrivate(char c);
+		void	setTopicChangeOnlyByChanop(char c);
+		void	setModeratedChannel(char c);
+		void	setPassWD(char c, std::string pass);
 		void	setLimit(int limit);
 
 		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
@@ -60,6 +60,10 @@ class Channel
 		void	removeFromVoiceList(std::string nick);
 		void	removeFromInviteList(std::string nick);
 		bool	validChannelName(Server *server, std::string& name, Client &client);
+		void	toggleTopic(char c);
+		void	setAnonymous(char c);
+		void	setQuiet(char c);
+		void	noOutsideMsg(char c);
 
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
