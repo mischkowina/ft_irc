@@ -225,6 +225,11 @@ void	Channel::addToInviteList(std::string nick)
 	_invitedUsers.insert(nick);
 }
 
+void	Channel::removeFromInviteList(std::string nick)
+{
+	_invitedUsers.erase(nick);	
+}
+
 void	Channel::removeFromVoiceList(std::string nick)
 {
 	_voiceUsers.erase(nick);	

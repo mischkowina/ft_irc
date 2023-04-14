@@ -105,10 +105,33 @@ void	quit(Server *server, Client &client, Message& msg)
 	std::vector<std::string> parameters = msg.getParameters();
 	std::string	message = ":" + server->getHostname() + " QUIT ";
 
+	std::string reason;
 	if (parameters.empty() == true)
-		message.append(client.getNick());
+		reason = client.getNick();
 	else
-		message.append(parameters[0]);
+		reason = parameters[0];
+	if (reason.find(" ", 0) != std::string::npos)
+		message.push_back(':');
+	message.append(reason);
+
+	Server::ChannelMap::iterator it = server->getChannelMap().begin();
+	while (it != server->getChannelMap().end())
+	{
+		if (it->second.clientIsChannelUser(client.getNick()) == true)
+		{
+			it->second.removeUser(client);
+			it->second.removeFromInviteList(client.getNick());
+			if (it->second.isQuiet())
+				continue;
+			if (it->second.isAnonymous() && reason == client.getNick())
+				it->second.sendMsgToChannel(client, "anonymous", "PART");
+			else if (it->second.isAnonymous() && reason != client.getNick())
+				it->second.sendMsgToChannel(client, reason, "PART");
+			else
+				it->second.sendMsgToChannel(client, reason, "QUIT");
+		}
+		it++;
+	}
 
 	send(client.getSocket(), message.data(), message.length(), 0);
 	close(client.getSocket());
