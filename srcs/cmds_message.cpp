@@ -93,8 +93,13 @@ void	notice(Server *server, Client &client, Message& msg)
 		return;
 
 	Server::ClientMap::iterator it = server->getAuthorizedClientMap().find(parameters[0]);
-	if (it == server->getAuthorizedClientMap().end())
+	if (it != server->getAuthorizedClientMap().end())
+	{
+		(*it).second.sendMsg(client, parameters[1], "NOTICE");
 		return;
+	}
 
-	(*it).second.sendMsg(client, parameters[1], "NOTICE");
+	Server::ChannelMap::iterator itChan = server->getChannelMap().find(parameters[0]);
+	if (itChan != server->getChannelMap().end())
+		(*itChan).second.sendMsgToChannel(client, parameters[1], "NOTICE");
 }
