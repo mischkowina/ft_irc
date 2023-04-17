@@ -193,42 +193,36 @@ void	Channel::manageOperatorList(char c, std::string& nick)
 
 /* modes */
 
-void	Channel::addToBannedList(Client& client, std::string list)
+void	Channel::manageBanMask(Client& client, char c, std::string& banList)
 {
-	if (list != "") {
-		// parse list and include those
-		// _bannedUsers.push_back(client);
-		return;
-	}
-	for (std::list<Client>::iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); ++it)
-		client.sendMsg(client, it->getNick(), NULL);
+	if (c == '+' && banList == "")
+		for (std::set<std::string>::const_iterator it = _banMask.begin(); it != _banMask.end(); ++it)
+			client.sendMsg(client, *it, NULL);
+	else if (c == '+'){}
+	else if (c == '-'){}
+		;//TODO
+		// remove banmask
 }
 
-void	Channel::removeFromBannedList(std::string nick)
+void	Channel::manageVoiceList(char c, std::string& nick)
 {
-	for (std::list<Client>::iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); it++)
-	{
-		if (it->getNick() == nick)
-		{
-			_bannedUsers.erase(it);
-			return ;
-		}
-	}
+	if (c == '+')
+		_voiceUsers.insert(nick);
+	else
+		_voiceUsers.erase(nick);
 }
 
-void	Channel::addToVoiceList(Client &client)
+void	Channel::manageInviteList(char c, std::string& nick)
 {
-	_voiceUsers.insert(client.getNick());
+	if (c == '+')
+		_invitedUsers.insert(nick);
+	else
+		_invitedUsers.erase(nick);
 }
 
-void	Channel::addToInviteList(std::string nick)
+void	Channel::addToInviteList(std::string& nick)
 {
 	_invitedUsers.insert(nick);
-}
-
-void	Channel::removeFromVoiceList(std::string nick)
-{
-	_voiceUsers.erase(nick);	
 }
 
 void	Channel::setPassWD(char c, std::string pass)
@@ -279,9 +273,12 @@ void	Channel::setModeratedChannel(char c)
 		_moderatedChannel = false;
 }
 
-void	Channel::setLimit(int limit)
+void	Channel::setLimit(char c, std::string limit)
 {
-	_userLimit = limit;
+	if (c == '+')
+		_userLimit = atoi(limit.c_str());
+	else
+		_userLimit = 0;
 }
 
 void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type) const
@@ -327,7 +324,7 @@ void	Channel::setQuiet(char c)
 		_quietChannel = false;
 }
 
-void	Channel::noOutsideMsg(char c)
+void	Channel::setOutsideMsg(char c)
 {
 	if (c == '+')
 		_noOutsideMessages = true;

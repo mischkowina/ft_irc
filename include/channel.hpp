@@ -11,7 +11,7 @@ class Channel
 {
 	private:
 		std::list<Client>		_channelUsers;
-		std::list<Client>		_bannedUsers;
+		std::set<std::string>	_banMask;
 		std::set<std::string>	_channelOperator;
 		std::set<std::string>	_invitedUsers;
 		std::set<std::string>	_voiceUsers;
@@ -46,22 +46,20 @@ class Channel
 		void	setTopicChangeOnlyByChanop(char c);
 		void	setModeratedChannel(char c);
 		void	setPassWD(char c, std::string pass);
-		void	setLimit(int limit);
+		void	setLimit(char c, std::string limit);
 
 		void	manageOperatorList(char c, std::string& nick);
+		void	manageVoiceList(char c, std::string& nick);
+		void	manageBanMask(Client& client, char c, std::string& banList);
+		void	manageInviteList(char c, std::string& nick);
 		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
-		void	addToBannedList(Client& client, std::string list);
-		void	addToVoiceList(Client& client);
-		void	addToInviteList(std::string nick);
+		void	addToInviteList(std::string& nick);
 
 		bool	removeUser(Client& client);
-		void	removeFromBannedList(std::string nick);
-		void	removeFromVoiceList(std::string nick);
-		void	removeFromInviteList(std::string nick);
 		bool	validChannelName(Server *server, std::string& name, Client &client);
 		void	setAnonymous(char c);
 		void	setQuiet(char c);
-		void	noOutsideMsg(char c);
+		void	setOutsideMsg(char c);
 
 		std::string				getTopic() const;
 		std::string				getChannelName() const;

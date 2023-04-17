@@ -40,12 +40,14 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		return;
 	}
 		// user's nick/username/hostname must not match any active bans;
-	for (std::list<Client>::const_iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); ++it) {
-		if (it->getNick() == client.getNick() || it->getName() == client.getName() || it->getIP() == client.getIP()) {
-			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
-			return;
-		}
-	}
+	// compare user ID against banmasks
+	// for (std::list<Client>::const_iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); ++it) {
+	// 	if (it->getNick() == client.getNick() || it->getName() == client.getName() || it->getIP() == client.getIP()) {
+	// 		client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+	// 		return;
+	// 	}
+	// }
+
 		// if channel is invite only
 	if (_inviteOnly == true && _invitedUsers.find(client.getNick()) == _invitedUsers.end()) {
 		client.sendErrMsg(server, ERR_INVITEONLYCHAN, NULL);
@@ -609,7 +611,7 @@ void	mode(Server *server, Client &client, Message& msg)
 
 	// +vbl [<limit>] [<user>] [<ban mask>]
 	std::string args;
-	int limit = 0;
+	std::string limit;
 	std::string user;
 	std::string addBanList;
 
@@ -619,17 +621,17 @@ void	mode(Server *server, Client &client, Message& msg)
 
 		std::stringstream ss(parameters[2]);
 		std::string token;
-		if (flags.find_first_of('l') != std::string::npos) {
+		if (flags.find_first_of('l') != std::string::npos){
 			std::getline(ss, token, ' ');
-			limit = atoi(token.c_str());
+			limit = token;
 			token.clear();
 		}
-		if (flags.find_first_of("ov") != std::string::npos) {
+		if (flags.find_first_of("ov") != std::string::npos){
 			std::getline(ss, token, ' ');
 			user = token;
 			token.clear();
 		}
-		if (flags.find_first_of('b') != std::string::npos) {
+		if (flags.find_first_of('b') != std::string::npos){
 			std::getline(ss, token, ' ');
 			addBanList = token;
 			token.clear();
@@ -639,9 +641,6 @@ void	mode(Server *server, Client &client, Message& msg)
 			user = token;
 		}
 	}
-
-	// MODE #mychannel +o userName
-	// MODE #mychannel +k pass
 
 	// execute MODE
 	const char* tmpCstr = flags.c_str();
@@ -653,17 +652,16 @@ void	mode(Server *server, Client &client, Message& msg)
 				itChannel->second.manageOperatorList(options[0], user);
 				break;
 			case 'b':
-				if (options.at(0) == '+') {
-					itChannel->second.addToBannedList(client, args);
-				} else {
-					itChannel->second.removeFromBannedList(client.getNick());
-				}
+				itChannel->second.manageBanMask(client, options[0], addBanList);
+				break;
+			case 'v':
+				itChannel->second.manageVoiceList(options[0], user);
 				break;
 			case 'i':
 				itChannel->second.setInvite(options[0]);
 				break;
 			case 'k':
-				itChannel->second.setPassWD(options[0], args);	// parse the key
+				itChannel->second.setPassWD(options[0], user);
 				break;
 			case 'p':
 				itChannel->second.setPrivate(options[0]);
@@ -677,22 +675,11 @@ void	mode(Server *server, Client &client, Message& msg)
 			case 'm':
 				itChannel->second.setModeratedChannel(options[0]);
 				break;
-			case 'v':
-				if (options.at(0) == '+') {
-					itChannel->second.addToVoiceList(client);
-				} else {
-					itChannel->second.removeFromVoiceList(client.getNick());
-				}
-				break;
 			case 'l':
-				if (options.at(0) == '+') {
-					itChannel->second.setLimit(limit);
-				} else {
-					itChannel->second.setLimit(0);
-				}
+				itChannel->second.setLimit(options[0], limit);
 				break;
 			case 'n':
-				itChannel->second.noOutsideMsg(options[0]);
+				itChannel->second.setOutsideMsg(options[0]);
 				break;
 			case 'q':
 				itChannel->second.setQuiet(options[0]);
