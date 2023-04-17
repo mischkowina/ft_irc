@@ -46,7 +46,8 @@ void	nick(Server *server, Client &client, Message& msg)
 	{
 		if (it->second.clientIsChannelUser(client.getNick()))
 		{
-			it->second.sendMsgToChannel(client, parameters[0], "NICK");
+			if (it->second.isQuiet() == false)
+				it->second.sendMsgToChannel(client, parameters[0], "NICK");
 			it->second.updateNick(client, changedClient);
 		}
 	}
