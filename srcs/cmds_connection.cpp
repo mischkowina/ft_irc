@@ -39,6 +39,16 @@ void	nick(Server *server, Client &client, Message& msg)
 				sendWelcome(server, changedClient);
 		}
 		server->eraseFromClientMap(client);
+	} 
+	//send message to all channels that client is on
+	//change nick in all channels
+	for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
+	{
+		if (it->second.clientIsChannelUser(client.getNick()))
+		{
+			it->second.sendMsgToChannel(client, parameters[0], "NICK");
+			it->second.updateNick(client, changedClient);
+		}
 	}
 }
 

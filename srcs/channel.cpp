@@ -163,9 +163,9 @@ bool	Channel::clientIsChannelUser(std::string nick) const
 	return true;
 }
 
-bool	Channel::clientIsVoicedUser(std::string nick) const
+bool	Channel::clientIsInvited(std::string nick) const
 {
-	if (_voiceUsers.find(nick) != _voiceUsers.end())
+	if (_invitedUsers.find(nick) != _invitedUsers.end())
 		return true;
 	return false;
 }
@@ -180,11 +180,21 @@ bool	Channel::clientIsBanned(std::string nick) const
 	return true;
 }
 
+bool	Channel::clientIsVoicedUser(std::string nick) const
+{
+	if (_voiceUsers.find(nick) != _voiceUsers.end())
+		return true;
+	return false;
+}
+
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
 	std::list<Client>::iterator	it = _channelUsers.begin();
-	while (it != _channelUsers.end() || it->getNick() != nick)
-		it++;
+	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end() || it->getNick() == nick; it++)
+	{
+		std::cout << nick << std::endl;
+		std::cout << it->getNick() << std::endl;
+	}
 	return (it);
 }
 
@@ -285,7 +295,8 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 		if (msg.find(" ", 0) != std::string::npos && type != "KICK")
 			msg.insert(0, ":");
 		msg.insert(0, " ");
-		msg.insert(0, " " + _channelName);
+		if (type != "NICK")
+			msg.insert(0, " " + _channelName);
 		//insert command name
 		msg.insert(0, type);
 
@@ -305,5 +316,26 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 		std::cout << BLUE "Sending to " << it->getNick() << ": " RESET << msg << std::endl;
 		msg.append("\r\n");
 		send(it->getSocket(), msg.data(), msg.size(), 0);
+	}
+}
+
+void	Channel::updateNick(Client &oldNick, Client &newNick)
+{
+	std::list<Client>::iterator it = getChannelUser(oldNick.getNick());
+	it->setNick(newNick.getNick());
+	if (clientIsChannelOperator(oldNick.getNick()))
+	{
+		removeFromOperatorList(oldNick.getNick());
+		addToOperatorList(newNick);
+	}
+	if (clientIsVoicedUser(oldNick.getNick()))
+	{
+		removeFromVoiceList(oldNick.getNick());
+		addToVoiceList(newNick);
+	}
+	if (clientIsInvited(oldNick.getNick()))
+	{
+		removeFromInviteList(oldNick.getNick());
+		addToInviteList(newNick.getNick());
 	}
 }

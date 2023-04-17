@@ -78,8 +78,10 @@ class Channel
 		bool					clientIsChannelOperator(std::string nick) const;
 		bool					clientIsVoicedUser(std::string nick) const;
 		bool					clientIsBanned(std::string nick) const;
+		bool					clientIsInvited(std::string nick) const;
 
 		std::list<Client>::iterator	getChannelUser(std::string nick);
+		void						updateNick(Client &oldNick, Client &newNick);
 
 		void	sendMsgToChannel(Client &sender, std::string msg, std::string type) const;
 };
