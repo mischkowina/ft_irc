@@ -555,61 +555,106 @@ void	kick(Server *server, Client &client, Message& msg)
 
 /////////////////////////////////// MODE ////////////////////////////////////
 
+bool	userMode(std::string user, Server *server, Client &client, std::vector<std::string>& parameters)
+{
+	(void)parameters;
+
+	Server::ClientMap authorizedClients = server->getAuthorizedClientMap();
+	Server::ClientMap::iterator it = authorizedClients.find(user);
+	if (it == authorizedClients.end() || it->second.getName() != client.getName())
+		return false;
+	// MODE <nickname> <flags> (user)
+	// ...
+	return true;
+}
+
 void	mode(Server *server, Client &client, Message& msg)
 {
-	std::vector<std::string>		parameters = msg.getParameters();
-	std::string 					channel = parameters[0];
-	Server::ChannelMap::iterator	itChannel = server->getChannelMap().find(channel);
-	std::set<std::string> 			operators = itChannel->second.getChannelOperators();
+	std::vector<std::string> parameters = msg.getParameters();
 
 	if (parameters.size() < 2) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
+
+	std::string	channel = parameters[0];
+	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
+	if (itChannel == server->getChannelMap().end()) {
+		client.sendErrMsg(server, ERR_NOSUCHCHANNEL, NULL);
+		return;
+	}
+
+		// MODE <channel> <flags> [<args>]
+	std::set<std::string> operators = itChannel->second.getChannelOperators();
+	std::string options = parameters[1];
+	std::string flags = options.substr(1);
+	if ((options.at(0) != '+' && options.at(0) != '-') || flags.length() > 3
+		|| flags.find_first_not_of("aopsitqmnbvkl") != std::string::npos) {
+
+		client.sendErrMsg(server, ERR_UNKNOWNMODE, flags.data());
+		return;
+	}
+	if (userMode(channel, server, client, parameters) == true)
+		return;
 	if (operators.find(client.getNick()) == operators.end()) {
 		client.sendErrMsg(server, ERR_NOPRIVILEGES, NULL);
 		return;
 	}
-	std::string options = parameters[1];
-	std::string tmp = options.substr(1);
-	if ((options.at(0) != '+' && options.at(0) != '-') || tmp.length() > 3
-		|| tmp.find_first_not_of("aopsitqmnbvkl") != std::string::npos) {
-
-		client.sendErrMsg(server, ERR_UNKNOWNMODE, tmp.data());
+	if (itChannel->second.supportedChannelModes() == false && options == "t") {
+		itChannel->second.setTopicChangeOnlyByChanop(options[0]);
 		return;
 	}
+
 	///////////////////////////////////////
 
-	// [<limit>] [<user>] [<ban mask>]
+	// +vbl [<limit>] [<user>] [<ban mask>]
+	std::string args;
+	int limit = 0;
+	std::string user;
+	std::string addBanList;
 
-	std::string args = parameters[2];
-	int	limit = atoi(args.c_str());
-
-	// MODE #mychannel +o userName
-
-	if (itChannel->second.supportedChannelModes() == false && options == "t")
+	if (parameters.size() > 2)
 	{
-		/* should only exec -/+t */
-		itChannel->second.toggleTopic(options[0]);
-		return;
+		args = parameters[2];
+
+		std::stringstream ss(parameters[2]);
+		std::string token;
+		if (flags.find_first_of('l') != std::string::npos) {
+			std::getline(ss, token, ' ');
+			limit = atoi(token.c_str());
+			token.clear();
+		}
+		if (flags.find_first_of("ov") != std::string::npos) {
+			std::getline(ss, token, ' ');
+			user = token;
+			token.clear();
+		}
+		if (flags.find_first_of('b') != std::string::npos) {
+			std::getline(ss, token, ' ');
+			addBanList = token;
+			token.clear();
+		}
+		if (ss.good()){
+		    std::getline(ss, token, ' ');
+			user = token;
+		}
 	}
 
-	// execute mode cmd
-	const char* tmpCstr = tmp.c_str();
-	for (unsigned int i = 0; i < tmp.length(); i++)
+	// MODE #mychannel +o userName
+	// MODE #mychannel +k pass
+
+	// execute MODE
+	const char* tmpCstr = flags.c_str();
+	for (unsigned int i = 0; i < flags.length(); i++)
 	{
 		switch (tmpCstr[i])
 		{
 			case 'o':
-				if (options.at(0) == '+') {
-					itChannel->second.addToOperatorList(client);
-				} else {
-					itChannel->second.removeFromOperatorList(client.getNick());
-				}
+				itChannel->second.manageOperatorList(options[0], user);
 				break;
 			case 'b':
 				if (options.at(0) == '+') {
-					itChannel->second.addToBannedList(client);
+					itChannel->second.addToBannedList(client, args);
 				} else {
 					itChannel->second.removeFromBannedList(client.getNick());
 				}

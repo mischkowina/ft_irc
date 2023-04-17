@@ -183,19 +183,25 @@ std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 	return (it);
 }
 
-void	Channel::addToOperatorList(Client &client)
+void	Channel::manageOperatorList(char c, std::string& nick)
 {
-	_channelOperator.insert(client.getNick());
+	if (c == '+')
+		_channelOperator.insert(nick);
+	else
+		_channelOperator.erase(nick);
 }
 
-void	Channel::removeFromOperatorList(std::string nick)
-{
-	_channelOperator.erase(nick);
-}
+/* modes */
 
-void	Channel::addToBannedList(Client &client)
+void	Channel::addToBannedList(Client& client, std::string list)
 {
-	_bannedUsers.push_back(client);
+	if (list != "") {
+		// parse list and include those
+		// _bannedUsers.push_back(client);
+		return;
+	}
+	for (std::list<Client>::iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); ++it)
+		client.sendMsg(client, it->getNick(), NULL);
 }
 
 void	Channel::removeFromBannedList(std::string nick)
@@ -224,8 +230,6 @@ void	Channel::removeFromVoiceList(std::string nick)
 {
 	_voiceUsers.erase(nick);	
 }
-
-/* modes */
 
 void	Channel::setPassWD(char c, std::string pass)
 {
@@ -305,14 +309,6 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 		msg.append("\r\n");
 		send(it->getSocket(), msg.data(), msg.size(), 0);
 	}
-}
-
-void	Channel::toggleTopic(char c)
-{
-	if (c == '+')
-		_topicChangeOnlyByChanop = true;
-	else
-		_topicChangeOnlyByChanop = false;
 }
 
 void	Channel::setAnonymous(char c)

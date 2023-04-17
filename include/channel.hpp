@@ -48,19 +48,17 @@ class Channel
 		void	setPassWD(char c, std::string pass);
 		void	setLimit(int limit);
 
+		void	manageOperatorList(char c, std::string& nick);
 		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
-		void	addToOperatorList(Client &client);
-		void	addToBannedList(Client& client);
+		void	addToBannedList(Client& client, std::string list);
 		void	addToVoiceList(Client& client);
 		void	addToInviteList(std::string nick);
 
 		bool	removeUser(Client& client);
-		void	removeFromOperatorList(std::string nick);
 		void	removeFromBannedList(std::string nick);
 		void	removeFromVoiceList(std::string nick);
 		void	removeFromInviteList(std::string nick);
 		bool	validChannelName(Server *server, std::string& name, Client &client);
-		void	toggleTopic(char c);
 		void	setAnonymous(char c);
 		void	setQuiet(char c);
 		void	noOutsideMsg(char c);

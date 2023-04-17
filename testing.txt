@@ -20,4 +20,4 @@ MODE #42 -p
 MODE #42 +k pass
 MODE #42 +b	// print ban masks for the channel
 
-MODE #42 +lvb 3 user1 *!*@*.edu
+MODE #42 +vbl 3 user1 *!*@*.edu
