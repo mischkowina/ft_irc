@@ -280,7 +280,7 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 {
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
-		if (it->getNick() == sender.getNick())//don't send message to the sender himself
+		if (it->getNick() == sender.getNick() && type != "JOIN")//don't send message to the sender himself unless it's join
 			continue;
 		if (msg.find(" ", 0) != std::string::npos && type != "KICK")
 			msg.insert(0, ":");

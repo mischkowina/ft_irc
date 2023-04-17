@@ -54,9 +54,19 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 
 	_channelUsers.push_back(client);
 	client.increaseChannelCounter();
-	// send msg to other clients
+
+	// send JOIN msg to all clients on the channel
 	if (_quietChannel == false)
 		sendMsgToChannel(client, "", "JOIN");
+
+	//send RPL_TOPIC && RPL_NAMREPLY && RPL_ENDOFNAMES to that client
+	std::vector<std::string> params;
+	params.push_back(_channelName);
+	params.push_back(_topic);
+	client.sendErrMsg(server, RPL_TOPIC, params);
+
+	Message message("NAMES " + _channelName);
+	names(server, client, message);
 }
 
 void	join(Server *server, Client &client, Message& msg)
