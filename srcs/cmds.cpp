@@ -2,12 +2,11 @@
 
 //////////////////////////////  JOIN  ////////////////////////////////////////
 
-bool	Channel::validChannelName(Server *server, std::string& name, Client &client)
+bool	validChannelName(Server *server, std::string& name, Client &client)
 {
 	std::string tmp = name.substr(1);
 	if ((name[0] != '#' && name[0] != '&' && name[0] != '+') || name == ""
-		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos
-		|| tmp == _channelName) {
+		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos) {
 		client.sendErrMsg(server, ERR_BADCHANMASK, NULL);
 		return false;
 	}
@@ -78,6 +77,7 @@ void	join(Server *server, Client &client, Message& msg)
 	std::stringstream ss(parameters[0]);
 	std::string token;
 	while (std::getline(ss, token, ',')) {
+		std::transform(token.begin(), token.end(), token.begin(), ::tolower);
 		channelNames.push_back(token);
 		token.clear();
 	}
@@ -91,13 +91,14 @@ void	join(Server *server, Client &client, Message& msg)
 	}
 	int index = 0;
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
+
 	for (std::vector<std::string>::iterator iterChannelName = channelNames.begin();
 		iterChannelName != channelNames.end(); iterChannelName++, index++) {
 
 		Server::ChannelMap::iterator itChannel = mapOfChannels.find(*iterChannelName);
 		if (itChannel == mapOfChannels.end()) {
 			// check channelName
-			if (itChannel->second.validChannelName(server, *iterChannelName, client) == false)
+			if (validChannelName(server, *iterChannelName, client) == false)
 				continue;
 			// add new channel to the server
 			server->createNewChannel(*iterChannelName, client);
@@ -580,12 +581,13 @@ void	mode(Server *server, Client &client, Message& msg)
 	}
 
 	std::string	channel = parameters[0];
+	std::transform(channel.begin(), channel.end(), channel.begin(), ::tolower);
+
 	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
 	if (itChannel == server->getChannelMap().end()) {
 		client.sendErrMsg(server, ERR_NOSUCHCHANNEL, NULL);
 		return;
 	}
-
 		// MODE <channel> <flags> [<args>]
 	std::set<std::string> operators = itChannel->second.getChannelOperators();
 	std::string options = parameters[1];

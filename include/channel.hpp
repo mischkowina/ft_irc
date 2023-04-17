@@ -56,11 +56,10 @@ class Channel
 		void	addToInviteList(std::string& nick);
 
 		bool	removeUser(Client& client);
-		bool	validChannelName(Server *server, std::string& name, Client &client);
 		void	setAnonymous(char c);
 		void	setQuiet(char c);
 		void	setOutsideMsg(char c);
-
+		
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
 		std::set<std::string>	getChannelOperators() const;
@@ -82,5 +81,7 @@ class Channel
 
 		void	sendMsgToChannel(Client &sender, std::string msg, std::string type) const;
 };
+
+bool	validChannelName(Server *server, std::string& name, Client &client);
 
 #endif
