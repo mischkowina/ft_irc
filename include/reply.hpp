@@ -31,6 +31,10 @@
 
 # define RPL_ENDOFNAMES	"366 <channel> :End of NAMES list"
 
+# define RPL_BANLIST	"367 <channel> <banmask>"
+
+# define RPL_ENDOFBANLIST "368 <channel> :End of channel ban list"
+
 # define RPL_MOTDSTART	"375 :- <server> Message of the day - "
 
 # define RPL_MOTD		"372 :- <text>"

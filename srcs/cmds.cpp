@@ -14,21 +14,24 @@ bool	validChannelName(Server *server, std::string& name, Client &client)
 	return true;
 }
 
-bool	includedOnBanList(Server *server, Client& client, std::string& banList)
+bool	Channel::includedOnBanList(Server *server, Client& client)
 {
-	// compare user ID against banmasks	-> *!*@*	*!*@*.edu
-	std::stringstream ss(banList);
-	// std::set<std::string> one, two, three;
-	// ss >> one >> two >> three;
-	(void)server;
-	(void)client;
-	(void)banList;
-
-	// TODO
+	// compare user ID against banmasks	-> *!*@* -> all users;	*!*@*.edu
+	
+	// WIP -> parse wildcards
+	std::stringstream ss(_banList);
+	std::string token;
+	while (std::getline(ss, token, ',')) {
+		if (token == client.getNick() + client.getName() + client.getIP()) {
+			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+			return true;
+		}
+		token.clear();
+	}
 	return false;
 }
 
-void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex, std::string& banList)
+void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex)
 {
 	// check any invalid conditions before adding a new client to the channel
 		// if client has already joined the channel -> stop
@@ -53,7 +56,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		return;
 	}
 		// user's nick/username/hostname must not match any active bans;
-	if (includedOnBanList(server, client, banList) == true) {
+	if (includedOnBanList(server, client) == true) {
 		client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
 		return;
 	}
@@ -140,7 +143,7 @@ void	join(Server *server, Client &client, Message& msg)
 		}
 		else {
 			// add client to the channel
-			itChannel->second.addClientToChannel(server, client, keys, index, parameters[1]);
+			itChannel->second.addClientToChannel(server, client, keys, index);
 		}
 	}
 }
@@ -685,8 +688,6 @@ void	mode(Server *server, Client &client, Message& msg)
 		}
 		if (ss.good() && flags.find_first_of('b') != std::string::npos){
 			std::getline(ss, token, ' ');
-			// addBanList = token;
-			addBanList = token;
 			token.clear();
 		}
 	}
@@ -700,7 +701,7 @@ void	mode(Server *server, Client &client, Message& msg)
 				itChannel->second.manageOperatorList(options[0], user);
 				break;
 			case 'b':
-				itChannel->second.manageBanMask(client, options[0], addBanList);
+				itChannel->second.manageBanList(client, options[0], addBanList);
 				break;
 			case 'v':
 				itChannel->second.manageVoiceList(options[0], user);

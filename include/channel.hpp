@@ -10,7 +10,8 @@ class Channel
 {
 	private:
 		std::list<Client>		_channelUsers;
-		std::vector<std::string>_banMask;
+		// std::vector<std::string>_banMask;
+		std::string				_banList;
 		std::set<std::string>	_channelOperator;
 		std::set<std::string>	_invitedUsers;
 		std::set<std::string>	_voiceUsers;
@@ -49,9 +50,9 @@ class Channel
 
 		void	manageOperatorList(char c, std::string nick);
 		void	manageVoiceList(char c, std::string& nick);
-		void	manageBanMask(Client& client, char c, std::string& banList);
+		void	manageBanList(Client& client, char c, std::string& banMask);
 		void	manageInviteList(char c, std::string& nick);
-		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex, std::string& banList);
+		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
 
 		void	removeFromOperatorList(std::string nick);
 		void	addToVoiceList(Client &client);
@@ -63,7 +64,10 @@ class Channel
 		void	setAnonymous(char c);
 		void	setQuiet(char c);
 		void	setOutsideMsg(char c);
+		bool	includedOnBanList(Server *server, Client& client);
 		
+		std::string				getBanList() const;
+		// std::vector<std::string>	getBanList() const;
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
 		std::set<std::string>	getChannelOperators() const;
@@ -91,6 +95,5 @@ class Channel
 };
 
 bool	validChannelName(Server *server, std::string& name, Client &client);
-bool	includedOnBanList(Server *server, Client& client, std::string& banList);
 
 #endif
