@@ -177,11 +177,12 @@ bool	Channel::clientIsInvited(std::string nick) const
 
 bool	Channel::clientIsBanned(std::string nick) const
 {
-	std::list<Client>::const_iterator	it = _bannedUsers.begin();
-	while (it != _bannedUsers.end() && it->getNick() != nick)
-		it++;
-	if (it == _bannedUsers.end())
-		return false;
+	(void)nick;
+	// std::list<Client>::const_iterator	it = _bannedUsers.begin();
+	// while (it != _bannedUsers.end() && it->getNick() != nick)
+	// 	it++;
+	// if (it == _bannedUsers.end())
+	// 	return false;
 	return true;
 }
 
@@ -203,31 +204,17 @@ std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 	return (it);
 }
 
-void	Channel::addToOperatorList(Client &client)
+void	Channel::manageOperatorList(char c, std::string nick)
 {
-	_channelOperator.insert(client.getNick());
+	if (c == '+')
+		_channelOperator.insert(nick);
+	else
+		_channelOperator.erase(nick);
 }
 
 void	Channel::removeFromOperatorList(std::string nick)
 {
 	_channelOperator.erase(nick);
-}
-
-void	Channel::addToBannedList(Client &client)
-{
-	_bannedUsers.push_back(client);
-}
-
-void	Channel::removeFromBannedList(std::string nick)
-{
-	for (std::list<Client>::iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); it++)
-	{
-		if (it->getNick() == nick)
-		{
-			_bannedUsers.erase(it);
-			return ;
-		}
-	}
 }
 
 void	Channel::addToVoiceList(Client &client)
@@ -251,6 +238,33 @@ void	Channel::removeFromVoiceList(std::string nick)
 }
 
 /* modes */
+
+void	Channel::manageBanMask(Client& client, char c, std::string& banList)
+{
+	//TODO
+	if (c == '+' && banList == "")
+		for (std::vector<std::string>::const_iterator it = _banMask.begin(); it != _banMask.end(); ++it)
+			client.sendMsg(client, *it, NULL);
+	else if (c == '+'){}
+	else if (c == '-'){}
+		// remove banmask
+}
+
+void	Channel::manageVoiceList(char c, std::string& nick)
+{
+	if (c == '+')
+		_voiceUsers.insert(nick);
+	else
+		_voiceUsers.erase(nick);
+}
+
+void	Channel::manageInviteList(char c, std::string& nick)
+{
+	if (c == '+')
+		_invitedUsers.insert(nick);
+	else
+		_invitedUsers.erase(nick);
+}
 
 void	Channel::setPassWD(char c, std::string pass)
 {
@@ -300,9 +314,36 @@ void	Channel::setModeratedChannel(char c)
 		_moderatedChannel = false;
 }
 
-void	Channel::setLimit(int limit)
+void	Channel::setLimit(char c, std::string limit)
 {
-	_userLimit = limit;
+	if (c == '+')
+		_userLimit = atoi(limit.c_str());
+	else
+		_userLimit = 0;
+}
+
+void	Channel::setAnonymous(char c)
+{
+	if (c == '+')
+		_anonymousChannel = true;
+	else
+		_anonymousChannel = false;
+}
+
+void	Channel::setQuiet(char c)
+{
+	if (c == '+')
+		_quietChannel = true;
+	else
+		_quietChannel = false;
+}
+
+void	Channel::setOutsideMsg(char c)
+{
+	if (c == '+')
+		_noOutsideMessages = true;
+	else
+		_noOutsideMessages = false;
 }
 
 void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type) const
@@ -338,38 +379,6 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 	}
 }
 
-void	Channel::toggleTopic(char c)
-{
-	if (c == '+')
-		_topicChangeOnlyByChanop = true;
-	else
-		_topicChangeOnlyByChanop = false;
-}
-
-void	Channel::setAnonymous(char c)
-{
-	if (c == '+')
-		_anonymousChannel = true;
-	else
-		_anonymousChannel = false;
-}
-
-void	Channel::setQuiet(char c)
-{
-	if (c == '+')
-		_quietChannel = true;
-	else
-		_quietChannel = false;
-}
-
-void	Channel::noOutsideMsg(char c)
-{
-	if (c == '+')
-		_noOutsideMessages = true;
-	else
-		_noOutsideMessages = false;
-}
-
 void	Channel::updateNick(Client &oldNick, Client &newNick)
 {
 	std::list<Client>::iterator it = getChannelUser(oldNick.getNick());
@@ -377,7 +386,7 @@ void	Channel::updateNick(Client &oldNick, Client &newNick)
 	if (clientIsChannelOperator(oldNick.getNick()))
 	{
 		removeFromOperatorList(oldNick.getNick());
-		addToOperatorList(newNick);
+		manageOperatorList('+', newNick.getNick());
 	}
 	if (clientIsVoicedUser(oldNick.getNick()))
 	{

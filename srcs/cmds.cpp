@@ -2,12 +2,11 @@
 
 //////////////////////////////  JOIN  ////////////////////////////////////////
 
-bool	Channel::validChannelName(Server *server, std::string& name, Client &client)
+bool	validChannelName(Server *server, std::string& name, Client &client)
 {
 	std::string tmp = name.substr(1);
 	if ((name[0] != '#' && name[0] != '&' && name[0] != '+') || name == ""
-		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos
-		|| tmp == _channelName) {
+		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos) {
 		client.sendErrMsg(server, ERR_BADCHANMASK, NULL);
 		return false;
 	}
@@ -15,7 +14,21 @@ bool	Channel::validChannelName(Server *server, std::string& name, Client &client
 	return true;
 }
 
-void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex)
+bool	includedOnBanList(Server *server, Client& client, std::string& banList)
+{
+	// compare user ID against banmasks	-> *!*@*	*!*@*.edu
+	std::stringstream ss(banList);
+	// std::set<std::string> one, two, three;
+	// ss >> one >> two >> three;
+	(void)server;
+	(void)client;
+	(void)banList;
+
+	// TODO
+	return false;
+}
+
+void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex, std::string& banList)
 {
 	// check any invalid conditions before adding a new client to the channel
 		// if client has already joined the channel -> stop
@@ -40,12 +53,8 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		return;
 	}
 		// user's nick/username/hostname must not match any active bans;
-	for (std::list<Client>::const_iterator it = _bannedUsers.begin(); it != _bannedUsers.end(); ++it) {
-		if (it->getNick() == client.getNick() || it->getName() == client.getName() || it->getIP() == client.getIP()) {
-			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
-			return;
-		}
-	}
+	if (includedOnBanList(server, client, banList) == true)
+		return;
 		// if channel is invite only
 	if (_inviteOnly == true && _invitedUsers.find(client.getNick()) == _invitedUsers.end()) {
 		client.sendErrMsg(server, ERR_INVITEONLYCHAN, NULL);
@@ -79,9 +88,12 @@ void	join(Server *server, Client &client, Message& msg)
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
+	// JOIN 0 -> leave all joined channels
+	
 	std::stringstream ss(parameters[0]);
 	std::string token;
 	while (std::getline(ss, token, ',')) {
+		std::transform(token.begin(), token.end(), token.begin(), ::tolower);
 		channelNames.push_back(token);
 		token.clear();
 	}
@@ -95,20 +107,21 @@ void	join(Server *server, Client &client, Message& msg)
 	}
 	int index = 0;
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
+
 	for (std::vector<std::string>::iterator iterChannelName = channelNames.begin();
 		iterChannelName != channelNames.end(); iterChannelName++, index++) {
 
 		Server::ChannelMap::iterator itChannel = mapOfChannels.find(*iterChannelName);
 		if (itChannel == mapOfChannels.end()) {
 			// check channelName
-			if (itChannel->second.validChannelName(server, *iterChannelName, client) == false)
+			if (validChannelName(server, *iterChannelName, client) == false)
 				continue;
 			// add new channel to the server
 			server->createNewChannel(*iterChannelName, client);
 		}
 		else {
 			// add client to the channel
-			itChannel->second.addClientToChannel(server, client, keys, index);
+			itChannel->second.addClientToChannel(server, client, keys, index, parameters[1]);
 		}
 	}
 }
@@ -572,70 +585,107 @@ void	kick(Server *server, Client &client, Message& msg)
 
 /////////////////////////////////// MODE ////////////////////////////////////
 
+bool	userMode(Server *server, Client &client, std::vector<std::string>& parameters)
+{
+	(void)parameters;
+
+	Server::ClientMap authorizedClients = server->getAuthorizedClientMap();
+	(void)client;
+	// Server::ClientMap::iterator it = authorizedClients.find();
+	if (1 /*client.getNick() != */)
+		return false;
+	// MODE WiZ -o
+	// :Angel MODE Angel +i
+	std::cout << " inside USERmode: " << parameters[0] << " - " << parameters[1] << std::endl;
+	return true;
+}
+
 void	mode(Server *server, Client &client, Message& msg)
 {
-	std::vector<std::string>		parameters = msg.getParameters();
-	std::string 					channel = parameters[0];
-	Server::ChannelMap::iterator	itChannel = server->getChannelMap().find(channel);
-	std::set<std::string> 			operators = itChannel->second.getChannelOperators();
+	std::vector<std::string> parameters = msg.getParameters();
 
 	if (parameters.size() < 2) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
+		return;
+	}
+	if (userMode(server, client, parameters) == true)
+		return;
+
+	std::string	channel = parameters[0];
+	std::transform(channel.begin(), channel.end(), channel.begin(), ::tolower);
+
+	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
+	if (itChannel == server->getChannelMap().end()) {
+		client.sendErrMsg(server, ERR_NOSUCHCHANNEL, NULL);
+		return;
+	}
+		// MODE <channel> <flags> [<args>]
+	std::set<std::string> operators = itChannel->second.getChannelOperators();
+	std::string options = parameters[1];
+	std::string flags = options.substr(1);
+	if ((options.at(0) != '+' && options.at(0) != '-') || flags.length() > 3
+		|| flags.find_first_not_of("aopsitqmnbvkl") != std::string::npos) {
+
+		client.sendErrMsg(server, ERR_UNKNOWNMODE, flags.data());
 		return;
 	}
 	if (operators.find(client.getNick()) == operators.end()) {
 		client.sendErrMsg(server, ERR_NOPRIVILEGES, NULL);
 		return;
 	}
-	std::string options = parameters[1];
-	std::string tmp = options.substr(1);
-	if ((options.at(0) != '+' && options.at(0) != '-') || tmp.length() > 3
-		|| tmp.find_first_not_of("aopsitqmnbvkl") != std::string::npos) {
-
-		client.sendErrMsg(server, ERR_UNKNOWNMODE, tmp.data());
+	if (itChannel->second.supportedChannelModes() == false && options == "t") {
+		itChannel->second.setTopicChangeOnlyByChanop(options[0]);
 		return;
 	}
+
 	///////////////////////////////////////
 
-	// [<limit>] [<user>] [<ban mask>]
+	// +vbl [<limit>] [<user>] [<ban mask>]
+	std::string limit;
+	std::string user;
+	std::string addBanList;
 
-	std::string args = parameters[2];
-	int	limit = atoi(args.c_str());
-
-	// MODE #mychannel +o userName
-
-	if (itChannel->second.supportedChannelModes() == false && options == "t")
+	if (parameters.size() > 2)
 	{
-		/* should only exec -/+t */
-		itChannel->second.toggleTopic(options[0]);
-		return;
+		std::stringstream ss(parameters[2]);
+		std::string token;
+		if (flags.find_first_of('l') != std::string::npos){
+			std::getline(ss, token, ' ');
+			limit = token;
+			token.clear();
+		}
+		if (ss.good() && flags.find('l') == std::string::npos){
+			std::getline(ss, token, ' ');
+			user = token;
+			token.clear();
+		}
+		if (ss.good() && flags.find_first_of('b') != std::string::npos){
+			std::getline(ss, token, ' ');
+			// addBanList = token;
+			addBanList = token;
+			token.clear();
+		}
 	}
 
-	// execute mode cmd
-	const char* tmpCstr = tmp.c_str();
-	for (unsigned int i = 0; i < tmp.length(); i++)
+	const char* tmpCStr = flags.c_str();
+	for (unsigned int i = 0; i < flags.length(); i++)
 	{
-		switch (tmpCstr[i])
+		switch (tmpCStr[i])
 		{
 			case 'o':
-				if (options.at(0) == '+') {
-					itChannel->second.addToOperatorList(client);
-				} else {
-					itChannel->second.removeFromOperatorList(client.getNick());
-				}
+				itChannel->second.manageOperatorList(options[0], user);
 				break;
 			case 'b':
-				if (options.at(0) == '+') {
-					itChannel->second.addToBannedList(client);
-				} else {
-					itChannel->second.removeFromBannedList(client.getNick());
-				}
+				itChannel->second.manageBanMask(client, options[0], addBanList);
+				break;
+			case 'v':
+				itChannel->second.manageVoiceList(options[0], user);
+				break;
+			case 'k':
+				itChannel->second.setPassWD(options[0], user);
 				break;
 			case 'i':
 				itChannel->second.setInvite(options[0]);
-				break;
-			case 'k':
-				itChannel->second.setPassWD(options[0], args);	// parse the key
 				break;
 			case 'p':
 				itChannel->second.setPrivate(options[0]);
@@ -649,22 +699,11 @@ void	mode(Server *server, Client &client, Message& msg)
 			case 'm':
 				itChannel->second.setModeratedChannel(options[0]);
 				break;
-			case 'v':
-				if (options.at(0) == '+') {
-					itChannel->second.addToVoiceList(client);
-				} else {
-					itChannel->second.removeFromVoiceList(client.getNick());
-				}
-				break;
 			case 'l':
-				if (options.at(0) == '+') {
-					itChannel->second.setLimit(limit);
-				} else {
-					itChannel->second.setLimit(0);
-				}
+				itChannel->second.setLimit(options[0], limit);
 				break;
 			case 'n':
-				itChannel->second.noOutsideMsg(options[0]);
+				itChannel->second.setOutsideMsg(options[0]);
 				break;
 			case 'q':
 				itChannel->second.setQuiet(options[0]);
