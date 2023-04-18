@@ -1,6 +1,5 @@
-
-#ifndef __CHANNEL_HPP
-#define __CHANNEL_HPP
+#ifndef CHANNEL_HPP
+#define CHANNEL_HPP
 
 #include "irc.hpp"
 
@@ -11,7 +10,7 @@ class Channel
 {
 	private:
 		std::list<Client>		_channelUsers;
-		std::set<std::string>	_banMask;
+		std::vector<std::string>	_banMask;
 		std::set<std::string>	_channelOperator;
 		std::set<std::string>	_invitedUsers;
 		std::set<std::string>	_voiceUsers;
@@ -52,7 +51,7 @@ class Channel
 		void	manageVoiceList(char c, std::string& nick);
 		void	manageBanMask(Client& client, char c, std::string& banList);
 		void	manageInviteList(char c, std::string& nick);
-		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
+		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex, std::string& banList);
 		void	addToInviteList(std::string& nick);
 
 		bool	removeUser(Client& client);
@@ -83,5 +82,6 @@ class Channel
 };
 
 bool	validChannelName(Server *server, std::string& name, Client &client);
+bool	includedOnBanList(Server *server, Client& client, std::string& banList);
 
 #endif

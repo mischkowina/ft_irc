@@ -195,12 +195,12 @@ void	Channel::manageOperatorList(char c, std::string& nick)
 
 void	Channel::manageBanMask(Client& client, char c, std::string& banList)
 {
+	//TODO
 	if (c == '+' && banList == "")
-		for (std::set<std::string>::const_iterator it = _banMask.begin(); it != _banMask.end(); ++it)
+		for (std::vector<std::string>::const_iterator it = _banMask.begin(); it != _banMask.end(); ++it)
 			client.sendMsg(client, *it, NULL);
 	else if (c == '+'){}
 	else if (c == '-'){}
-		;//TODO
 		// remove banmask
 }
 

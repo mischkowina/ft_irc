@@ -21,3 +21,11 @@ MODE #42 +k pass
 MODE #42 +b	// print ban masks for the channel
 
 MODE #42 +vbl 3 user1 *!*@*.edu
+
+MODE #42 +ovk user1 user1 pass
+MODE #42 +ovb user1 user1 !*@*.com
+
+TODO:
+	- userMode	-> modify the behavior of individual users
+	- JOIN 0
+	- banmask	-> parse the list
