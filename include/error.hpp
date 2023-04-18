@@ -61,4 +61,6 @@
 
 # define ERR_CHANOPRIVSNEEDED	"482 <channel> :You're not channel operator"
 
+# define ERR_USERSDONTMATCH		"502 :Cant change mode for other users"
+
 #endif

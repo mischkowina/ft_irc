@@ -66,8 +66,12 @@ class Channel
 		
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
-		std::set<std::string>	getChannelOperators() const;
-		std::list<Client>		getChannelUsers() const;
+		std::set<std::string>	&getChannelOperators();
+		std::list<Client>		&getChannelUsers();
+		std::string				getChannelKey() const;
+		int						getChannelLimit() const;
+		std::vector<std::string>	&getChannelBanMasks();
+		std::set<std::string>	&getChannelInviteList();
 		bool					isInviteOnly() const;
 		bool					isSecret() const;
 		bool					isPrivate() const;
