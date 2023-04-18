@@ -193,6 +193,11 @@ bool	Channel::clientIsVoicedUser(std::string nick) const
 	return false;
 }
 
+std::list<Client>& Channel::getChannelUsers()
+{
+	return _channelUsers;
+}
+
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
 	std::list<Client>::iterator	it = _channelUsers.begin();

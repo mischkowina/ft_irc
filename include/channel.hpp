@@ -10,7 +10,7 @@ class Channel
 {
 	private:
 		std::list<Client>		_channelUsers;
-		std::vector<std::string>	_banMask;
+		std::vector<std::string>_banMask;
 		std::set<std::string>	_channelOperator;
 		std::set<std::string>	_invitedUsers;
 		std::set<std::string>	_voiceUsers;
@@ -83,6 +83,7 @@ class Channel
 		bool					clientIsBanned(std::string nick) const;
 		bool					clientIsInvited(std::string nick) const;
 
+		std::list<Client>& 			getChannelUsers();
 		std::list<Client>::iterator	getChannelUser(std::string nick);
 		void						updateNick(Client &oldNick, Client &newNick);
 

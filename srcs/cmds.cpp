@@ -78,6 +78,22 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	names(server, client, message);
 }
 
+void leaveChannels(Server *server, Client &client)
+{
+	Server::ChannelMap& mapOfChannels = server->getChannelMap();
+
+	for (Server::ChannelMap::iterator itChan = mapOfChannels.begin(); itChan != mapOfChannels.end(); ++itChan)
+	{
+		// get nth channel and check it, if there is the targeted user
+		std::list<Client>& channelUsers = itChan->second.getChannelUsers();
+		for (std::list<Client>::iterator channelUser = channelUsers.begin(); channelUser != channelUsers.end(); ++channelUser)
+		{
+			if (channelUser->getNick() == client.getNick())
+				itChan->second.removeUser(client);
+		}
+	}
+}
+
 void	join(Server *server, Client &client, Message& msg)
 {
 	std::vector<std::string> parameters = msg.getParameters();
@@ -88,8 +104,9 @@ void	join(Server *server, Client &client, Message& msg)
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
-	// JOIN 0 -> leave all joined channels
-	
+	// leave all joined channels
+	if (parameters[0] == "0")
+		leaveChannels(server, client);
 	std::stringstream ss(parameters[0]);
 	std::string token;
 	while (std::getline(ss, token, ',')) {
