@@ -24,8 +24,9 @@ MODE #42 +vbl 3 user1 *!*@*.edu
 
 MODE #42 +ovk user1 user1 pass
 MODE #42 +ovb user1 user1 !*@*.com
+MODE WiZ -o
+:Angel MODE Angel +i
 
 TODO:
-	- userMode	-> modify the behavior of individual users
 	- banmask	-> parse the list
 	==> fix clientIsBanned()

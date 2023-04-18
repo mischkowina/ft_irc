@@ -87,6 +87,11 @@ void	Client::setIsOperator(bool status)
 	this->_isOperator = status;
 }
 
+void	Client::setIsInvisible(bool status)
+{
+	this->_isInvisible = status;
+}
+
 void	Client::setAwayMsg(std::string msg)
 {
 	this->_awayMsg = msg;

@@ -34,6 +34,7 @@ class Client {
 		void		setIsAuthorized(bool status);
 		void		setHasPass(bool status);
 		void		setIsOperator(bool status);
+		void		setIsInvisible(bool status);
 		void		setAwayMsg(std::string msg);
 		void		addToRecvBuffer(char *buffer, int len);
 	

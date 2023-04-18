@@ -53,8 +53,10 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		return;
 	}
 		// user's nick/username/hostname must not match any active bans;
-	if (includedOnBanList(server, client, banList) == true)
+	if (includedOnBanList(server, client, banList) == true) {
+		client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
 		return;
+	}
 		// if channel is invite only
 	if (_inviteOnly == true && _invitedUsers.find(client.getNick()) == _invitedUsers.end()) {
 		client.sendErrMsg(server, ERR_INVITEONLYCHAN, NULL);
@@ -78,7 +80,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	names(server, client, message);
 }
 
-void leaveChannels(Server *server, Client &client)
+void	leaveChannels(Server *server, Client &client)
 {
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
 
@@ -105,7 +107,7 @@ void	join(Server *server, Client &client, Message& msg)
 		return;
 	}
 	// leave all joined channels
-	if (parameters[0] == "0")
+	if (parameters.size() == 1 && parameters[0] == "0")
 		leaveChannels(server, client);
 	std::stringstream ss(parameters[0]);
 	std::string token;
@@ -604,16 +606,21 @@ void	kick(Server *server, Client &client, Message& msg)
 
 bool	userMode(Server *server, Client &client, std::vector<std::string>& parameters)
 {
-	(void)parameters;
-
-	Server::ClientMap authorizedClients = server->getAuthorizedClientMap();
-	(void)client;
-	// Server::ClientMap::iterator it = authorizedClients.find();
-	if (1 /*client.getNick() != */)
+	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(parameters[0]);
+	if (itChannel != server->getChannelMap().end())
 		return false;
-	// MODE WiZ -o
-	// :Angel MODE Angel +i
-	std::cout << " inside USERmode: " << parameters[0] << " - " << parameters[1] << std::endl;
+	if (client.getNick() != parameters[0]) {
+		client.sendErrMsg(server, ERR_USERSDONTMATCH, NULL);
+		return true;
+	}
+	if (parameters.size() < 2)
+		return true;
+	if (parameters[1] == "-o")
+		client.setIsOperator(false);
+	else if (parameters[1] == "+i")
+		client.setIsInvisible(true);
+	else if (parameters[1] == "-i")
+		client.setIsInvisible(false);
 	return true;
 }
 

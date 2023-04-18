@@ -11,7 +11,7 @@
 
 # define ERR_CANNOTSENDTOCHAN	"404 <channel name> :Cannot send to channel"
 
-# define ERR_TOOMANYCHANNELS	"405 <channel name> :You have joined too many channels"	//have joined the maximum number of allowed channels and they try to join another channel
+# define ERR_TOOMANYCHANNELS	"405 <channel name> :You have joined too many channels"
 
 # define ERR_TOOMANYTARGETS		"407 <target> :Duplicate recipients. No message delivered"
 
@@ -60,5 +60,7 @@
 # define ERR_NOPRIVILEGES		"481 :Permission Denied- You're not an IRC operator"
 
 # define ERR_CHANOPRIVSNEEDED	"482 <channel> :You're not channel operator"
+
+# define ERR_USERSDONTMATCH		"502 :Cannot change mode for other users"
 
 #endif
