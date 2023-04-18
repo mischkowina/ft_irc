@@ -168,6 +168,23 @@ bool	Channel::clientIsChannelUser(std::string nick) const
 	return true;
 }
 
+bool	Channel::clientIsInvited(std::string nick) const
+{
+	if (_invitedUsers.find(nick) != _invitedUsers.end())
+		return true;
+	return false;
+}
+
+bool	Channel::clientIsBanned(std::string nick) const
+{
+	std::list<Client>::const_iterator	it = _bannedUsers.begin();
+	while (it != _bannedUsers.end() && it->getNick() != nick)
+		it++;
+	if (it == _bannedUsers.end())
+		return false;
+	return true;
+}
+
 bool	Channel::clientIsVoicedUser(std::string nick) const
 {
 	if (_voiceUsers.find(nick) != _voiceUsers.end())
@@ -178,8 +195,11 @@ bool	Channel::clientIsVoicedUser(std::string nick) const
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
 	std::list<Client>::iterator	it = _channelUsers.begin();
-	while (it != _channelUsers.end() || it->getNick() != nick)
-		it++;
+	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end() || it->getNick() == nick; it++)
+	{
+		std::cout << nick << std::endl;
+		std::cout << it->getNick() << std::endl;
+	}
 	return (it);
 }
 
@@ -218,6 +238,11 @@ void	Channel::addToVoiceList(Client &client)
 void	Channel::addToInviteList(std::string nick)
 {
 	_invitedUsers.insert(nick);
+}
+
+void	Channel::removeFromInviteList(std::string nick)
+{
+	_invitedUsers.erase(nick);	
 }
 
 void	Channel::removeFromVoiceList(std::string nick)
@@ -284,22 +309,28 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 {
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
-		if (it->getNick() == sender.getNick())//don't send message to the sender himself
+		if (it->getNick() == sender.getNick() && type != "JOIN")//don't send message to the sender himself unless it's join
 			continue;
 		if (msg.find(" ", 0) != std::string::npos && type != "KICK")
 			msg.insert(0, ":");
 		msg.insert(0, " ");
-		msg.insert(0, " " + _channelName);
+		if (type != "NICK")
+			msg.insert(0, " " + _channelName);
 		//insert command name
 		msg.insert(0, type);
 
 		msg.insert(0, " ");
-		//insert full prefix of sender - :<nick>!<username>@<IP>
-		msg.insert(0, sender.getIP());
-		msg.insert(0, "@");
-		msg.insert(0, sender.getName());
-		msg.insert(0, "!");
-		msg.insert(0, sender.getNick());
+		//insert full prefix of sender - :<nick>!<username>@<IP> or anonymous for anonymous channels
+		if (_anonymousChannel == true)
+			msg.insert(0, "anonymous!anonymous@anonymous.");
+		else
+		{
+			msg.insert(0, sender.getIP());
+			msg.insert(0, "@");
+			msg.insert(0, sender.getName());
+			msg.insert(0, "!");
+			msg.insert(0, sender.getNick());
+		}
 		msg.insert(0, ":");
 		std::cout << BLUE "Sending to " << it->getNick() << ": " RESET << msg << std::endl;
 		msg.append("\r\n");
@@ -337,4 +368,25 @@ void	Channel::noOutsideMsg(char c)
 		_noOutsideMessages = true;
 	else
 		_noOutsideMessages = false;
+}
+
+void	Channel::updateNick(Client &oldNick, Client &newNick)
+{
+	std::list<Client>::iterator it = getChannelUser(oldNick.getNick());
+	it->setNick(newNick.getNick());
+	if (clientIsChannelOperator(oldNick.getNick()))
+	{
+		removeFromOperatorList(oldNick.getNick());
+		addToOperatorList(newNick);
+	}
+	if (clientIsVoicedUser(oldNick.getNick()))
+	{
+		removeFromVoiceList(oldNick.getNick());
+		addToVoiceList(newNick);
+	}
+	if (clientIsInvited(oldNick.getNick()))
+	{
+		removeFromInviteList(oldNick.getNick());
+		addToInviteList(newNick.getNick());
+	}
 }

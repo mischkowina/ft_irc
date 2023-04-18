@@ -24,9 +24,17 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 		Server::ChannelMap::const_iterator itChannel = tmpChannel.find(*itRecv);
 		if (itChannel != tmpChannel.end())
 		{
-			//TO-DO: check if client is authorized to send message in that channel
-			
-			itChannel->second.sendMsgToChannel(sender, msg, "PRIVMSG");
+			//sending message not possible if the channel is moderated and the sender is neither voiced nor chanop
+			if (itChannel->second.isModerated() && (itChannel->second.clientIsVoicedUser(sender.getNick()) == false) && itChannel->second.clientIsChannelOperator(sender.getNick()) == false)
+				sender.sendErrMsg(server, ERR_CANNOTSENDTOCHAN, itChannel->second.getChannelName().c_str());
+			//sending message not possible if the channel allows no outside messages and the sender is not on the channel
+			else if (itChannel->second.allowsNoOutsideMessages() && itChannel->second.clientIsChannelUser(sender.getNick()) == false)
+				sender.sendErrMsg(server, ERR_CANNOTSENDTOCHAN, itChannel->second.getChannelName().c_str());
+			//sending message not possible if the sender is banned on that channel
+			else if (itChannel->second.clientIsBanned(sender.getNick()))
+				sender.sendErrMsg(server, ERR_CANNOTSENDTOCHAN, itChannel->second.getChannelName().c_str());
+			else
+				itChannel->second.sendMsgToChannel(sender, msg, "PRIVMSG");
 			continue ;
 		}
 		//check if message is directed at horoscope bot
@@ -85,8 +93,13 @@ void	notice(Server *server, Client &client, Message& msg)
 		return;
 
 	Server::ClientMap::iterator it = server->getAuthorizedClientMap().find(parameters[0]);
-	if (it == server->getAuthorizedClientMap().end())
+	if (it != server->getAuthorizedClientMap().end())
+	{
+		(*it).second.sendMsg(client, parameters[1], "NOTICE");
 		return;
+	}
 
-	(*it).second.sendMsg(client, parameters[1], "NOTICE");
+	Server::ChannelMap::iterator itChan = server->getChannelMap().find(parameters[0]);
+	if (itChan != server->getChannelMap().end())
+		(*itChan).second.sendMsgToChannel(client, parameters[1], "NOTICE");
 }

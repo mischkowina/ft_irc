@@ -27,7 +27,7 @@ void	nick(Server *server, Client &client, Message& msg)
 	if (changedClient.getName().empty() == false)
 		changedClient.setIsAuthorized(true);
 
-	if (parameters[0] == "horoscope" || server->addClient(changedClient) == false)
+	if (parameters[0] == "horoscope" || parameters[0] == "anonymous" || server->addClient(changedClient) == false)
 		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
 	else
 	{
@@ -39,8 +39,18 @@ void	nick(Server *server, Client &client, Message& msg)
 				sendWelcome(server, changedClient);
 		}
 		server->eraseFromClientMap(client);
+	} 
+	//send message to all channels that client is on
+	//change nick in all channels
+	for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
+	{
+		if (it->second.clientIsChannelUser(client.getNick()))
+		{
+			if (it->second.isQuiet() == false)
+				it->second.sendMsgToChannel(client, parameters[0], "NICK");
+			it->second.updateNick(client, changedClient);
+		}
 	}
-	//COMMENT: No implementation of ERR_NICKCOLLISION since it is only applicable for multi-server connections
 }
 
 /////////////////////////////////// PASS ////////////////////////////////////
@@ -106,10 +116,33 @@ void	quit(Server *server, Client &client, Message& msg)
 	std::vector<std::string> parameters = msg.getParameters();
 	std::string	message = ":" + server->getHostname() + " QUIT ";
 
+	std::string reason;
 	if (parameters.empty() == true)
-		message.append(client.getNick());
+		reason = client.getNick();
 	else
-		message.append(parameters[0]);
+		reason = parameters[0];
+	if (reason.find(" ", 0) != std::string::npos)
+		message.push_back(':');
+	message.append(reason);
+
+	Server::ChannelMap::iterator it = server->getChannelMap().begin();
+	while (it != server->getChannelMap().end())
+	{
+		if (it->second.clientIsChannelUser(client.getNick()) == true)
+		{
+			it->second.removeUser(client);
+			it->second.removeFromInviteList(client.getNick());
+			if (it->second.isQuiet())
+				continue;
+			if (it->second.isAnonymous() && reason == client.getNick())
+				it->second.sendMsgToChannel(client, "anonymous", "PART");
+			else if (it->second.isAnonymous() && reason != client.getNick())
+				it->second.sendMsgToChannel(client, reason, "PART");
+			else
+				it->second.sendMsgToChannel(client, reason, "QUIT");
+		}
+		it++;
+	}
 
 	send(client.getSocket(), message.data(), message.length(), 0);
 	close(client.getSocket());

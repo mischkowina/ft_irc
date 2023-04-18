@@ -54,13 +54,19 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 
 	_channelUsers.push_back(client);
 	client.increaseChannelCounter();
-	// send msg to other clients
-	if (_quietChannel == true)
-		return;
-	std::string msg = client.getNick() + " has joined the channel\n";
-	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
-		send(it->getSocket(), msg.data(), msg.length(), 0);
-	}
+
+	// send JOIN msg to all clients on the channel
+	if (_quietChannel == false)
+		sendMsgToChannel(client, "", "JOIN");
+
+	//send RPL_TOPIC && RPL_NAMREPLY && RPL_ENDOFNAMES to that client
+	std::vector<std::string> params;
+	params.push_back(_channelName);
+	params.push_back(_topic);
+	client.sendErrMsg(server, RPL_TOPIC, params);
+
+	Message message("NAMES " + _channelName);
+	names(server, client, message);
 }
 
 void	join(Server *server, Client &client, Message& msg)
@@ -132,8 +138,8 @@ void	part(Server *server, Client &client, Message& msg)
 	std::string	message;
 	if (parameters.size() > 1)
 		message = parameters[1];
-	else
-		message = "";
+	else 
+		message = client.getNick();
 
 	Server::ChannelMap::iterator it;
 	for (size_t i = 0; i < channelNames.size(); i++)
@@ -144,7 +150,14 @@ void	part(Server *server, Client &client, Message& msg)
 			if (it->second.removeUser(client) == false)
 				client.sendErrMsg(server, ERR_NOTONCHANNEL, channelNames[i].c_str());
 			else
-				it->second.sendMsgToChannel(client, message, "PART");
+			{
+				if (it->second.isQuiet())
+					continue ;
+				if (it->second.isAnonymous() && message == client.getNick())
+					it->second.sendMsgToChannel(client, "anonymous", "PART");
+				else
+					it->second.sendMsgToChannel(client, message, "PART");
+			}	
 		}
 		else 
 			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, channelNames[i].c_str());
@@ -233,6 +246,9 @@ void	names_per_channel(Server *server, Client &client, Channel &channel)
 	{
 		//if the respective user is invisible and the client is not on the same channel, it doesn't get displayed
 		if (itClien->isInvisible() && channel.clientIsChannelUser(client.getNick()) == false)
+			continue;
+		//if the channel is Anonymous, only the name of the active client is shown (if he is on the channel)
+		if (channel.isAnonymous() && itClien->getNick() != client.getNick())
 			continue;
 		//separate nicknames by space
 		if (param2.empty() == false)
@@ -448,8 +464,9 @@ void	kick_client_from_channel(Client &client, Channel &channel, std::vector<std:
 	else
 		msg.append(client.getNick());
 	
-	//send message to the whole channel that the user got kicked from (still including that user)
-	channel.sendMsgToChannel(client, msg, "KICK");
+	//send message to the whole channel that the user got kicked from (still including that user) - unless it's a quiet channel
+	if (channel.isQuiet() == false)
+		channel.sendMsgToChannel(client, msg, "KICK");
 
 	//actually remove the victim from the channel
 	channel.removeUser(victim);
