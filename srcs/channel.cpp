@@ -251,23 +251,16 @@ void	Channel::removeFromVoiceList(std::string nick)
 
 void	Channel::manageBanList(Client& client, char c, std::string& banMask)
 {
+	(void)client;
 	if (c == '+' && banMask == "") {
 		// ... REPLACE with prepared code
-		(void)client;
 		return;
 	}
 	else if (c == '+')
+		_banList = _banList + banMask + ",";
+	else if (c == '-' && banMask.size() > 5)
 	{
-		std::stringstream ss(_banList);
-		std::string token;
-		while (std::getline(ss, token, ',')) {
-			_banList = _banList + " " + token + " ";
-			token.clear();
-		}
-	}
-	else if (c == '-')
-	{
-		size_t pos = _banList.find(banMask + " ");
+		size_t pos = _banList.find(banMask + ",");
 		if (pos != std::string::npos)
 			_banList.erase(pos, banMask.length() + 1);
 	}
