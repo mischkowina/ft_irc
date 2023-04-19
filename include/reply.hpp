@@ -23,7 +23,7 @@
 
 # define RPL_LISTEND	"323 :End of /LIST"
 
-# define RPL_CHANNELMODEIS "324: <channel> <mode> <mode params>"
+# define RPL_CHANNELMODEIS "324 <channel> <mode> <mode params>"
 
 # define RPL_NOTOPIC	"331 <channel> :No topic is set"
 

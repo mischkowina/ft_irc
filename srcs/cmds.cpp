@@ -663,19 +663,17 @@ void	info_all_channel_modes(Server *server, Client &client, Channel &channel)
 	{
 		params[1] = "+l";
 		std::stringstream ss;
-		ss << channel.getChannelLimit() << " ";
+		ss << channel.getChannelLimit();
 		params[2] = ss.str();
 		client.sendErrMsg(server, RPL_CHANNELMODEIS, params);
 	}
+	//if channel has ban mask
 	if (channel.getChannelBanMasks().empty() == false)
 	{
-		std::vector<std::string> params;
-		params.push_back(channel.getChannelName());
-		params.push_back("");
-
+		params.pop_back();
 		for (std::vector<std::string>::iterator it = channel.getChannelBanMasks().begin(); it != channel.getChannelBanMasks().end(); it++)
 		{
-			params[2] = *it;
+			params[1] = *it;
 			client.sendErrMsg(server, RPL_BANLIST, params);
 		}
 		client.sendErrMsg(server, RPL_BANLIST, channel.getChannelName().c_str());	
@@ -740,7 +738,7 @@ void	mode(Server *server, Client &client, Message& msg)
 	std::set<std::string> operators = itChannel->second.getChannelOperators();
 	std::string options = parameters[1];
 	std::string flags;
-	if (options[0] == '+' && options[0] == '-')
+	if (options[0] == '+' || options[0] == '-')
 		flags = options.substr(1);
 	else
 	{
@@ -750,6 +748,7 @@ void	mode(Server *server, Client &client, Message& msg)
 	}
 	if (flags.length() > 3 || flags.find_first_not_of("aopsitqmnbvkl") != std::string::npos)
 	{
+		std::cout << "HERE?" << std::endl; 
 		client.sendErrMsg(server, ERR_UNKNOWNMODE, flags.data());
 		return;
 	}
