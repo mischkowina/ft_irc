@@ -10,7 +10,7 @@ class Channel
 {
 	private:
 		std::list<Client>		_channelUsers;
-		std::vector<std::string>_banMask;
+		// std::vector<std::string>_banMask;
 		std::string				_banList;
 		std::set<std::string>	_channelOperator;
 		std::set<std::string>	_invitedUsers;

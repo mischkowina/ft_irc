@@ -267,8 +267,7 @@ void	Channel::removeFromVoiceList(std::string nick)
 void	Channel::manageBanList(Client& client, char c, std::string& banMask)
 {
 	if (c == '+' && banMask == "") {
-		// ... REPLACE with prepared code
-		(void)client;
+		//REPLIES OPEN!!!
 		return;
 	}
 	else if (c == '+')

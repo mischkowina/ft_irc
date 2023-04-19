@@ -653,6 +653,8 @@ void	info_all_user_modes(Server *server, Client &client)
 		modes += "i";
 	if (client.getIsOperator())
 		modes += "o";
+	if (modes.empty() == false)
+		modes.insert(0, "+");
 	client.sendErrMsg(server, RPL_UMODEIS, modes.c_str());
 }
 
@@ -740,24 +742,54 @@ void	info_all_channel_modes(Server *server, Client &client, Channel &channel)
 	}
 }
 
-bool	userMode(Server *server, Client &client, std::vector<std::string>& parameters)
+void	userMode(Server *server, Client &client, std::vector<std::string>& parameters)
 {
-	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(parameters[0]);
-	if (itChannel != server->getChannelMap().end())
-		return false;
-	if (client.getNick() != parameters[0]) {
+	//if first parameters is a nickname and it is not the same as the client issuing the message, send ERR msg -> clients are not allowed to change or view user modes for anyone but themselves
+	if (parameters[0] != client.getNick()) {
 		client.sendErrMsg(server, ERR_USERSDONTMATCH, NULL);
-		return true;
+		return;
 	}
+	
+	//if there is no second parameter, it's a query to see all active user modes
 	if (parameters.size() < 2)
-		return true;
-	if (parameters[1] == "-o")
-		client.setIsOperator(false);
-	else if (parameters[1] == "+i")
-		client.setIsInvisible(true);
-	else if (parameters[1] == "-i")
-		client.setIsInvisible(false);
-	return true;
+	{
+		info_all_user_modes(server, client);
+		return;
+	}
+
+	//check if second parameter is valid
+	std::string options = parameters[1];
+	std::string flags = options.substr(1);
+	if ((options[0] != '+' && options[0] != '-') || flags.length() > 3 || flags.find_first_not_of("oi") != std::string::npos)
+	{
+		client.sendErrMsg(server, ERR_UMODEUNKNOWNFLAG, NULL);
+		return;
+	}
+
+	//change stati for all flags in the second parameter
+	for (size_t i = 0; i < flags.length(); i++)
+	{
+		bool status;
+		if (options[0] == '+')
+			status = true;
+		else
+			status = false;
+		if (flags[i] == 'i')
+		{
+			if (client.setIsInvisible(status))
+			{
+				//set invisibility status in all channels of that user in case it changed
+				for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
+				{
+					if (it->second.clientIsChannelUser(client.getNick()))
+						it->second.getChannelUser(client.getNick())->setIsInvisible(status);
+				}
+			}
+		}
+		if (flags[i] == 'o' && status == false)
+			client.setIsOperator(false);
+	}
+	client.sendMsg(client, options, "MODE");
 }
 
 void	mode(Server *server, Client &client, Message& msg)
@@ -769,37 +801,29 @@ void	mode(Server *server, Client &client, Message& msg)
 		return;
 	}
 
-	//if first parameters is a nickname and it is not the same as the client issuing the message, send ERR msg -> clients are not allowed to change or view user modes for anyone but themselves
-	if (server->getAuthorizedClientMap().find(parameters[0]) != server->getAuthorizedClientMap().end() &&
-			parameters[0] != client.getNick()) {
-		client.sendErrMsg(server, ERR_USERSDONTMATCH, NULL);
+	//check if parameter[0] is a channel or a user - if user, call usermode function, if none send error, else continue with this function
+	if (server->getAuthorizedClientMap().find(parameters[0]) != server->getAuthorizedClientMap().end())
+	{
+		userMode(server, client, parameters);
 		return;
 	}
-
-	//if there is only one (valid) parameter, send info message on all modes of the subject 
-	if (parameters.size() < 2) {
-		if (server->getAuthorizedClientMap().find(parameters[0]) != server->getAuthorizedClientMap().end())
-			info_all_user_modes(server, client);
-		else if (server->getChannelMap().find(parameters[0]) != server->getChannelMap().end())
-			info_all_channel_modes(server, client, server->getChannelMap().find(parameters[0])->second);
-		else if (parameters[0].find_first_of("+#&") != std::string::npos)
+	else if (server->getChannelMap().find(parameters[0]) == server->getChannelMap().end())
+	{
+		if (parameters[0].find_first_of("+#&") != std::string::npos)
 			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, parameters[0].c_str());
-		else 
+		else
 			client.sendErrMsg(server, ERR_NOSUCHNICK, parameters[0].c_str());
-		return;
 	}
 
-	if (userMode(server, client, parameters) == true)
-		return;
+	//if there is only one (valid) parameter, send info message on all modes of the channel
+	if (parameters.size() < 2) 
+		info_all_channel_modes(server, client, server->getChannelMap().find(parameters[0])->second);
 
 	std::string	channel = parameters[0];
 	std::transform(channel.begin(), channel.end(), channel.begin(), ::tolower);
 
 	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
-	if (itChannel == server->getChannelMap().end()) {
-		client.sendErrMsg(server, ERR_NOSUCHCHANNEL, NULL);
-		return;
-	}
+
 		// MODE <channel> <flags> [<args>]
 	std::set<std::string> operators = itChannel->second.getChannelOperators();
 	std::string options = parameters[1];

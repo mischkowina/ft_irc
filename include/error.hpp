@@ -61,6 +61,8 @@
 
 # define ERR_CHANOPRIVSNEEDED	"482 <channel> :You're not channel operator"
 
+# define ERR_UMODEUNKNOWNFLAG	"501 :Unknown MODE flag"
+
 # define ERR_USERSDONTMATCH		"502 :Cannot change mode for other users"
 
 #endif
