@@ -729,17 +729,17 @@ void	info_all_channel_modes(Server *server, Client &client, Channel &channel)
 		params[2] = ss.str();
 		client.sendErrMsg(server, RPL_CHANNELMODEIS, params);
 	}
-	//if channel has ban mask
-	if (channel.getChannelBanMasks().empty() == false)
-	{
-		params.pop_back();
-		for (std::vector<std::string>::iterator it = channel.getChannelBanMasks().begin(); it != channel.getChannelBanMasks().end(); it++)
-		{
-			params[1] = *it;
-			client.sendErrMsg(server, RPL_BANLIST, params);
-		}
-		client.sendErrMsg(server, RPL_BANLIST, channel.getChannelName().c_str());	
-	}
+	//if channel has ban mask - TODO
+	// if (channel.getChannelBanMasks().empty() == false)
+	// {
+	// 	params.pop_back();
+	// 	for (std::vector<std::string>::iterator it = channel.getChannelBanMasks().begin(); it != channel.getChannelBanMasks().end(); it++)
+	// 	{
+	// 		params[1] = *it;
+	// 		client.sendErrMsg(server, RPL_BANLIST, params);
+	// 	}
+	// 	client.sendErrMsg(server, RPL_BANLIST, channel.getChannelName().c_str());	
+	// }
 }
 
 void	userMode(Server *server, Client &client, std::vector<std::string>& parameters)

@@ -93,11 +93,6 @@ int	Channel::getChannelLimit() const
 	return _userLimit;
 }
 
-std::vector<std::string>	&Channel::getChannelBanMasks()
-{
-	return _banMask;
-}
-
 std::set<std::string>	&Channel::getChannelInviteList()
 {
 	return _invitedUsers;
@@ -268,6 +263,7 @@ void	Channel::manageBanList(Client& client, char c, std::string& banMask)
 {
 	if (c == '+' && banMask == "") {
 		//REPLIES OPEN!!!
+		(void)client;
 		return;
 	}
 	else if (c == '+')

@@ -67,7 +67,6 @@ class Channel
 		bool	includedOnBanList(Server *server, Client& client);
 		
 		std::string				getBanList() const;
-		// std::vector<std::string>	getBanList() const;
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
 		std::set<std::string>	&getChannelOperators();
