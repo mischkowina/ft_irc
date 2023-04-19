@@ -355,6 +355,8 @@ void	Server::execCmd(Client &client, Message& msg)
 			(*it->second)(this, client, msg);
 		else if (msg.getCommand() == "USER" && client.getName().empty() == true)
 			(*it->second)(this, client, msg);
+		else if (msg.getCommand() == "PASS")
+			(*it->second)(this, client, msg);
 		else
 			client.sendErrMsg(this, ERR_NOTREGISTERED, NULL);
 		return ;
