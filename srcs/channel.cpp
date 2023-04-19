@@ -63,12 +63,12 @@ void	Channel::setChannelUsers(Client &client)
 
 /* getters */
 
-std::list<Client> Channel::getChannelUsers() const
+std::list<Client> &Channel::getChannelUsers()
 {
 	return _channelUsers;
 }
 
-std::set<std::string> Channel::getChannelOperators() const
+std::set<std::string> &Channel::getChannelOperators()
 {
 	return _channelOperator;
 }
@@ -81,6 +81,26 @@ std::string	Channel::getTopic() const
 std::string  Channel::getChannelName() const
 {
 	return _channelName;
+}
+
+std::string	Channel::getChannelKey() const
+{
+	return _password;
+}
+
+int	Channel::getChannelLimit() const
+{
+	return _userLimit;
+}
+
+std::vector<std::string>	&Channel::getChannelBanMasks()
+{
+	return _banMask;
+}
+
+std::set<std::string>	&Channel::getChannelInviteList()
+{
+	return _invitedUsers;
 }
 
 bool	Channel::removeUser(Client& client)
@@ -188,7 +208,7 @@ bool	Channel::clientIsBanned(std::string nick) const
 	// 	it++;
 	// if (it == _bannedUsers.end())
 	// 	return false;
-	return true;
+	return false;
 }
 
 bool	Channel::clientIsVoicedUser(std::string nick) const

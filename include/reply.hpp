@@ -11,6 +11,8 @@
 
 # define RPL_MYINFO		"004 :<servername> ft_irc 1.0 io opsitnmlbvk"
 
+# define RPL_UMODEIS	"221 <user mode string>"
+
 # define RPL_AWAY		"301 <nick> :<away message>"
 
 # define RPL_UNAWAY		"305 :You are no longer marked as being away"
@@ -20,6 +22,8 @@
 # define RPL_LIST		"322 <channel> <# visible>:<topic>"
 
 # define RPL_LISTEND	"323 :End of /LIST"
+
+# define RPL_CHANNELMODEIS "324 <channel> <mode> <mode params>"
 
 # define RPL_NOTOPIC	"331 <channel> :No topic is set"
 
