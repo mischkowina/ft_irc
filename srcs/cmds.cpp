@@ -14,57 +14,48 @@ bool	validChannelName(Server *server, std::string& name, Client &client)
 	return true;
 }
 
-bool	compDiff(Server *server, Client& client, std::string& str1, std::string& str2)
+bool	parseWildCards(std::string& str1, std::string& str2)
 {
-	if (str1[str1.size() - 1] == '*')
+	if (str2[str2.size() - 1] == '*')
 	{
-		std::string sub1 = str1.substr(0, str1.find('*'));
-		std::string sub2 = str2.substr(0, str2.find('*'));
-		if (sub1 == sub2) {
-			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+		std::string sub1 = str2.substr(0, str2.size() - 1);
+		size_t pos = str1.find(sub1);
+		if (pos != std::string::npos)
 			return true;
-		}
 	}
-	else if (str1[0] == '*')
+	else if (str2[0] == '*')
 	{
-		std::string sub1 = str1.substr(1, str1.size());
-		std::string sub2 = str2.substr(1, str2.size());
-		if (sub1 == sub2) {
-			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+		std::string sub1 = str2.substr(1);
+		size_t pos = str1.find(sub1);
+		if (pos != std::string::npos)
 			return true;
-		}
 	}
 	return false;
 }
 
 bool	Channel::includedOnBanList(Server *server, Client& client)
 {
-	// compare user ID against banmasks	-> *!*@* -> all users are banned;	*!*@*.edu
+	// compare user ID against banmasks
 	std::string userNick = client.getNick();
 	std::string userName = client.getName();
 	std::string userHost = client.getIP();
 
-	std::stringstream ss(_banList);
-	std::string token;
-	while (std::getline(ss, token, ','))
+	for (std::set<std::string>::iterator it = _banList.begin(); it != _banList.end(); ++it)
 	{
 		std::string banNick, banUser, banHost;
-		size_t pos1 = token.find('!');
-		size_t pos2 = token.find('@');
-		banNick = token.substr(0, pos1);
-		banUser = token.substr(pos1 + 1, pos2 - pos1 - 1);
-		banHost = token.substr(pos2 + 1);
+		size_t pos1 = (*it).find('!');
+		size_t pos2 = (*it).find('@');
+		banNick = (*it).substr(0, pos1);
+		banUser = (*it).substr(pos1 + 1, pos2 - pos1 - 1);
+		banHost = (*it).substr(pos2 + 1);
 
-		if ((banNick == "*" && banUser == "*" && banHost == "*")
-			|| (banNick == userNick && banUser == userName && banHost == userHost))
+		if (parseWildCards(userNick, banNick) == true
+			&& parseWildCards(userName, banUser) == true
+			&& parseWildCards(userHost, banHost) == true)
 		{
 			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
-			return true;
+			return false;
 		}
-		if (compDiff(server, client, userNick, banNick) == true
-			|| compDiff(server, client, userName, banUser) == true
-			|| compDiff(server, client, userHost, banHost) == true)
-			return true;
 	}
 	return false;
 }

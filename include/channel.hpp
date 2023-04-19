@@ -10,9 +10,8 @@ class Channel
 {
 	private:
 		std::list<Client>		_channelUsers;
-		// std::vector<std::string>_banMask;
-		std::string				_banList;
 		std::set<std::string>	_channelOperator;
+		std::set<std::string>	_banList;
 		std::set<std::string>	_invitedUsers;
 		std::set<std::string>	_voiceUsers;
 		std::string				_channelName;
@@ -66,7 +65,6 @@ class Channel
 		void	setOutsideMsg(char c);
 		bool	includedOnBanList(Server *server, Client& client);
 		
-		std::string				getBanList() const;
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
 		std::set<std::string>	&getChannelOperators();

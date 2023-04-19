@@ -190,11 +190,6 @@ bool	Channel::clientIsInvited(std::string nick) const
 	return false;
 }
 
-std::string	Channel::getBanList() const
-{
-	return _banList;
-}
-
 bool	Channel::clientIsBanned(std::string nick) const
 {
 	(void)nick;
@@ -261,25 +256,18 @@ void	Channel::removeFromVoiceList(std::string nick)
 
 void	Channel::manageBanList(Client& client, char c, std::string& banMask)
 {
+	(void)client;
 	if (c == '+' && banMask == "") {
 		//REPLIES OPEN!!!
-		(void)client;
 		return;
-	}
+	}	
 	else if (c == '+')
+		_banList.insert(banMask);
+	else if (c == '-' && banMask.size() > 5)
 	{
-		std::stringstream ss(_banList);
-		std::string token;
-		while (std::getline(ss, token, ',')) {
-			_banList = _banList + " " + token + " ";
-			token.clear();
-		}
-	}
-	else if (c == '-')
-	{
-		size_t pos = _banList.find(banMask + " ");
-		if (pos != std::string::npos)
-			_banList.erase(pos, banMask.length() + 1);
+		std::set<std::string>::iterator it = _banList.find(banMask);
+		if (it != _banList.end())
+			_banList.erase(it);
 	}
 }
 
