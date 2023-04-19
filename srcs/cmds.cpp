@@ -786,6 +786,7 @@ void	mode(Server *server, Client &client, Message& msg)
 			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, parameters[0].c_str());
 		else 
 			client.sendErrMsg(server, ERR_NOSUCHNICK, parameters[0].c_str());
+		return;
 	}
 
 	if (userMode(server, client, parameters) == true)
@@ -802,18 +803,9 @@ void	mode(Server *server, Client &client, Message& msg)
 		// MODE <channel> <flags> [<args>]
 	std::set<std::string> operators = itChannel->second.getChannelOperators();
 	std::string options = parameters[1];
-	std::string flags;
-	if (options[0] == '+' || options[0] == '-')
-		flags = options.substr(1);
-	else
-	{
-		flags = options;
-		//insert a ? to identify it's query for all the manage/set commands
-		options.insert(0, "?");
-	}
-	if (flags.length() > 3 || flags.find_first_not_of("aopsitqmnbvkl") != std::string::npos)
-	{
-		std::cout << "HERE?" << std::endl; 
+	std::string flags = options.substr(1);
+	if ((options[0] != '+' && options[0] != '-') || flags.length() > 3 || flags.find_first_not_of("aopsitqmnbvkl") != std::string::npos)
+	{ 
 		client.sendErrMsg(server, ERR_UNKNOWNMODE, flags.data());
 		return;
 	}
@@ -821,7 +813,7 @@ void	mode(Server *server, Client &client, Message& msg)
 		client.sendErrMsg(server, ERR_NOPRIVILEGES, NULL);
 		return;
 	}
-	if (itChannel->second.supportedChannelModes() == false && options == "t") {
+	if (itChannel->second.supportedChannelModes() == false && flags == "t") {
 		itChannel->second.setTopicChangeOnlyByChanop(options[0]);
 		return;
 	}
@@ -856,19 +848,47 @@ void	mode(Server *server, Client &client, Message& msg)
 	const char* tmpCStr = flags.c_str();
 	for (unsigned int i = 0; i < flags.length(); i++)
 	{
+		//check for o / v option if given user exists / is on the channel
+		if (tmpCStr[i] == 'o' || tmpCStr[i] == 'v')
+		{
+			//check if user exists on the server
+			if (server->getAuthorizedClientMap().find(user) == server->getAuthorizedClientMap().end())
+			{
+				client.sendErrMsg(server, ERR_NOSUCHNICK, user.c_str());
+				continue ;
+			}
+			//check if user is on the channel
+			if (itChannel->second.clientIsChannelUser(user) == false)
+			{
+				std::vector<std::string> params;
+				params.push_back(user);
+				params.push_back(itChannel->second.getChannelName());
+				client.sendErrMsg(server, ERR_USERNOTINCHANNEL, params);
+				continue ;
+			}
+		}
+		
+		std::string message;
+		message.push_back(options[0]);
+		message.push_back(tmpCStr[i]);
+
 		switch (tmpCStr[i])
 		{
 			case 'o':
 				itChannel->second.manageOperatorList(options[0], user);
+				message.append(" " + user);
 				break;
 			case 'b':
 				itChannel->second.manageBanList(client, options[0], addBanList);
+				message.append(" " + addBanList);
 				break;
 			case 'v':
 				itChannel->second.manageVoiceList(options[0], user);
+				message.append(" " + user);
 				break;
 			case 'k':
 				itChannel->second.setPassWD(options[0], user);
+				message.append(" " + user);
 				break;
 			case 'i':
 				itChannel->second.setInvite(options[0]);
@@ -887,6 +907,7 @@ void	mode(Server *server, Client &client, Message& msg)
 				break;
 			case 'l':
 				itChannel->second.setLimit(options[0], limit);
+				message.append(" " + limit);
 				break;
 			case 'n':
 				itChannel->second.setOutsideMsg(options[0]);
@@ -898,5 +919,6 @@ void	mode(Server *server, Client &client, Message& msg)
 				itChannel->second.setAnonymous(options[0]);
 				break;
 		}
+		itChannel->second.sendMsgToChannel(client, message, "MODE");
 	}
 }

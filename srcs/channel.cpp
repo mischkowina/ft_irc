@@ -218,11 +218,6 @@ bool	Channel::clientIsVoicedUser(std::string nick) const
 	return false;
 }
 
-std::list<Client>& Channel::getChannelUsers()
-{
-	return _channelUsers;
-}
-
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
 	std::list<Client>::iterator	it = _channelUsers.begin();
@@ -393,7 +388,7 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 {
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
-		if (it->getNick() == sender.getNick() && type != "JOIN")//don't send message to the sender himself unless it's join
+		if (it->getNick() == sender.getNick() && type != "JOIN" && type != "MODE")//don't send message to the sender himself unless it's join or mode
 			continue;
 		if (msg.find(" ", 0) != std::string::npos && type != "KICK")
 			msg.insert(0, ":");
