@@ -798,10 +798,11 @@ void	mode(Server *server, Client &client, Message& msg)
 			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, parameters[0].c_str());
 		else
 			client.sendErrMsg(server, ERR_NOSUCHNICK, parameters[0].c_str());
+		return;
 	}
 
 	//if there is only one (valid) parameter, send info message on all modes of the channel
-	if (parameters.size() < 2) 
+	if (parameters.size() < 2)
 		info_all_channel_modes(server, client, server->getChannelMap().find(parameters[0])->second);
 
 	std::string	channel = parameters[0];
