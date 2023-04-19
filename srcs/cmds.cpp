@@ -117,15 +117,7 @@ void	leaveChannels(Server *server, Client &client)
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
 
 	for (Server::ChannelMap::iterator itChan = mapOfChannels.begin(); itChan != mapOfChannels.end(); ++itChan)
-	{
-		// get nth channel and check it, if there is the targeted user
-		std::list<Client>& channelUsers = itChan->second.getChannelUsers();
-		for (std::list<Client>::iterator channelUser = channelUsers.begin(); channelUser != channelUsers.end(); ++channelUser)
-		{
-			if (channelUser->getNick() == client.getNick())
-				itChan->second.removeUser(client);
-		}
-	}
+		itChan->second.removeUser(client);
 }
 
 void	join(Server *server, Client &client, Message& msg)
@@ -139,8 +131,10 @@ void	join(Server *server, Client &client, Message& msg)
 		return;
 	}
 	// leave all joined channels
-	if (parameters.size() == 1 && parameters[0] == "0")
+	if (parameters.size() == 1 && parameters[0] == "0") {
 		leaveChannels(server, client);
+		return;
+	}
 	std::stringstream ss(parameters[0]);
 	std::string token;
 	while (std::getline(ss, token, ',')) {
