@@ -65,7 +65,6 @@ class Channel
 		void	setOutsideMsg(char c);
 		bool	includedOnBanList(Server *server, Client& client);
 		
-		std::set<std::string>	getBanList() const;
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
 		std::set<std::string>	getChannelOperators() const;

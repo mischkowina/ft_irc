@@ -175,11 +175,6 @@ bool	Channel::clientIsInvited(std::string nick) const
 	return false;
 }
 
-std::set<std::string>	Channel::getBanList() const
-{
-	return _banList;
-}
-
 bool	Channel::clientIsBanned(std::string nick) const
 {
 	(void)nick;
