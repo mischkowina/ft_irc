@@ -40,16 +40,14 @@ bool	Channel::includedOnBanList(Server *server, Client& client)
 	std::string userName = client.getName();
 	std::string userHost = client.getIP();
 
-	std::stringstream ss(_banList);
-	std::string token;
-	while (std::getline(ss, token, ','))
+	for (std::set<std::string>::iterator it = _banList.begin(); it != _banList.end(); ++it)
 	{
 		std::string banNick, banUser, banHost;
-		size_t pos1 = token.find('!');
-		size_t pos2 = token.find('@');
-		banNick = token.substr(0, pos1);
-		banUser = token.substr(pos1 + 1, pos2 - pos1 - 1);
-		banHost = token.substr(pos2 + 1);
+		size_t pos1 = (*it).find('!');
+		size_t pos2 = (*it).find('@');
+		banNick = (*it).substr(0, pos1);
+		banUser = (*it).substr(pos1 + 1, pos2 - pos1 - 1);
+		banHost = (*it).substr(pos2 + 1);
 
 		if (parseWildCards(userNick, banNick) == true
 			&& parseWildCards(userName, banUser) == true

@@ -175,7 +175,7 @@ bool	Channel::clientIsInvited(std::string nick) const
 	return false;
 }
 
-std::string	Channel::getBanList() const
+std::set<std::string>	Channel::getBanList() const
 {
 	return _banList;
 }
@@ -255,14 +255,14 @@ void	Channel::manageBanList(Client& client, char c, std::string& banMask)
 	if (c == '+' && banMask == "") {
 		// ... REPLACE with prepared code
 		return;
-	}
+	}	
 	else if (c == '+')
-		_banList = _banList + banMask + ",";
+		_banList.insert(banMask);
 	else if (c == '-' && banMask.size() > 5)
 	{
-		size_t pos = _banList.find(banMask + ",");
-		if (pos != std::string::npos)
-			_banList.erase(pos, banMask.length() + 1);
+		std::set<std::string>::iterator it = _banList.find(banMask);
+		if (it != _banList.end())
+			_banList.erase(it);
 	}
 }
 
