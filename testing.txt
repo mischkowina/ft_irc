@@ -26,7 +26,3 @@ MODE #42 +ovk user1 user1 pass
 MODE #42 +ovb user1 user1 !*@*.com
 MODE WiZ -o
 :Angel MODE Angel +i
-
-TODO:
-	- banmask	-> parse the list
-	==> fix clientIsBanned()

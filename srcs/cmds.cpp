@@ -14,19 +14,57 @@ bool	validChannelName(Server *server, std::string& name, Client &client)
 	return true;
 }
 
-bool	Channel::includedOnBanList(Server *server, Client& client)
+bool	compDiff(Server *server, Client& client, std::string& str1, std::string& str2)
 {
-	// compare user ID against banmasks	-> *!*@* -> all users;	*!*@*.edu
-	
-	// WIP -> parse wildcards
-	std::stringstream ss(_banList);
-	std::string token;
-	while (std::getline(ss, token, ',')) {
-		if (token == client.getNick() + client.getName() + client.getIP()) {
+	if (str1[str1.size() - 1] == '*')
+	{
+		std::string sub1 = str1.substr(0, str1.find('*'));
+		std::string sub2 = str2.substr(0, str2.find('*'));
+		if (sub1 == sub2) {
 			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
 			return true;
 		}
-		token.clear();
+	}
+	else if (str1[0] == '*')
+	{
+		std::string sub1 = str1.substr(1, str1.size());
+		std::string sub2 = str2.substr(1, str2.size());
+		if (sub1 == sub2) {
+			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool	Channel::includedOnBanList(Server *server, Client& client)
+{
+	// compare user ID against banmasks	-> *!*@* -> all users are banned;	*!*@*.edu
+	std::string userNick = client.getNick();
+	std::string userName = client.getName();
+	std::string userHost = client.getIP();
+
+	std::stringstream ss(_banList);
+	std::string token;
+	while (std::getline(ss, token, ','))
+	{
+		std::string banNick, banUser, banHost;
+		size_t pos1 = token.find('!');
+		size_t pos2 = token.find('@');
+		banNick = token.substr(0, pos1);
+		banUser = token.substr(pos1 + 1, pos2 - pos1 - 1);
+		banHost = token.substr(pos2 + 1);
+
+		if ((banNick == "*" && banUser == "*" && banHost == "*")
+			|| (banNick == userNick && banUser == userName && banHost == userHost))
+		{
+			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+			return true;
+		}
+		if (compDiff(server, client, userNick, banNick) == true
+			|| compDiff(server, client, userName, banUser) == true
+			|| compDiff(server, client, userHost, banHost) == true)
+			return true;
 	}
 	return false;
 }
