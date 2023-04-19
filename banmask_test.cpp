@@ -8,11 +8,12 @@ bool compDiff(std::string& str1, std::string& str2);
 
 std::string userNick = "oli";
 std::string userName = "USER1";
-std::string userHost = "host1";
+// std::string userHost = "host1.edu";
+std::string userHost = "uni.edu";
 
 std::string _banList0 = "*!*@*";
 // std::string _banList1 = "mare!superuser@uni.edu";
-std::string _banList1 = "oli!USER1@host1";
+std::string _banList1 = "oli!USER1@host1.edu";
 
 std::string _banList2 = "*!*@*.edu";
 std::string _banList3 = "*!*@uni.*";
@@ -26,10 +27,14 @@ std::string _banList7 = "*a!*@*";
 
 std::string _banList8 = "*!*1@*";
 std::string _banList9 = "*!*9@*";
+std::string _banList10 = "o*!X*@uni.*";
+std::string _banList11 = "o*!U*@uni.*";
 
 int main(int argc, char **argv) {
-
-	std::stringstream ss(return_banList(atoi(argv[1])));
+	if (argc != 2)
+		return 42;
+	std::string _BANLIST = return_banList(atoi(argv[1]));
+	std::stringstream ss(_BANLIST);
 	std::string token;
 	while (std::getline(ss, token, ','))
 	{
@@ -40,51 +45,67 @@ int main(int argc, char **argv) {
 		banNick = token.substr(0, pos1);
 		banUser = token.substr(pos1 + 1, pos2 - pos1 - 1);
 		banHost = token.substr(pos2 + 1);
-		if ((banNick == "*" && banUser == "*" && banHost == "*")
-			|| (banNick == userNick && banUser == userName && banHost == userHost))
+
+		if (compDiff(userNick, banNick) == true && compDiff(userName, banUser)
+			&& compDiff(userHost, banHost) == true)
 		{
-			std::cout << " 1. BANNED user : " << userNick << std::endl;
+			std::cout << " compDiff: BANNED user : " << userNick << std::endl;
+			std::cout << " _BANLIST : " << _BANLIST << std::endl;
+			std::cout << " userID : " << userNick <<"!"<<userName<<"@"<<userHost<< std::endl;
+		}
+		else {
+			std::cout << " _BANLIST : " << _BANLIST << std::endl;
+			std::cout << " NOT banned userID : " << userNick <<"!"<<userName<<"@"<<userHost<< std::endl;
 		}
 
-		compDiff(userNick, banNick);
-		compDiff(userName, banUser);
-		compDiff(userHost, banHost);
-
-		std::cout << "//debug: " << banNick << std::endl;
-		std::cout << "//debug: " << banUser << std::endl;
-		std::cout << "//debug: " << banHost << std::endl;
 	}
 	return 0;
 }
 
 bool	compDiff(std::string& str1, std::string& str2)
 {
-	if (str1[str1.size() - 1] == '*')
+	// std::cout << " ------- compDiff -----\n";
+	// std::cout << "str1 : " << str1 << " " << " str2 : " << str2<< std::endl;
+	
+	if (str2[str2.size() - 1] == '*')
 	{
-		std::string sub1 = str1.substr(0, str1.find('*'));
-		std::string sub2 = str2.substr(0, str2.find('*'));
-		if (sub1 == sub2) {
-			std::cout << " 2. BANNED user : " << str1 << std::endl;
+		// std::cout << " __pos__ is : " << str2.size() - 1 << " and char : " << str2[str2.size() - 1] << std::endl;
+		
+		std::string sub1 = str2.substr(0, str2.size() - 1);		// uni.*
+		// std::cout << " ::debug sub1 : " << sub1 << std::endl;
+		// std::cout << " --debug str1 : " << str1 << std::endl;
+		// std::cout << " --debug str2 : " << str2 << std::endl;
+		size_t pos = str1.find(sub1);
+		// std::string sub2 = str2.substr(0, str2.size());
+			// std::cout << " --debug pos : " << pos << std::endl;
+			// std::cout << " --debug sub2 : " << sub2 << std::endl;
+		if (pos != std::string::npos) {
+			// std::cout << " 2. -> BANNED user : " << str1 << std::endl;
 			return true;
 		}
 	}
-	else if (str1[0] == '*')
+	else if (str2[0] == '*')
 	{
-		std::string sub1 = str1.substr(1, str1.size());
-		std::string sub2 = str2.substr(1, str2.size());
-			std::cout << "sub1 : " << sub1 << std::endl;
-			std::cout << "sub2 : " << sub2 << std::endl;
-		if (sub1 == sub2) {
-			std::cout << " 3. BANNED user : " << str1 << std::endl;
+		std::string sub1 = str2.substr(1);
+		// std::cout << " --debug sub1 : " << sub1 << std::endl;
+		// std::cout << " --debug str1 : " << str1 << std::endl;
+		// std::cout << " --debug str2 : " << str2 << std::endl;
+		size_t pos = str1.find(sub1);
+		// std::string sub2 = str2.substr(0, str2.size());
+			// std::cout << " --debug pos : " << pos << std::endl;
+			// std::cout << " --debug sub2 : " << sub2 << std::endl;
+		if (pos != std::string::npos) {
+			// std::cout << " 3. -> BANNED user : " << str1 << std::endl;
 			return true;
 		}
 	}
 	return false;
+	// std::cout << " ------- compDiff -----\n";
 }
 
 std::string return_banList(int v)
 {
-	std::cout << "value is : " << v << std::endl;
+	// std::cout << "value is : " << v << std::endl;
 	switch (v) {
 		case 0:
 			return _banList0;
@@ -106,10 +127,13 @@ std::string return_banList(int v)
 			return _banList8;
 		case 9:
 			return _banList9;
+		case 10:
+			return _banList10;
+		case 11:
+			return _banList11;
 		default:
 			std::cerr << "invalid option" << std::endl;
 			return std::string ("none");
 		}
 	return std::string ("nonexistent");
 }
-
