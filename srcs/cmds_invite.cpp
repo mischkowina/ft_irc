@@ -57,8 +57,8 @@ void	invite(Server *server, Client &client, Message& msg)
 
 	//send reply to the client that invited to signal succesful invitation
 	std::vector<std::string> params;
-	params.push_back(parameters[1]);
 	params.push_back(parameters[0]);
+	params.push_back(parameters[1]);
 	client.sendErrMsg(server, RPL_INVITING, params);
 	if (receiver->second.getAwayMsg().empty() == false)
 	{
