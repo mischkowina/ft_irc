@@ -166,19 +166,22 @@ void	mode(Server *server, Client &client, Message& msg)
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
 		return;
 	}
+	std::string& channel = parameters[0];
+	std::transform(channel.begin(), channel.end(), channel.begin(), ::tolower);
 
 	//check if parameter[0] is a channel or a user - if user, call usermode function, if none send error, else continue with this function
-	if (server->getAuthorizedClientMap().find(parameters[0]) != server->getAuthorizedClientMap().end())
+	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
+	if (server->getAuthorizedClientMap().find(channel) != server->getAuthorizedClientMap().end())
 	{
 		userMode(server, client, parameters);
 		return;
 	}
-	else if (server->getChannelMap().find(parameters[0]) == server->getChannelMap().end())
+	else if (itChannel == server->getChannelMap().end())
 	{
-		if (parameters[0].find_first_of("+#&") != std::string::npos)
-			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, parameters[0].c_str());
+		if (channel.find_first_of("+#&") != std::string::npos)
+			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, channel.c_str());
 		else
-			client.sendErrMsg(server, ERR_NOSUCHNICK, parameters[0].c_str());
+			client.sendErrMsg(server, ERR_NOSUCHNICK, channel.c_str());
 		return;
 	}
 
@@ -188,14 +191,8 @@ void	mode(Server *server, Client &client, Message& msg)
 		return;
 	}
 
-	std::string	channel = parameters[0];
-	std::transform(channel.begin(), channel.end(), channel.begin(), ::tolower);
-
-	Server::ChannelMap::iterator itChannel = server->getChannelMap().find(channel);
-
 		// MODE <channel> <flags> [<args>]
 	std::set<std::string> operators = itChannel->second.getChannelOperators();
-	
 	std::string options = parameters[1];
 	std::string flags = options.substr(1);
 	if ((options[0] != '+' && options[0] != '-') || flags.length() > 3 || flags.find_first_not_of("aopsitqmnbvkl") != std::string::npos)
@@ -221,22 +218,24 @@ void	mode(Server *server, Client &client, Message& msg)
 
 	if (parameters.size() > 2)
 	{
-		std::stringstream ss(parameters[2]);
-		std::string token;
+		std::stringstream ss;
+		if (parameters.size() > 2) {
+			ss << parameters[2] << " ";
+		}
+		if (parameters.size() > 3) {
+			ss << parameters[3] << " ";
+		}
+		if (parameters.size() > 4) {
+			ss << parameters[4] << " ";
+		}
 		if (flags.find_first_of('l') != std::string::npos){
-			std::getline(ss, token, ' ');
-			limit = token;
-			token.clear();
+			ss >> limit;
 		}
-		if (ss.good() && flags.find('l') == std::string::npos){
-			std::getline(ss, token, ' ');
-			user = token;
-			token.clear();
+		if (flags.find_first_not_of("lb") != std::string::npos){
+			ss >> user;
 		}
-		if (ss.good() && flags.find_first_of('b') != std::string::npos){
-			std::getline(ss, token, ' ');
-			addBanList = token;
-			token.clear();
+		if (flags.find_first_of('b') != std::string::npos){
+			ss >> addBanList;
 		}
 	}
 
