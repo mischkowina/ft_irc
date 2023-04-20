@@ -381,3 +381,8 @@ void	Server::createNewChannel(std::string name, Client &client)
 	Message message("NAMES " + tmp.getChannelName());
 	names(this, client, message);
 }
+
+void	Server::removeChannel(std::string name)
+{
+	_channels.erase(name);
+}

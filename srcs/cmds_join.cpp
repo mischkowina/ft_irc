@@ -19,7 +19,11 @@ void	leaveChannels(Server *server, Client &client)
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
 
 	for (Server::ChannelMap::iterator itChan = mapOfChannels.begin(); itChan != mapOfChannels.end(); ++itChan)
-		itChan->second.removeUser(client, "");
+	{
+		itChan->second.removeUser(client, "", "PART");
+		if (itChan->second.getChannelUsers().empty())
+			server->removeChannel(itChan->second.getChannelName());
+	}
 }
 
 void	join(Server *server, Client &client, Message& msg)

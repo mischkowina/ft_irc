@@ -130,16 +130,10 @@ void	quit(Server *server, Client &client, Message& msg)
 	{
 		if (it->second.clientIsChannelUser(client.getNick()) == true)
 		{
-			it->second.removeUser(client, "NICK");
+			it->second.removeUser(client, reason, "QUIT");
 			it->second.removeFromInviteList(client.getNick());
-			if (it->second.isQuiet())
-				continue;
-			if (it->second.isAnonymous() && reason == client.getNick())
-				it->second.sendMsgToChannel(client, "anonymous", "PART");
-			else if (it->second.isAnonymous() && reason != client.getNick())
-				it->second.sendMsgToChannel(client, reason, "PART");
-			else
-				it->second.sendMsgToChannel(client, reason, "QUIT");
+			if (it->second.getChannelUsers().empty())
+				server->removeChannel(it->second.getChannelName());
 		}
 		it++;
 	}

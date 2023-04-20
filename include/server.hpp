@@ -31,6 +31,7 @@ class Server
 		void		addAuthorizedClient(Client &client);
 
 		void		createNewChannel(std::string name, Client &client);
+		void		removeChannel(std::string name);
 
 		void	run();
 

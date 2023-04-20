@@ -103,7 +103,7 @@ std::set<std::string>	&Channel::getChannelInviteList()
 	return _invitedUsers;
 }
 
-bool	Channel::removeUser(Client& client, std::string message)
+bool	Channel::removeUser(Client& client, std::string message, std::string type)
 {
 	if (message.empty())
 		message = client.getNick();
@@ -121,10 +121,12 @@ bool	Channel::removeUser(Client& client, std::string message)
 			// decrease channelCounter
 			client.decreaseChannelCounter();
 
-			if (_quietChannel == false || message != "NICK")
+			if (_quietChannel == false)
 			{
 				if (_anonymousChannel && message == client.getNick())
 					this->sendMsgToChannel(client, "anonymous", "PART");
+				else if (!_anonymousChannel && type == "QUIT")
+					this->sendMsgToChannel(client, message, "QUIT");
 				else
 					this->sendMsgToChannel(client, message, "PART");
 			}

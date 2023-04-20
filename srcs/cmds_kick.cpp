@@ -2,7 +2,7 @@
 
 /////////////////////////////////// KICK ////////////////////////////////////
 
-void	kick_client_from_channel(Client &client, Channel &channel, std::vector<std::string>	parameters, Client &victim)
+void	kick_client_from_channel(Server *server, Client &client, Channel &channel, std::vector<std::string>	parameters, Client &victim)
 {
 	std::string	msg = victim.getNick() + " :";
 
@@ -17,7 +17,9 @@ void	kick_client_from_channel(Client &client, Channel &channel, std::vector<std:
 		channel.sendMsgToChannel(client, msg, "KICK");
 
 	//actually remove the victim from the channel
-	channel.removeUser(victim, "");
+	channel.removeUser(victim, "", "PART");
+	if (channel.getChannelUsers().empty())
+		server->removeChannel(channel.getChannelName());
 }
 
 void	kick(Server *server, Client &client, Message& msg)
@@ -96,7 +98,7 @@ void	kick(Server *server, Client &client, Message& msg)
 
 				//send message with KICK information to victim
 				Client victim = *(channel.getChannelUser(clientNames[j]));
-				kick_client_from_channel(client, channel, parameters, victim);
+				kick_client_from_channel(server, client, channel, parameters, victim);
 			}
 			return ;
 		}
@@ -115,6 +117,6 @@ void	kick(Server *server, Client &client, Message& msg)
 
 		//send message with KICK information to victim
 		Client victim = *(channel.getChannelUser(clientNames[i]));
-		kick_client_from_channel(client, channel, parameters, victim);
+		kick_client_from_channel(server, client, channel, parameters, victim);
 	}
 }

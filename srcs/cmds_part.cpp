@@ -33,8 +33,13 @@ void	part(Server *server, Client &client, Message& msg)
 		it = server->getChannelMap().find(channelNames[i]);
 		if (it != server->getChannelMap().end())
 		{
-			if (it->second.removeUser(client, message) == false)
+			if (it->second.removeUser(client, message, "PART") == false)
 				client.sendErrMsg(server, ERR_NOTONCHANNEL, channelNames[i].c_str());
+			else
+			{
+				if (it->second.getChannelUsers().empty())
+					server->removeChannel(it->second.getChannelName());
+			}
 		}
 		else 
 			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, channelNames[i].c_str());
