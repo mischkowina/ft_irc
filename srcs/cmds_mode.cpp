@@ -87,16 +87,17 @@ void	info_all_channel_modes(Server *server, Client &client, Channel &channel)
 		client.sendErrMsg(server, RPL_CHANNELMODEIS, params);
 	}
 	//if channel has ban mask - TODO
-	// if (channel.getChannelBanMasks().empty() == false)
-	// {
-	// 	params.pop_back();
-	// 	for (std::vector<std::string>::iterator it = channel.getChannelBanMasks().begin(); it != channel.getChannelBanMasks().end(); it++)
-	// 	{
-	// 		params[1] = *it;
-	// 		client.sendErrMsg(server, RPL_BANLIST, params);
-	// 	}
-	// 	client.sendErrMsg(server, RPL_BANLIST, channel.getChannelName().c_str());	
-	// }
+	if (channel.getChannelBanMasks().empty() == false)
+	{
+		std::cout << "HERE" << std::endl;
+		params.pop_back();
+		for (std::set<std::string>::iterator it = channel.getChannelBanMasks().begin(); it != channel.getChannelBanMasks().end(); it++)
+		{
+			params[1] = *it;
+			client.sendErrMsg(server, RPL_BANLIST, params);
+		}
+		client.sendErrMsg(server, RPL_ENDOFBANLIST, channel.getChannelName().c_str());	
+	}
 }
 
 void	userMode(Server *server, Client &client, std::vector<std::string>& parameters)
@@ -159,7 +160,7 @@ void	userMode(Server *server, Client &client, std::vector<std::string>& paramete
 // }
 
 void	mode(Server *server, Client &client, Message& msg)
-{
+{	
 	std::vector<std::string> parameters = msg.getParameters();
 	if (parameters.empty()) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
@@ -234,6 +235,7 @@ void	mode(Server *server, Client &client, Message& msg)
 		}
 		if (ss.good() && flags.find_first_of('b') != std::string::npos){
 			std::getline(ss, token, ' ');
+			addBanList = token;
 			token.clear();
 		}
 	}
@@ -272,7 +274,9 @@ void	mode(Server *server, Client &client, Message& msg)
 				message.append(" " + user);
 				break;
 			case 'b':
-				itChannel->second.manageBanList(client, options[0], addBanList);
+				itChannel->second.manageBanList(server, client, options[0], addBanList);
+				if (addBanList == "")
+					continue;
 				message.append(" " + addBanList);
 				break;
 			case 'v':

@@ -73,6 +73,11 @@ std::set<std::string> &Channel::getChannelOperators()
 	return _channelOperator;
 }
 
+std::set<std::string>	&Channel::getChannelBanMasks()
+{
+	return _banList;
+}
+
 std::string	Channel::getTopic() const
 {
 	return _topic;
@@ -190,17 +195,6 @@ bool	Channel::clientIsInvited(std::string nick) const
 	return false;
 }
 
-bool	Channel::clientIsBanned(std::string nick) const
-{
-	(void)nick;
-	// std::list<Client>::const_iterator	it = _bannedUsers.begin();
-	// while (it != _bannedUsers.end() && it->getNick() != nick)
-	// 	it++;
-	// if (it == _bannedUsers.end())
-	// 	return false;
-	return false;
-}
-
 bool	Channel::clientIsVoicedUser(std::string nick) const
 {
 	if (_voiceUsers.find(nick) != _voiceUsers.end())
@@ -254,12 +248,20 @@ void	Channel::removeFromVoiceList(std::string nick)
 
 /* modes */
 
-void	Channel::manageBanList(Client& client, char c, std::string& banMask)
+void	Channel::manageBanList(Server *server, Client& client, char c, std::string& banMask)
 {
-	(void)client;
 	if (c == '+' && banMask == "") {
-		//REPLIES OPEN!!!
-		return;
+		std::vector<std::string> params;
+		params.push_back(_channelName);
+		params.push_back("");
+		if (_banList.empty())
+			std::cout << "EMPTY" << std::endl;
+		for (std::set<std::string>::iterator it = _banList.begin(); it != _banList.end(); it++)
+		{
+			params[1] = *it;
+			client.sendErrMsg(server, RPL_BANLIST, params);
+		}
+		client.sendErrMsg(server, RPL_ENDOFBANLIST, _channelName.c_str());
 	}	
 	else if (c == '+')
 		_banList.insert(banMask);
@@ -440,7 +442,7 @@ static bool	parseWildCards(std::string& str1, std::string& str2)
 	return false;
 }
 
-bool	Channel::includedOnBanList(Server *server, Client& client)
+bool	Channel::includedOnBanList(Client& client) const
 {
 	// compare user ID against banmasks
 	std::string userNick = client.getNick();
@@ -459,10 +461,7 @@ bool	Channel::includedOnBanList(Server *server, Client& client)
 		if (parseWildCards(userNick, banNick) == true
 			&& parseWildCards(userName, banUser) == true
 			&& parseWildCards(userHost, banHost) == true)
-		{
-			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
-			return false;
-		}
+			return true;
 	}
 	return false;
 }
@@ -492,7 +491,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		return;
 	}
 		// user's nick/username/hostname must not match any active bans;
-	if (includedOnBanList(server, client) == true) {
+	if (includedOnBanList(client) == true) {
 		client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
 		return;
 	}

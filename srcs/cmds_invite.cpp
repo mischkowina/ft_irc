@@ -24,6 +24,7 @@ void	invite(Server *server, Client &client, Message& msg)
 	}
 
 	//check if the channel exists and if so, if client is on the channel 
+	std::transform(parameters[1].begin(), parameters[1].end(), parameters[1].begin(), ::tolower);
 	Server::ChannelMap::iterator itChan = channels.find(parameters[1]);
 	if (itChan == channels.end() || itChan->second.clientIsChannelUser(client.getNick()) == false)
 	{

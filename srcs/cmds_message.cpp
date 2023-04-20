@@ -31,7 +31,7 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 			else if (itChannel->second.allowsNoOutsideMessages() && itChannel->second.clientIsChannelUser(sender.getNick()) == false)
 				sender.sendErrMsg(server, ERR_CANNOTSENDTOCHAN, itChannel->second.getChannelName().c_str());
 			//sending message not possible if the sender is banned on that channel
-			else if (itChannel->second.clientIsBanned(sender.getNick()))
+			else if (itChannel->second.includedOnBanList(sender))
 				sender.sendErrMsg(server, ERR_CANNOTSENDTOCHAN, itChannel->second.getChannelName().c_str());
 			else
 				itChannel->second.sendMsgToChannel(sender, msg, "PRIVMSG");

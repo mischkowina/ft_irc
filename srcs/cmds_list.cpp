@@ -44,6 +44,7 @@ void	list(Server *server, Client &client, Message& msg)
 	std::stringstream ss(parameters[0]);
 	std::string token;
 	while (std::getline(ss, token, ',')) {
+		std::transform(token.begin(), token.end(), token.begin(), ::tolower);
 		channelNames.push_back(token);
 		token.clear();
 	}

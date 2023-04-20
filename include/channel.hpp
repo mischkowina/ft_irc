@@ -49,7 +49,7 @@ class Channel
 
 		void	manageOperatorList(char c, std::string nick);
 		void	manageVoiceList(char c, std::string& nick);
-		void	manageBanList(Client& client, char c, std::string& banMask);
+		void	manageBanList(Server *server, Client& client, char c, std::string& banMask);
 		void	manageInviteList(char c, std::string& nick);
 		void	addClientToChannel(Server *server, Client &client, std::vector<std::string> &keys, int keyIndex);
 
@@ -63,7 +63,7 @@ class Channel
 		void	setAnonymous(char c);
 		void	setQuiet(char c);
 		void	setOutsideMsg(char c);
-		bool	includedOnBanList(Server *server, Client& client);
+		bool	includedOnBanList(Client& client) const;
 		
 		std::string				getTopic() const;
 		std::string				getChannelName() const;
@@ -71,7 +71,7 @@ class Channel
 		std::list<Client>		&getChannelUsers();
 		std::string				getChannelKey() const;
 		int						getChannelLimit() const;
-		std::vector<std::string>	&getChannelBanMasks();
+		std::set<std::string>	&getChannelBanMasks();
 		std::set<std::string>	&getChannelInviteList();
 		bool					isInviteOnly() const;
 		bool					isSecret() const;
@@ -85,7 +85,6 @@ class Channel
 		bool					clientIsChannelUser(std::string nick) const;
 		bool					clientIsChannelOperator(std::string nick) const;
 		bool					clientIsVoicedUser(std::string nick) const;
-		bool					clientIsBanned(std::string nick) const;
 		bool					clientIsInvited(std::string nick) const;
 
 		std::list<Client>::iterator	getChannelUser(std::string nick);
