@@ -2,12 +2,13 @@
 ----------------------------------------
 
 	JOIN #42									// confirmation on client side + msg to other clients
-	JOIN +42									// existing channel, no reply
-	JOIN &42									// existing channel, no reply
-	NAMES #42									// list users of the channel
-	NAMES										// list users
-	LIST										// list users
-	LIST #42									// list users of the channel
+	JOIN +42									// allowed new channel (diff functionality)
+	JOIN &42									// allowed new channel (diff functionality)
+	JOIN #42									// no reply (existing channel)
+	NAMES #42									// list user : channel
+	NAMES										// list user :channels
+	LIST										// list user : all channel
+	LIST #42									// list user : channel				
 	JOIN 0										// leave all channels,  reply?
 	NAMES										// no channels listed where client has joined
 	LIST										// no channels listed where client has joined
@@ -16,26 +17,27 @@
 ----------------------------------------
 
 	JOIN 0										// leave all channels, reply?
-	JOIN										// reply?
-	JOIN aaa									// reply?
-	JOIN #										// reply?
-	JOIN #42,									// commma error?, reply?
+	JOIN										// <command> :Not enough parameters
+	JOIN aaa									// <channel> :Invalid channel name
+	JOIN #								// ---> fix should not create a new channel
+	JOIN #42,									// ignore (OK)
 	JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9,&11		// max limit, reply?
 
 3. set of testing		//INVALID
 ----------------------------------------
 
 	JOIN +42
-	JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9			// limit of 10 channels per client
+	JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9				// limit of 10 channels per client
+	JOIN #A,#B,#C,#D,#E,#F,#G,#H,#I,#J,#K			// limit of 10 channels per client 
 
 4. set of testing		//valid
 ----------------------------------------
 	
-	JOIN &0,&1,#2,#3,#4,#5,#6,#7,#8,+9,			// comma error?
-	PART +9										// leave channel
+	JOIN &0,&1,#2,#3,#4,#5,#6,#7,#8,+9,			// ignore
+	PART +9										// 403 W1 +9 :No such channel
 	NAMES										// list channels 
 	JOIN +42									// OK
-	JOIN #21									// reply too many channels 
+	JOIN #21									// reply - user joined too many channels  (KO)
 
 5. set of testing		//INVALID		-> include into py script
 ----------------------------------------
@@ -47,20 +49,21 @@
 ----------------------------------------
 JOIN #42							/// join channel for testing
 
-	MODE
-	MODE #
-	MODE #AAA
-	MODE #A #A +m
-	MODE #A #A +l 1
-	MODE #42									// 
-	MODE #42 ++m								// 
-	MODE #42 -5									// 
-	MODE #42 345								// 
-	MODE #42 dfm dfd 							// 
+	MODE										// 461 W1 <command> :Not enough parameters
+	MODE #										// 403 W1 # :No such channel
+	MODE #AAA									// -||-
+	MODE #A #A +m								// 472 W1 A :is unknown mode char to this server
+	MODE #A #A +l 1								// 472 W1 A :is unknown mode char to this server
+	MODE #42									// ignore
+	MODE #42 ++m								// 472 W1 +m :is unknown mode char to this server
+	MODE #42 -5									// W1 5 :is unknown mode char to this server
+	MODE #42 345								// 472 W1 45 :is unknown mode char to this server
+	MODE #42 dfm dfd 							// W1 5 :is unknown mode char to this server
 
-7. set of testing		//valid
+7. set of testing		//valid				----> CONTINUE
 ----------------------------------------
-	
+JOIN #42,#TWO pass
+
 	MODE #42 +l 2 								// (-> connect 2 new clients)
 	NAMES #42									// check that only 2 clients have joined
 	MODE #42 +lm 2 								// reply for moderated channel & limit 
@@ -92,11 +95,16 @@ JOIN #42
 	MODE #42 +l 3
 	MODE #42 +o user1
 	MODE #42 +p
-	MODE #42 +s
+	MODE #42 +s									// should not set to s
 	MODE #42 -p
+	MODE #42 +s									// set to s
 	MODE #42 +k pass
 	(connect new client using pass)
 	NAMES #42
+	MODE #42 +p									// should not set to p
+	MODE #42 -s
+	MODE #42 +p
+	MODE #42 +s									// should not set to p
 
 
 10. set of testing		//valid

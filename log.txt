@@ -1,0 +1,83 @@
+server:
+Sending to W1: :W1!V@127.0.0.1 JOIN # 
+Sending to W1: :c2s17d109.42wolfsburg.de 332 W1 # :
+Sending to W1: :c2s17d109.42wolfsburg.de 353 W1 = # @W1
+Sending to W1: :c2s17d109.42wolfsburg.de 366 W1 # :End of NAMES list
+superuser: PING 1682020694
+Sending to superuser: :c2s17d109.42wolfsburg.de PONG 1682020694
+W1: JOIN #42,
+W1: JOIN 0
+Sending to W1: :W1!V@127.0.0.1 PART # W1
+[1]    34029 segmentation fault  ./ircserv									
+-------------------------------------------------------------------------------
+client 1:
+LIST #42
+:c2s17d109.42wolfsburg.de 322 Q1 #42 :
+:c2s17d109.42wolfsburg.de 323 Q1 :End of /LIST
+LIST
+:c2s17d109.42wolfsburg.de 322 Q1 #42 :
+:c2s17d109.42wolfsburg.de 322 Q1 &42 :
+:c2s17d109.42wolfsburg.de 322 Q1 +42 :
+:c2s17d109.42wolfsburg.de 323 Q1 :End of /LIST
+NAMES
+:c2s17d109.42wolfsburg.de 353 Q1 = #42 @Q1
+:c2s17d109.42wolfsburg.de 366 Q1 #42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 Q1 = &42 @Q1
+:c2s17d109.42wolfsburg.de 366 Q1 &42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 Q1 = +42 Q1
+:c2s17d109.42wolfsburg.de 366 Q1 +42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 Q1 * W1
+:c2s17d109.42wolfsburg.de 366 Q1 * :End of NAMES list
+NAMES #42
+:c2s17d109.42wolfsburg.de 353 Q1 = #42 @Q1
+:c2s17d109.42wolfsburg.de 366 Q1 #42 :End of NAMES list
+-------------------------------------------------------------------------------
+client 2:
+LIST
+:c2s17d109.42wolfsburg.de 322 W1 #42 :
+:c2s17d109.42wolfsburg.de 322 W1 &42 :
+:c2s17d109.42wolfsburg.de 322 W1 +42 :
+:c2s17d109.42wolfsburg.de 323 W1 :End of /LIST
+NAMES
+:c2s17d109.42wolfsburg.de 353 W1 = #42 
+:c2s17d109.42wolfsburg.de 366 W1 #42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 W1 = &42 
+:c2s17d109.42wolfsburg.de 366 W1 &42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 W1 = +42 
+:c2s17d109.42wolfsburg.de 366 W1 +42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 W1 * W1
+:c2s17d109.42wolfsburg.de 366 W1 * :End of NAMES list
+JOIN 0
+NAMES
+:c2s17d109.42wolfsburg.de 353 W1 = #42 @Q1
+:c2s17d109.42wolfsburg.de 366 W1 #42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 W1 = &42 @Q1
+:c2s17d109.42wolfsburg.de 366 W1 &42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 W1 = +42 Q1
+:c2s17d109.42wolfsburg.de 366 W1 +42 :End of NAMES list
+:c2s17d109.42wolfsburg.de 353 W1 * W1
+:c2s17d109.42wolfsburg.de 366 W1 * :End of NAMES list
+LIST
+:c2s17d109.42wolfsburg.de 322 W1 #42 :
+:c2s17d109.42wolfsburg.de 322 W1 &42 :
+:c2s17d109.42wolfsburg.de 322 W1 +42 :
+:c2s17d109.42wolfsburg.de 323 W1 :End of /LIST
+LIST #42
+:c2s17d109.42wolfsburg.de 322 W1 #42 :
+:c2s17d109.42wolfsburg.de 323 W1 :End of /LIST
+JOIN
+:c2s17d109.42wolfsburg.de 461 W1 <command> :Not enough parameters
+JOIN aaa
+:c2s17d109.42wolfsburg.de 476 W1 <channel> :Invalid channel name
+JOIN #
+:W1!V@127.0.0.1 JOIN # 
+:c2s17d109.42wolfsburg.de 332 W1 # :
+:c2s17d109.42wolfsburg.de 353 W1 = # @W1
+:c2s17d109.42wolfsburg.de 366 W1 # :End of NAMES list
+JOIN #42,
+JOIN 0
+:W1!V@127.0.0.1 PART # W1
+
+
+----> FIX client's limit of 10 channels max
+----> FIX channel;s name = min len > 1
