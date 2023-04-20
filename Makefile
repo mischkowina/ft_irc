@@ -32,7 +32,18 @@ SRC			:=	main.cpp \
 				message.cpp \
 				channel.cpp \
 				utils.cpp \
-				cmds.cpp \
+				cmds_invite.cpp \
+				cmds_join.cpp \
+				cmds_kick.cpp \
+				cmds_list.cpp \
+				cmds_message.cpp \
+				cmds_misc.cpp \
+				cmds_mode.cpp \
+				cmds_names.cpp \
+				cmds_optional.cpp \
+				cmds_part.cpp \
+				cmds_server.cpp \
+				cmds_topic.cpp \
 				cmds_connection.cpp \
 				cmds_message.cpp \
 				cmds_misc.cpp \

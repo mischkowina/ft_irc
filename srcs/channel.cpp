@@ -420,3 +420,101 @@ void	Channel::updateNick(Client &oldNick, Client &newNick)
 		addToInviteList(newNick.getNick());
 	}
 }
+
+static bool	parseWildCards(std::string& str1, std::string& str2)
+{
+	if (str2[str2.size() - 1] == '*')
+	{
+		std::string sub1 = str2.substr(0, str2.size() - 1);
+		size_t pos = str1.find(sub1);
+		if (pos != std::string::npos)
+			return true;
+	}
+	else if (str2[0] == '*')
+	{
+		std::string sub1 = str2.substr(1);
+		size_t pos = str1.find(sub1);
+		if (pos != std::string::npos)
+			return true;
+	}
+	return false;
+}
+
+bool	Channel::includedOnBanList(Server *server, Client& client)
+{
+	// compare user ID against banmasks
+	std::string userNick = client.getNick();
+	std::string userName = client.getName();
+	std::string userHost = client.getIP();
+
+	for (std::set<std::string>::iterator it = _banList.begin(); it != _banList.end(); ++it)
+	{
+		std::string banNick, banUser, banHost;
+		size_t pos1 = (*it).find('!');
+		size_t pos2 = (*it).find('@');
+		banNick = (*it).substr(0, pos1);
+		banUser = (*it).substr(pos1 + 1, pos2 - pos1 - 1);
+		banHost = (*it).substr(pos2 + 1);
+
+		if (parseWildCards(userNick, banNick) == true
+			&& parseWildCards(userName, banUser) == true
+			&& parseWildCards(userHost, banHost) == true)
+		{
+			client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+			return false;
+		}
+	}
+	return false;
+}
+
+void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std::string> &keys, int keyIndex)
+{
+	// check any invalid conditions before adding a new client to the channel
+		// if client has already joined the channel -> stop
+	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
+		if (it->getNick() == client.getNick() || it->getName() == client.getName()/* ignore while testing on localhost! || it->getIP() == client.getIP()*/)
+			return;
+	}
+		// a client can be a member of 10 channels max
+	if (client.maxNumOfChannels() == true) {
+		client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
+		return;
+	}
+		// max limit of users on a channel 
+	if (_userCounter++ == _userLimit) {
+		client.sendErrMsg(server, ERR_CHANNELISFULL, NULL);
+		--_userCounter;
+		return;
+	}
+		// the correct key (password) must be given if it is set.
+	if (_password != "" && keys[keyIndex] != _password) {
+		client.sendErrMsg(server, ERR_BADCHANNELKEY, NULL);
+		return;
+	}
+		// user's nick/username/hostname must not match any active bans;
+	if (includedOnBanList(server, client) == true) {
+		client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+		return;
+	}
+		// if channel is invite only
+	if (_inviteOnly == true && _invitedUsers.find(client.getNick()) == _invitedUsers.end()) {
+		client.sendErrMsg(server, ERR_INVITEONLYCHAN, NULL);
+		return;
+	}
+
+	_channelUsers.push_back(client);
+	client.increaseChannelCounter();
+
+	// send JOIN msg to all clients on the channel
+	if (_quietChannel == false)
+		sendMsgToChannel(client, "", "JOIN");
+
+	//send RPL_TOPIC && RPL_NAMREPLY && RPL_ENDOFNAMES to that client
+	std::vector<std::string> params;
+	params.push_back(_channelName);
+	params.push_back(_topic);
+	client.sendErrMsg(server, RPL_TOPIC, params);
+
+	Message message("NAMES " + _channelName);
+	names(server, client, message);
+}
