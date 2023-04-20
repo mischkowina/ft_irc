@@ -1,27 +1,134 @@
-JOIN 42
-JOIN &42
+1. set of testing		//valid
+----------------------------------------
+
+	JOIN #42									// confirmation on client side + msg to other clients
+	JOIN +42									// existing channel, no reply
+	JOIN &42									// existing channel, no reply
+	NAMES #42									// list users of the channel
+	NAMES										// list users
+	LIST										// list users
+	LIST #42									// list users of the channel
+	JOIN 0										// leave all channels,  reply?
+	NAMES										// no channels listed where client has joined
+	LIST										// no channels listed where client has joined
+
+2. set of testing		//INVALID
+----------------------------------------
+
+	JOIN 0										// leave all channels, reply?
+	JOIN										// reply?
+	JOIN aaa									// reply?
+	JOIN #										// reply?
+	JOIN #42,									// commma error?, reply?
+	JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9,&11		// max limit, reply?
+
+3. set of testing		//INVALID
+----------------------------------------
+
+	JOIN +42
+	JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9			// limit of 10 channels per client
+
+4. set of testing		//valid
+----------------------------------------
+	
+	JOIN &0,&1,#2,#3,#4,#5,#6,#7,#8,+9,			// comma error?
+	PART +9										// leave channel
+	NAMES										// list channels 
+	JOIN +42									// OK
+	JOIN #21									// reply too many channels 
+
+5. set of testing		//INVALID		-> include into py script
+----------------------------------------
+	
+	JOIN #42 (10x)
+	JOIN #42,#TWO pass
+
+6. set of testing		//INVALID
+----------------------------------------
+JOIN #42							/// join channel for testing
+
+	MODE
+	MODE #
+	MODE #AAA
+	MODE #A #A +m
+	MODE #A #A +l 1
+	MODE #42									// 
+	MODE #42 ++m								// 
+	MODE #42 -5									// 
+	MODE #42 345								// 
+	MODE #42 dfm dfd 							// 
+
+7. set of testing		//valid
+----------------------------------------
+	
+	MODE #42 +l 2 								// (-> connect 2 new clients)
+	NAMES #42									// check that only 2 clients have joined
+	MODE #42 +lm 2 								// reply for moderated channel & limit 
+	MODE #42 +lm 2 								// response?
+	(connect +2 clients)
+	MODE #42 -lm 2 								// reply for removed limitations
+	(connect +2 clients again)
+
+8. set of testing		//valid
+----------------------------------------
 JOIN #42
+	MODE #42 +lm 2 W1							// reply? ignore 2nd param for client?
+	MODE #42 +lm 2 W1							// reply? 
+	MODE #42 +t									// reply?
+	MODE #42 +t	smth							// reply? error?
+	TOPIC #42 TEST								// reply?
+	NAMES										// check name of the topic
+	MODE #42 -t
+	MODE #42 -l
+	MODE #42 -l 234
+	NAMES										// check name of the topic
+
+9. set of testing		//valid
+----------------------------------------
 JOIN #42
+	MODE #42 +m	// moderated,invite only
+	(connect new client user1)
+	MODE #42 +v user1
+	MODE #42 +l 3
+	MODE #42 +o user1
+	MODE #42 +p
+	MODE #42 +s
+	MODE #42 -p
+	MODE #42 +k pass
+	(connect new client using pass)
+	NAMES #42
 
-JOIN #42 (10x)
-JOIN +42
-JOIN #42,#TWO pass
 
-MODE #42 +t
-MODE #42 -t
-MODE #42 +im	// moderated,invite only
-MODE #42 +v user1
-MODE #42 +l 3
-MODE #42 -l
-MODE #42 +o user1
-MODE #42 +p
-MODE #42 +s
-MODE #42 -p
-MODE #42 +k pass
-MODE #42 +b	// print ban masks for the channel
+10. set of testing		//valid
+----------------------------------------
+JOIN #42
+	MODE #42 +b											// print ban masks for the channel
+	MODE #42 +vbl 3 user1 *!*@42*.de
+	MODE #42 +b											(verify)
+	MODE #42 +ovk user1 user1 pass
+	MODE #42 +ovb user2 user2 *!*@*.tnt					(connect user1)
+	MODE #42 +b  *!*11@*.edu
+	MODE #42 +b											(verify)
+	MODE #42 +b  *!*11@*.edu,*!*11@*.edu			// handle error?
+	MODE #42 +b											(verify)
+	MODE #42 +b  *!*@*.net,!*@*.com					// reply?
+	MODE #42 +b											(verify)
+	MODE #42 +b  *!*@mail.*,*!*@localhost			// reply?
+	MODE #42 +b											(verify)
 
-MODE #42 +vbl 3 user1 *!*@*.edu
+	MODE #42 -b											(verify)
+	MODE #42 -b	*!*@*.net,!*@*.com						(verify) :  *!*@mail.* *!*@localhost *!*11@*.edu *!*@*.tnt *!*@42*.de
+	MODE #42 +b											(verify)
 
-MODE #42 +ovk user1 user1 pass
-MODE #42 +ovb user1 user1 !*@*.com
 
+11. set of testing		//invalid
+----------------------------------------
+JOIN #42
+	MODE #42 +ovk user1 user1 pass fd gdfg dfdfg dfg d
+	MODE #42 +ovkam user1 user1 pass fd gdfg dfdfg dfg d
+	MODE #42 +ovkam 
+	MODE #42 - 
+	MODE #42 - user1 
+	MODE #42 +ovkaml 12 
+	MODE #42 +ovkaml 12 dsfsfs ds fds3 
+	MODE #42 lbv 12 user1 banmask

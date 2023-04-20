@@ -278,8 +278,15 @@ void	Channel::manageBanList(Server *server, Client& client, char c, std::string&
 		}
 		client.sendErrMsg(server, RPL_ENDOFBANLIST, _channelName.c_str());
 	}	
-	else if (c == '+')
-		_banList.insert(banMask);
+	else if (c == '+') {
+		std::stringstream ss(banMask);
+		std::string token;
+		while (std::getline(ss, token, ',')) {
+			std::transform(token.begin(), token.end(), token.begin(), ::tolower);
+			_banList.insert(token);
+			token.clear();
+		}
+	}
 	else if (c == '-' && banMask.size() > 5)
 	{
 		std::set<std::string>::iterator it = _banList.find(banMask);

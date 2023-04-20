@@ -149,17 +149,8 @@ void	userMode(Server *server, Client &client, std::vector<std::string>& paramete
 	client.sendMsg(client, options, "MODE");
 }
 
-// void 	printAllValues(Server *server)
-// {
-// 	std::cout << "Present channels: " << std::endl;
-// 	for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
-// 	{
-// 		std::cout << it->second.getChannelName() << std::endl;
-// 	}
-// }
-
 void	mode(Server *server, Client &client, Message& msg)
-{	
+{
 	std::vector<std::string> parameters = msg.getParameters();
 	if (parameters.empty()) {
 		client.sendErrMsg(server, ERR_NEEDMOREPARAMS, NULL);
