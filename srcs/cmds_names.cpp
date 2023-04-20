@@ -14,6 +14,12 @@ void	names_per_channel(Server *server, Client &client, Channel &channel)
 	std::list<Client>			channelClients = channel.getChannelUsers();
 
 	//channel name is first parameters for RPL_NAMREPLY
+	if (channel.isSecret())
+		param1.insert(0, "@ ");
+	else if (channel.isPrivate())
+		param1.insert(0, "* ");
+	else
+		param1.insert(0, "= ");
 	params.push_back(param1);
 
 	//second parameter gets filled with list of clients on that channel

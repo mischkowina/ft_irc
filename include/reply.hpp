@@ -31,7 +31,7 @@
 
 # define RPL_INVITING	"341 <channel> <nick>"
 
-# define RPL_NAMREPLY	"353 <channel> :<list of names>"
+# define RPL_NAMREPLY	"353 <channel> <list of names>"
 
 # define RPL_ENDOFNAMES	"366 <channel> :End of NAMES list"
 
