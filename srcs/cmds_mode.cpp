@@ -89,7 +89,6 @@ void	info_all_channel_modes(Server *server, Client &client, Channel &channel)
 	//if channel has ban mask - TODO
 	if (channel.getChannelBanMasks().empty() == false)
 	{
-		std::cout << "HERE" << std::endl;
 		params.pop_back();
 		for (std::set<std::string>::iterator it = channel.getChannelBanMasks().begin(); it != channel.getChannelBanMasks().end(); it++)
 		{

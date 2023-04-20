@@ -51,7 +51,7 @@ def main():
     send_msg(client1, f"PASS {PASSWORD}")#ERR_ALREADYREGISTERED
     send_msg(client1, f"USER {USER1} a a {NICK1}")#no reply
     send_msg(client1, f"NICK {NICK1}")#welcome & motd
-    time.sleep(3)  #MOT
+    time.sleep(3)  #MOTD
 
 
 if __name__ == '__main__':

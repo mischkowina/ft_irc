@@ -220,10 +220,10 @@ bool	Channel::clientIsVoicedUser(std::string nick) const
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
 	std::list<Client>::iterator	it = _channelUsers.begin();
-	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end() || it->getNick() == nick; it++)
+	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
-		std::cout << nick << std::endl;
-		std::cout << it->getNick() << std::endl;
+		if (it->getNick() == nick)
+			return (it);
 	}
 	return (it);
 }
@@ -384,11 +384,12 @@ void	Channel::setOutsideMsg(char c)
 		_noOutsideMessages = false;
 }
 
-void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type) const
+void	Channel::sendMsgToChannel(Client &sender, std::string message, std::string type) const
 {
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
-		if (it->getNick() == sender.getNick() && type != "JOIN" && type != "MODE" && type != "PART")//don't send message to the sender himself unless it's join or mode
+		std::string msg = message;
+		if (it->getNick() == sender.getNick() && (type == "PRIVMSG" || type == "NOTICE"))//don't send prvmsg/notice to the sender himself
 			continue;
 		if (msg.find(" ", 0) != std::string::npos && type != "KICK")
 			msg.insert(0, ":");
