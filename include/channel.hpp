@@ -59,7 +59,7 @@ class Channel
 		void	removeFromInviteList(std::string nick);
 		void	removeFromVoiceList(std::string nick);
 
-		bool	removeUser(Client& client);
+		bool	removeUser(Client& client, std::string message);
 		void	setAnonymous(char c);
 		void	setQuiet(char c);
 		void	setOutsideMsg(char c);

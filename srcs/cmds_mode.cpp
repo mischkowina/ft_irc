@@ -173,6 +173,7 @@ void	mode(Server *server, Client &client, Message& msg)
 		userMode(server, client, parameters);
 		return;
 	}
+	
 	else if (server->getChannelMap().find(parameters[0]) == server->getChannelMap().end())
 	{
 		if (parameters[0].find_first_of("+#&") != std::string::npos)

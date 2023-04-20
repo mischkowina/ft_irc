@@ -371,4 +371,13 @@ void	Server::createNewChannel(std::string name, Client &client)
 		tmp.setChannelOp(client);
 	tmp.setChannelUsers(client);
 	_channels.insert(std::make_pair(name, tmp));
+
+	tmp.sendMsgToChannel(client, "", "JOIN");
+	std::vector<std::string> params;
+	params.push_back(tmp.getChannelName());
+	params.push_back(tmp.getTopic());
+	client.sendErrMsg(this, RPL_TOPIC, params);
+
+	Message message("NAMES " + tmp.getChannelName());
+	names(this, client, message);
 }

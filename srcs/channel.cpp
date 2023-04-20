@@ -103,8 +103,11 @@ std::set<std::string>	&Channel::getChannelInviteList()
 	return _invitedUsers;
 }
 
-bool	Channel::removeUser(Client& client)
+bool	Channel::removeUser(Client& client, std::string message)
 {
+	if (message.empty())
+		message = client.getNick();
+	
 	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
 		if (it->getNick() == client.getNick())
@@ -113,12 +116,22 @@ bool	Channel::removeUser(Client& client)
 			_channelOperator.erase(client.getNick());
 			//remove nick from voiced user list as well (erase can be called for the string value in a set :-))
 			_voiceUsers.erase(client.getNick());
-			//remove nick from user list
-			_channelUsers.erase(it);
 			// decrease userCounter
 			--_userCounter;
 			// decrease channelCounter
 			client.decreaseChannelCounter();
+
+			if (_quietChannel == false || message != "NICK")
+			{
+				if (_anonymousChannel && message == client.getNick())
+					this->sendMsgToChannel(client, "anonymous", "PART");
+				else
+					this->sendMsgToChannel(client, message, "PART");
+			}
+			
+			//remove nick from user list
+			_channelUsers.erase(it);
+
 			return true;
 		}
 	}
@@ -373,7 +386,7 @@ void	Channel::sendMsgToChannel(Client &sender, std::string msg, std::string type
 {
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
-		if (it->getNick() == sender.getNick() && type != "JOIN" && type != "MODE")//don't send message to the sender himself unless it's join or mode
+		if (it->getNick() == sender.getNick() && type != "JOIN" && type != "MODE" && type != "PART")//don't send message to the sender himself unless it's join or mode
 			continue;
 		if (msg.find(" ", 0) != std::string::npos && type != "KICK")
 			msg.insert(0, ":");

@@ -17,7 +17,7 @@ void	kick_client_from_channel(Client &client, Channel &channel, std::vector<std:
 		channel.sendMsgToChannel(client, msg, "KICK");
 
 	//actually remove the victim from the channel
-	channel.removeUser(victim);
+	channel.removeUser(victim, "");
 }
 
 void	kick(Server *server, Client &client, Message& msg)

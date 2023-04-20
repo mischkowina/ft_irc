@@ -130,7 +130,7 @@ void	quit(Server *server, Client &client, Message& msg)
 	{
 		if (it->second.clientIsChannelUser(client.getNick()) == true)
 		{
-			it->second.removeUser(client);
+			it->second.removeUser(client, "NICK");
 			it->second.removeFromInviteList(client.getNick());
 			if (it->second.isQuiet())
 				continue;

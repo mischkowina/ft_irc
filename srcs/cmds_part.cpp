@@ -23,11 +23,9 @@ void	part(Server *server, Client &client, Message& msg)
 		token.clear();
 	}
 
-	std::string	message;
+	std::string	message = "";
 	if (parameters.size() > 1)
 		message = parameters[1];
-	else 
-		message = client.getNick();
 
 	Server::ChannelMap::iterator it;
 	for (size_t i = 0; i < channelNames.size(); i++)
@@ -35,17 +33,8 @@ void	part(Server *server, Client &client, Message& msg)
 		it = server->getChannelMap().find(channelNames[i]);
 		if (it != server->getChannelMap().end())
 		{
-			if (it->second.removeUser(client) == false)
+			if (it->second.removeUser(client, message) == false)
 				client.sendErrMsg(server, ERR_NOTONCHANNEL, channelNames[i].c_str());
-			else
-			{
-				if (it->second.isQuiet())
-					continue ;
-				if (it->second.isAnonymous() && message == client.getNick())
-					it->second.sendMsgToChannel(client, "anonymous", "PART");
-				else
-					it->second.sendMsgToChannel(client, message, "PART");
-			}	
 		}
 		else 
 			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, channelNames[i].c_str());
