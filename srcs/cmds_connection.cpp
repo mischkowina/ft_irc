@@ -165,7 +165,7 @@ void	oper(Server *server, Client &client, Message& msg)
 		(*it).second.setIsOperator(true);
 		Server::ClientMap::iterator itC = server->getClientMap().find((*it).second.getNick());
 		(*itC).second.setIsOperator(true);
-		(*it).second.sendErrMsg(server, RPL_YOUREOPER, NULL);//TBD: FUNCTION FOR REPLIES?
+		(*it).second.sendErrMsg(server, RPL_YOUREOPER, NULL);
 	}
 	else
 		client.sendErrMsg(server, ERR_PASSWDMISMATCH, NULL);

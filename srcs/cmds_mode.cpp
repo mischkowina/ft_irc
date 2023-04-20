@@ -181,13 +181,13 @@ void	mode(Server *server, Client &client, Message& msg)
 		if (channel.find_first_of("+#&") != std::string::npos)
 			client.sendErrMsg(server, ERR_NOSUCHCHANNEL, channel.c_str());
 		else
-			client.sendErrMsg(server, ERR_NOSUCHNICK, channel.c_str());
+			client.sendErrMsg(server, ERR_NOSUCHNICK, parameters[0].c_str());
 		return;
 	}
 
 	//if there is only one (valid) parameter, send info message on all modes of the channel
 	if (parameters.size() < 2) {
-		info_all_channel_modes(server, client, server->getChannelMap().find(parameters[0])->second);
+		info_all_channel_modes(server, client, server->getChannelMap().find(channel)->second);
 		return;
 	}
 

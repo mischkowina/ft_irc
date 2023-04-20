@@ -21,7 +21,9 @@ void findReceivers(Server *server, Client &sender, std::vector<std::string> list
 			}
 			continue ;
 		}
-		Server::ChannelMap::const_iterator itChannel = tmpChannel.find(*itRecv);
+		std::string receiver = *itRecv;
+		std::transform(receiver.begin(),receiver.end(), receiver.begin(), ::tolower);
+		Server::ChannelMap::const_iterator itChannel = tmpChannel.find(receiver);
 		if (itChannel != tmpChannel.end())
 		{
 			//sending message not possible if the channel is moderated and the sender is neither voiced nor chanop
@@ -78,10 +80,46 @@ void	privmsg(Server *server, Client &client, Message& msg)
 	}
 
 	//send message to all receivers
-	try {
-		findReceivers(server, client, receivers, textToBeSend);
-	} catch (const std::exception& e) {
-		std::cerr << "--- Error --- : " << e.what() << std::endl;	// adjust appropriate response here
+	findReceivers(server, client, receivers, textToBeSend);
+}
+
+void findNoticeReceivers(Server *server, Client &sender, std::vector<std::string> listOfRecv, std::string msg)
+{
+	Server::ClientMap tmpClient = server->getAuthorizedClientMap();
+	Server::ChannelMap tmpChannel = server->getChannelMap();
+
+	// iterate through receivers, try to find a matching channel or client to send the messag eto
+	for (std::vector<std::string>::const_iterator itRecv = listOfRecv.begin(); itRecv != listOfRecv.end(); itRecv++)
+	{
+		Server::ClientMap::iterator itClien = tmpClient.find(*itRecv);
+		if (itClien != tmpClient.end())
+		{
+			itClien->second.sendMsg(sender, msg, "NOTICE");
+			continue ;
+		}
+		std::string receiver = *itRecv;
+		std::transform(receiver.begin(),receiver.end(), receiver.begin(), ::tolower);
+		Server::ChannelMap::const_iterator itChannel = tmpChannel.find(receiver);
+		if (itChannel != tmpChannel.end())
+		{
+			//sending message not possible if the channel is moderated and the sender is neither voiced nor chanop
+			if (itChannel->second.isModerated() && (itChannel->second.clientIsVoicedUser(sender.getNick()) == false) && itChannel->second.clientIsChannelOperator(sender.getNick()) == false)
+				continue ;
+			//sending message not possible if the channel allows no outside messages and the sender is not on the channel
+			else if (itChannel->second.allowsNoOutsideMessages() && itChannel->second.clientIsChannelUser(sender.getNick()) == false)
+				continue ;
+			//sending message not possible if the sender is banned on that channel
+			else if (itChannel->second.includedOnBanList(sender))
+				continue ;
+			itChannel->second.sendMsgToChannel(sender, msg, "NOTICE");
+			continue ;
+		}
+		//check if message is directed at horoscope bot
+		if (*itRecv == "horoscope")
+		{
+			horoscope(server, sender, msg);
+			continue;
+		}
 	}
 }
 
@@ -92,14 +130,17 @@ void	notice(Server *server, Client &client, Message& msg)
 	if (parameters.size() < 2)
 		return;
 
-	Server::ClientMap::iterator it = server->getAuthorizedClientMap().find(parameters[0]);
-	if (it != server->getAuthorizedClientMap().end())
-	{
-		(*it).second.sendMsg(client, parameters[1], "NOTICE");
-		return;
+	std::vector<std::string>	receivers;
+	std::string textToBeSend = parameters[1];
+
+	//parse first parameter by commas to get all the recipients -> <receiver> can be a list of names or channels
+	std::stringstream ss(parameters[0]);
+	std::string token;
+	while (std::getline(ss, token, ',')) {
+		receivers.push_back(token);
+		token.clear();
 	}
 
-	Server::ChannelMap::iterator itChan = server->getChannelMap().find(parameters[0]);
-	if (itChan != server->getChannelMap().end())
-		(*itChan).second.sendMsgToChannel(client, parameters[1], "NOTICE");
+	//send message to all receivers
+	findReceivers(server, client, receivers, textToBeSend);
 }
