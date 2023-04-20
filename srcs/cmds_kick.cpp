@@ -18,6 +18,7 @@ void	kick_client_from_channel(Server *server, Client &client, Channel &channel, 
 
 	//actually remove the victim from the channel
 	channel.removeUser(victim, "", "PART");
+
 	if (channel.getChannelUsers().empty())
 		server->removeChannel(channel.getChannelName());
 }
@@ -67,7 +68,7 @@ void	kick(Server *server, Client &client, Message& msg)
 		}
 
 		//check if client is on that channel
-		Channel channel = server->getChannelMap().find(channelNames[i])->second;
+		Channel &channel = server->getChannelMap().find(channelNames[i])->second;
 		if (channel.clientIsChannelUser(client.getNick()) == false)
 		{
 			client.sendErrMsg(server, ERR_NOTONCHANNEL, channelNames[i].c_str());
