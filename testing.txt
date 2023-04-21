@@ -1,4 +1,4 @@
-1. set of testing		//valid
+1. set of testing		//valid		(OK)
 ----------------------------------------
 
 	JOIN #42									// confirmation on client side + msg to other clients
@@ -13,41 +13,41 @@
 	NAMES										// no channels listed where client has joined
 	LIST										// no channels listed where client has joined
 
-2. set of testing		//INVALID
+2. set of testing		//INVALID	(OK)
 ----------------------------------------
 
-	JOIN 0										// leave all channels, reply?
+	JOIN 0										// leave all channels 
 	JOIN										// <command> :Not enough parameters
 	JOIN aaa									// <channel> :Invalid channel name
-	JOIN #								// ---> fix should not create a new channel
-	JOIN #42,									// ignore (OK)
-	JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9,&11		// max limit, reply?
+	JOIN #										// E1 <channel> :Invalid channel name
+	JOIN #42,									// ignore 
+	JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9,&11		// max limit 
 
-3. set of testing		//INVALID
+3. set of testing		//INVALID	(OK)
 ----------------------------------------
 
 	JOIN +42
 	JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9				// limit of 10 channels per client
 	JOIN #A,#B,#C,#D,#E,#F,#G,#H,#I,#J,#K			// limit of 10 channels per client 
 
-4. set of testing		//valid
+4. set of testing		//valid		(OK)
 ----------------------------------------
 	
 	JOIN &0,&1,#2,#3,#4,#5,#6,#7,#8,+9,			// ignore
 	PART +9										// 403 W1 +9 :No such channel
 	NAMES										// list channels 
 	JOIN +42									// OK
-	JOIN #21									// reply - user joined too many channels  (KO)
+	JOIN #21									// reply - user joined too many channels  (OK)
 
-5. set of testing		//INVALID		-> include into py script
+5. set of testing		//INVALID	(OK)		-> include into py script
 ----------------------------------------
 	
 	JOIN #42 (10x)
 	JOIN #42,#TWO pass
 
-6. set of testing		//INVALID
+6. set of testing		//INVALID	(OK)
 ----------------------------------------
-JOIN #42							/// join channel for testing
+JOIN #42	/// join channel for testing
 
 	MODE										// 461 W1 <command> :Not enough parameters
 	MODE #										// 403 W1 # :No such channel
@@ -60,16 +60,23 @@ JOIN #42							/// join channel for testing
 	MODE #42 345								// 472 W1 45 :is unknown mode char to this server
 	MODE #42 dfm dfd 							// W1 5 :is unknown mode char to this server
 
-7. set of testing		//valid				----> CONTINUE
+7. set of testing		//valid		(OK)
 ----------------------------------------
 JOIN #42,#TWO pass
 
-	MODE #42 +l 2 								// (-> connect 2 new clients)
+	MODE #42 +k pass 							// response :R1!V@127.0.0.1 MODE #new :+k
+	JOIN #42 									// cannot join channel (+k)	(2nd client)
+	JOIN #42 pass								// 2nd client joins
+	MODE #42 -k pass							// reomve pass
+
+	MODE #42 +l 1 								// :Cannot join channel (+l) (CONNECTING NEW client)
 	NAMES #42									// check that only 2 clients have joined
 	MODE #42 +lm 2 								// reply for moderated channel & limit 
-	MODE #42 +lm 2 								// response?
+	MODE #42 +lm 2 								// 
 	(connect +2 clients)
+	PRIVMSG #42 :lalala							// #42 :Cannot send to channel
 	MODE #42 -lm 2 								// reply for removed limitations
+	PRIVMSG #42 :lalala							// PRIVMSG #1 lalala
 	(connect +2 clients again)
 
 8. set of testing		//valid
