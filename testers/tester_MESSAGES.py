@@ -73,6 +73,7 @@ def main():
 	send_msg(client2, f"AWAY :i'm away")
 	send_msg(client1, f"PRIVMSG {NICK2},invalid,client_3 :test message")#success
 	send_msg(client1, f"NOTICE {NICK2},invalid,client_3 :test message")#success
+	send_msg(client2, f"AWAY")
 	# normal channel
 	send_msg(client1, f"JOIN #normal")
 	send_msg(client2, f"JOIN #normal")
@@ -124,6 +125,8 @@ def main():
 	# to horoscope
 	send_msg(client3, f"PRIVMSG horoscope :CAPRICORN")
 	send_msg(client3, f"NOTICE horoscope :CAPRICORN")
+	#MOTD
+	send_msg(client3, f"MOTD")
 	#kill server
 	send_msg(client1, f"OPER {NICK1} operator")
 	time.sleep(3)
