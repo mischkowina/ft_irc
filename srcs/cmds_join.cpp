@@ -22,14 +22,13 @@ void	leaveChannels(Server *server, Client &client)
 	for (Server::ChannelMap::iterator itChan = mapOfChannels.begin(); itChan != mapOfChannels.end(); ++itChan)
 	{
 		itChan->second.removeUser(client, "", "PART");
-		toBeDeleted.push_back(itChan->second.getChannelName());
+		if (itChan->second.getChannelUsers().empty())
+			toBeDeleted.push_back(itChan->second.getChannelName());
 	}
+
+	//delete channels that are empty
 	for (std::vector<std::string>::iterator iterChannelName = toBeDeleted.begin(); iterChannelName != toBeDeleted.end(); iterChannelName++)
-	{
-		Server::ChannelMap::iterator it = mapOfChannels.find(*iterChannelName);
-		if (it != mapOfChannels.end() && it->second.getChannelUsers().empty())
-			mapOfChannels.erase(it);
-	}
+		mapOfChannels.erase(mapOfChannels.find(*iterChannelName));
 }
 
 void	join(Server *server, Client &client, Message& msg)

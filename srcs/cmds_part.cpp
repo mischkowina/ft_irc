@@ -26,7 +26,7 @@ void	part(Server *server, Client &client, Message& msg)
 	std::string	message = "";
 	if (parameters.size() > 1)
 		message = parameters[1];
-
+	
 	Server::ChannelMap::iterator it;
 	for (size_t i = 0; i < channelNames.size(); i++)
 	{

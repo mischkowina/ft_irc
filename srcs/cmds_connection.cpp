@@ -125,6 +125,8 @@ void	quit(Server *server, Client &client, Message& msg)
 		message.push_back(':');
 	message.append(reason);
 
+	std::vector<std::string> toBeDeleted;
+	
 	Server::ChannelMap::iterator it = server->getChannelMap().begin();
 	while (it != server->getChannelMap().end())
 	{
@@ -133,10 +135,13 @@ void	quit(Server *server, Client &client, Message& msg)
 			it->second.removeUser(client, reason, "QUIT");
 			it->second.removeFromInviteList(client.getNick());
 			if (it->second.getChannelUsers().empty())
-				server->removeChannel(it->second.getChannelName());
+				toBeDeleted.push_back(it->second.getChannelName());
 		}
 		it++;
 	}
+
+	for (std::vector<std::string>::iterator iterChannelName = toBeDeleted.begin(); iterChannelName != toBeDeleted.end(); iterChannelName++)
+		server->removeChannel(*iterChannelName);
 
 	send(client.getSocket(), message.data(), message.length(), 0);
 	close(client.getSocket());
