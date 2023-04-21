@@ -20,10 +20,10 @@ def recv_msg(sock):
     return data
 
 # tests
-def join_limit(sock, msg):
+def test_user_limit(sock, msg, val):
 	i = 0
-	while i < 12:
-		sock.send(f"{msg}\r\n".encode())
+	while i < val:
+		sock.send(f"{msg} #{i}\r\n".encode())
 		i += 1
 
 def gen_testing(sock):
@@ -42,7 +42,7 @@ def main():
     client1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client1.connect((SERVER, PORT))
     send_msg(client1, f"PASS {PASSWORD}")
-    send_msg(client1, f"USER {USER1} a a {NICK1}")
+    send_msg(client1, f"USER {USER1} A A {NICK1}")
     send_msg(client1, f"NICK {NICK1}")
     time.sleep(3)  # Wait for server to acknowledge connection
     send_msg(client1, f"JOIN {CHANNEL}")
@@ -53,15 +53,19 @@ def main():
     client2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client2.connect((SERVER, PORT))
     send_msg(client2, f"PASS {PASSWORD}")
-    send_msg(client2, f"USER {USER2} b b {NICK2}")
+    send_msg(client2, f"USER {USER2} B B {NICK2}")
     send_msg(client2, f"NICK {NICK2}")
     time.sleep(3)  # Wait for server to acknowledge connection
     send_msg(client2, f"JOIN {CHANNEL}")
     send_msg(client2, f"PRIVMSG {CHANNEL} :Hello from {NICK2}!")
     recv_msg(client2)  # Wait for server response
     #testing
-    join_limit(client2, f"JOIN #test")
-    gen_testing(client2)
+    test_user_limit(client2,f"JOIN", 14)
+    test_user_limit(client2,f"PART", 7)
+    test_user_limit(client2,f"JOIN", 7)
+    send_msg(client2, f"JOIN #OneTooMany")
+    send_msg(client2, f"NAMES")
+    #gen_testing(client2)
 
 if __name__ == '__main__':
     main()

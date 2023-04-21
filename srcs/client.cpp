@@ -234,7 +234,7 @@ void	Client::sendErrMsg(Server *server, std::string const err_code, std::vector<
 
 bool	Client::maxNumOfChannels()
 {
-	return (_channelCounter > 10);
+	return (_channelCounter > 9);
 }
 
 void	Client::decreaseChannelCounter()

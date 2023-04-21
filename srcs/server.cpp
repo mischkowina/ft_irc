@@ -6,7 +6,6 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 		this->_noAuthorization = true;
 	
 	// create a socket
-	// TODO: ALL neTWORK INTERFACES
 	_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_sockfd == -1) {
 		std::cerr << "ERROR opening socket" << std::endl;
@@ -331,7 +330,6 @@ void	Server::process_request(Client &client, std::string msg)
 // void	execCmd(Message& msg)
 void	Server::execCmd(Client &client, Message& msg)
 {
-
 	std::map<std::string, FuncPtr>::const_iterator it = _cmdMap.find(msg.getCommand());
 	if (it == _cmdMap.end())
 	{
@@ -366,11 +364,16 @@ void	Server::execCmd(Client &client, Message& msg)
 
 void	Server::createNewChannel(std::string name, Client &client)
 {
+	if (client.maxNumOfChannels() == true) {
+		client.sendErrMsg(this, ERR_TOOMANYCHANNELS, NULL);
+		return;
+	}
 	Channel tmp(name);
 	if (name.at(0) != '+')
 		tmp.setChannelOp(client);
 	tmp.setChannelUsers(client);
 	_channels.insert(std::make_pair(name, tmp));
+	client.increaseChannelCounter();
 
 	tmp.sendMsgToChannel(client, "", "JOIN");
 	std::vector<std::string> params;

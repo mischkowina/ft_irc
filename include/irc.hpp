@@ -38,9 +38,9 @@
 # include "horoscope.hpp"
 
 #define RED     "\033[1m\033[31m"      /* Bold Red */
-#define BLUE "\033[1m\033[36m"      /* Bold Cyan */
+#define BLUE 	"\033[1m\033[36m"      /* Bold Cyan */
 #define YELLOW  "\033[1m\033[33m"      /* Bold Yellow */
-#define RESET "\033[0m"
+#define RESET 	"\033[0m"
 
 namespace ft
 {
