@@ -64,6 +64,8 @@ def main():
     time.sleep(3)
     send_msg(client2, f"JOIN #ANONYM")#success
     time.sleep(3)
+    send_msg(client1, f"NAMES")#success
+    time.sleep(3)
     #third client, message
     client3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client3.connect((SERVER, PORT))
@@ -76,6 +78,8 @@ def main():
     time.sleep(3)
     send_msg(client3, f"JOIN #ANONYM")#success
     time.sleep(3)
+    send_msg(client1, f"NAMES")#success
+    time.sleep(3)
     #QUIT connection for both
     send_msg(client2, f"QUIT")#success
     time.sleep(3)
@@ -85,7 +89,6 @@ def main():
     send_msg(client1, f"OPER {NICK1} operator")
     time.sleep(3)
     send_msg(client1, f"DIE")
-    
 
 
 if __name__ == '__main__':
