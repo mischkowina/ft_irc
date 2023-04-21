@@ -44,9 +44,9 @@ void	nick(Server *server, Client &client, Message& msg)
 	//change nick in all channels
 	for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
 	{
-		if (it->second.clientIsChannelUser(client.getNick()))
+		if (it->second.clientIsChannelUser(client.getNick()) || it->second.clientIsInvited(client.getNick()))
 		{
-			if (it->second.isQuiet() == false)
+			if (it->second.isQuiet() == false && it->second.clientIsChannelUser(client.getNick()))
 				it->second.sendMsgToChannel(client, parameters[0], "NICK");
 			it->second.updateNick(client, changedClient);
 		}

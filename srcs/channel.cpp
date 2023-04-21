@@ -219,13 +219,12 @@ bool	Channel::clientIsVoicedUser(std::string nick) const
 
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
-	std::list<Client>::iterator	it = _channelUsers.begin();
 	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
 		if (it->getNick() == nick)
 			return (it);
 	}
-	return (it);
+	return (_channelUsers.end());
 }
 
 void	Channel::manageOperatorList(char c, std::string nick)
@@ -428,7 +427,8 @@ void	Channel::sendMsgToChannel(Client &sender, std::string message, std::string 
 void	Channel::updateNick(Client &oldNick, Client &newNick)
 {
 	std::list<Client>::iterator it = getChannelUser(oldNick.getNick());
-	it->setNick(newNick.getNick());
+	if (it != getChannelUsers().end())
+		it->setNick(newNick.getNick());
 	if (clientIsChannelOperator(oldNick.getNick()))
 	{
 		removeFromOperatorList(oldNick.getNick());

@@ -139,6 +139,7 @@ def main():
     #nick is still invited
     send_msg(client2, f"JOIN #INVITE")
     time.sleep(3)
+    time.sleep(3)
     send_msg(client1, f"NAMES")
     time.sleep(3)
     #register new nick with old nicks name
