@@ -1,4 +1,4 @@
-#include "cmds.hpp"
+ #include "cmds.hpp"
 
 void findReceivers(Server *server, Client &sender, std::vector<std::string> listOfRecv, std::string msg)
 {
@@ -142,5 +142,5 @@ void	notice(Server *server, Client &client, Message& msg)
 	}
 
 	//send message to all receivers
-	findReceivers(server, client, receivers, textToBeSend);
+	findNoticeReceivers(server, client, receivers, textToBeSend);
 }
