@@ -44,10 +44,10 @@ def main():
     send_msg(client1, f"PASS")#ERR_NEEDMOREPARAMS
     send_msg(client1, f"NICK {NICK1}")#ERR_NOTREGISTERED
     send_msg(client1, f"USER {USER1} a a {NICK1}")#ERR_NOTREGISTERED
-    send_msg(client1, f"PASS wrong")#no reply, not registered
+    send_msg(client1, f"PASS wrong wromg wrong")#no reply, not registered
     send_msg(client1, f"NICK {NICK1}")#ERR_NOTREGISTERED
     send_msg(client1, f"USER {USER1} a a {NICK1}")#ERR_NOTREGISTERED
-    send_msg(client1, f"PASS {PASSWORD}")#no reply, registered
+    send_msg(client1, f"PASS {PASSWORD} wrong")#no reply, registered
     send_msg(client1, f"PASS {PASSWORD}")#ERR_ALREADYREGISTERED
     send_msg(client1, f"USER {USER1} a a {NICK1}")#no reply
     send_msg(client1, f"NICK {NICK1}")#welcome & motd

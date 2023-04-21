@@ -191,7 +191,7 @@ void	mode(Server *server, Client &client, Message& msg)
 		return;
 	}
 	if (operators.find(client.getNick()) == operators.end()) {
-		client.sendErrMsg(server, ERR_NOPRIVILEGES, NULL);
+		client.sendErrMsg(server, ERR_CHANOPRIVSNEEDED, itChannel->second.getChannelName().c_str());
 		return;
 	}
 	if (itChannel->second.supportedChannelModes() == false && flags == "t") {

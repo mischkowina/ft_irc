@@ -25,7 +25,7 @@ void	leaveChannels(Server *server, Client &client)
 		if (itChan->second.getChannelUsers().empty())
 			toBeDeleted.push_back(itChan->second.getChannelName());
 	}
-
+	
 	//delete channels that are empty
 	for (std::vector<std::string>::iterator iterChannelName = toBeDeleted.begin(); iterChannelName != toBeDeleted.end(); iterChannelName++)
 		mapOfChannels.erase(mapOfChannels.find(*iterChannelName));
