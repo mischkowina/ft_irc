@@ -17,12 +17,18 @@ bool	validChannelName(Server *server, std::string& name, Client &client)
 void	leaveChannels(Server *server, Client &client)
 {
 	Server::ChannelMap& mapOfChannels = server->getChannelMap();
+	std::vector<std::string> toBeDeleted;
 
 	for (Server::ChannelMap::iterator itChan = mapOfChannels.begin(); itChan != mapOfChannels.end(); ++itChan)
 	{
 		itChan->second.removeUser(client, "", "PART");
-		if (itChan->second.getChannelUsers().empty())
-			server->removeChannel(itChan->second.getChannelName());
+		toBeDeleted.push_back(itChan->second.getChannelName());
+	}
+	for (std::vector<std::string>::iterator iterChannelName = toBeDeleted.begin(); iterChannelName != toBeDeleted.end(); iterChannelName++)
+	{
+		Server::ChannelMap::iterator it = mapOfChannels.find(*iterChannelName);
+		if (it != mapOfChannels.end() && it->second.getChannelUsers().empty())
+			mapOfChannels.erase(it);
 	}
 }
 

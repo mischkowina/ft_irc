@@ -1,15 +1,3 @@
-server:
-Sending to W1: :W1!V@127.0.0.1 JOIN # 
-Sending to W1: :c2s17d109.42wolfsburg.de 332 W1 # :
-Sending to W1: :c2s17d109.42wolfsburg.de 353 W1 = # @W1
-Sending to W1: :c2s17d109.42wolfsburg.de 366 W1 # :End of NAMES list
-superuser: PING 1682020694
-Sending to superuser: :c2s17d109.42wolfsburg.de PONG 1682020694
-W1: JOIN #42,
-W1: JOIN 0
-Sending to W1: :W1!V@127.0.0.1 PART # W1
-[1]    34029 segmentation fault  ./ircserv									
--------------------------------------------------------------------------------
 client 1:
 LIST #42
 :c2s17d109.42wolfsburg.de 322 Q1 #42 :
