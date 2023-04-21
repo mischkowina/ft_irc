@@ -44,9 +44,9 @@ void	nick(Server *server, Client &client, Message& msg)
 	//change nick in all channels
 	for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
 	{
-		if (it->second.clientIsChannelUser(client.getNick()))
+		if (it->second.clientIsChannelUser(client.getNick()) || it->second.clientIsInvited(client.getNick()))
 		{
-			if (it->second.isQuiet() == false)
+			if (it->second.isQuiet() == false && it->second.clientIsChannelUser(client.getNick()))
 				it->second.sendMsgToChannel(client, parameters[0], "NICK");
 			it->second.updateNick(client, changedClient);
 		}
@@ -125,6 +125,8 @@ void	quit(Server *server, Client &client, Message& msg)
 		message.push_back(':');
 	message.append(reason);
 
+	std::vector<std::string> toBeDeleted;
+	
 	Server::ChannelMap::iterator it = server->getChannelMap().begin();
 	while (it != server->getChannelMap().end())
 	{
@@ -133,10 +135,13 @@ void	quit(Server *server, Client &client, Message& msg)
 			it->second.removeUser(client, reason, "QUIT");
 			it->second.removeFromInviteList(client.getNick());
 			if (it->second.getChannelUsers().empty())
-				server->removeChannel(it->second.getChannelName());
+				toBeDeleted.push_back(it->second.getChannelName());
 		}
 		it++;
 	}
+
+	for (std::vector<std::string>::iterator iterChannelName = toBeDeleted.begin(); iterChannelName != toBeDeleted.end(); iterChannelName++)
+		server->removeChannel(*iterChannelName);
 
 	send(client.getSocket(), message.data(), message.length(), 0);
 	close(client.getSocket());

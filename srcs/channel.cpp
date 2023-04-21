@@ -219,13 +219,12 @@ bool	Channel::clientIsVoicedUser(std::string nick) const
 
 std::list<Client>::iterator	Channel::getChannelUser(std::string nick)
 {
-	std::list<Client>::iterator	it = _channelUsers.begin();
 	for (std::list<Client>::iterator it = _channelUsers.begin(); it != _channelUsers.end(); it++)
 	{
 		if (it->getNick() == nick)
 			return (it);
 	}
-	return (it);
+	return (_channelUsers.end());
 }
 
 void	Channel::manageOperatorList(char c, std::string nick)
@@ -428,7 +427,8 @@ void	Channel::sendMsgToChannel(Client &sender, std::string message, std::string 
 void	Channel::updateNick(Client &oldNick, Client &newNick)
 {
 	std::list<Client>::iterator it = getChannelUser(oldNick.getNick());
-	it->setNick(newNick.getNick());
+	if (it != getChannelUsers().end())
+		it->setNick(newNick.getNick());
 	if (clientIsChannelOperator(oldNick.getNick()))
 	{
 		removeFromOperatorList(oldNick.getNick());
@@ -499,28 +499,28 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	}
 		// a client can be a member of 10 channels max
 	if (client.maxNumOfChannels() == true) {
-		client.sendErrMsg(server, ERR_TOOMANYCHANNELS, NULL);
+		client.sendErrMsg(server, ERR_TOOMANYCHANNELS, _channelName.c_str());
 		return;
 	}
 		// max limit of users on a channel 
 	if (_userCounter++ == _userLimit) {
-		client.sendErrMsg(server, ERR_CHANNELISFULL, NULL);
+		client.sendErrMsg(server, ERR_CHANNELISFULL, _channelName.c_str());
 		--_userCounter;
 		return;
 	}
 		// the correct key (password) must be given if it is set.
 	if (_password != "" && (keys.size() <= (size_t)keyIndex || keys[keyIndex] != _password)) {
-		client.sendErrMsg(server, ERR_BADCHANNELKEY, NULL);
+		client.sendErrMsg(server, ERR_BADCHANNELKEY, _channelName.c_str());
 		return;
 	}
 		// user's nick/username/hostname must not match any active bans;
 	if (includedOnBanList(client) == true) {
-		client.sendErrMsg(server, ERR_BANNEDFROMCHAN, NULL);
+		client.sendErrMsg(server, ERR_BANNEDFROMCHAN, _channelName.c_str());
 		return;
 	}
 		// if channel is invite only
 	if (_inviteOnly == true && _invitedUsers.find(client.getNick()) == _invitedUsers.end()) {
-		client.sendErrMsg(server, ERR_INVITEONLYCHAN, NULL);
+		client.sendErrMsg(server, ERR_INVITEONLYCHAN, _channelName.c_str());
 		return;
 	}
 

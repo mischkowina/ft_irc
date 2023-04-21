@@ -5,8 +5,8 @@
 void	invite(Server *server, Client &client, Message& msg)
 {
 	std::vector<std::string>	parameters = msg.getParameters();
-	Server::ClientMap			clients = server->getAuthorizedClientMap();
-	Server::ChannelMap			channels = server->getChannelMap();
+	Server::ClientMap			&clients = server->getAuthorizedClientMap();
+	Server::ChannelMap			&channels = server->getChannelMap();
 
 	//check if enough parameters
 	if (parameters.size() < 2)
