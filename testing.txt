@@ -71,64 +71,69 @@ JOIN #42,#TWO pass
 
 	MODE #42 +l 1 								// :Cannot join channel (+l) (CONNECTING NEW client)
 	NAMES #42									// check that only 2 clients have joined
-	MODE #42 +lm 2 								// reply for moderated channel & limit 
-	MODE #42 +lm 2 								// 
+	MODE #42 +lm 2 								// MODE #42 :+l 2 & MODE #42 +m 
+	MODE #42 +lo 2 								// 401 E1  :No such nick/channel
+	MODE #42 +lo 2 234							// 401 E1  :No such nick/channel
 	(connect +2 clients)
 	PRIVMSG #42 :lalala							// #42 :Cannot send to channel
 	MODE #42 -lm 2 								// reply for removed limitations
 	PRIVMSG #42 :lalala							// PRIVMSG #1 lalala
 	(connect +2 clients again)
 
-8. set of testing		//valid
+8. set of testing		//valid		(OK)
 ----------------------------------------
 JOIN #42
-	MODE #42 +lm 2 W1							// reply? ignore 2nd param for client?
-	MODE #42 +lm 2 W1							// reply? 
-	MODE #42 +t									// reply?
-	MODE #42 +t	smth							// reply? error?
-	TOPIC #42 TEST								// reply?
-	NAMES										// check name of the topic
-	MODE #42 -t
-	MODE #42 -l
-	MODE #42 -l 234
-	NAMES										// check name of the topic
+	MODE #42 +lm								// ignore no param
+	MODE #42 +lm 2 W1							// MODE #42 :+l 2	 =ignore 2nd param for client
+	MODE #42 -lm 2 W1							// MODE #42 :-l 2  (ignore last arg)
+	MODE #42 +t									// MODE #42 +t		(only Op can change topic)
+	MODE #42 +t	smth							// T5 #42 :You're not channel operator	(non Op user)
+	TOPIC #42 TEST								// no reply
+	LIST										// check name of the topic
+	MODE #42 +vm								// 401 E1  :No such nick/channel
+	MODE #42 +v noone							// E1 noone :No such nick/channel?
+	MODE #42 +v	user1							// MODE #42 :+v user1
+	PRIVMSG #42 :lalala							// PRIVMSG #42 :lalala
+	MODE #42 -l									// MODE #42 :-l 
+	MODE #42 -l 234								// MODE #42 :-l 234
+	LIST										// check name of the topic
 
-9. set of testing		//valid
+9. set of testing		//valid		(OK)
 ----------------------------------------
 JOIN #42
-	MODE #42 +m	// moderated,invite only
-	(connect new client user1)
-	MODE #42 +v user1
-	MODE #42 +l 3
-	MODE #42 +o user1
-	MODE #42 +p
-	MODE #42 +s									// should not set to s
-	MODE #42 -p
-	MODE #42 +s									// set to s
-	MODE #42 +k pass
-	(connect new client using pass)
-	NAMES #42
-	MODE #42 +p									// should not set to p
-	MODE #42 -s
-	MODE #42 +p
-	MODE #42 +s									// should not set to p
-
+	MODE #42 +mi								// 341 E1 T5 #42 
+	(connect new client user1)					(OK)
+	MODE #21 +t
+	MODE #21 +p									// MODE #42 +p	; T5 #21 : TOPIC () ; (2ND CLIENT:) #21 Prv:
+	MODE #21 +s									// MODE #42 +s ; (nothing changed)
+	MODE #21 -p									// 322 T5 #21 :eee ; (2ND CLIENT:) #21 :eee
+	MODE #42 +p									// MODE #42 +s ; (nothing changed)
+	MODE #1 +k pass								// 403 E1 #1 :No such channel
+	JOIN #1 pass								// ignore last arg
+	NAMES #1									// 353 E1 = #1 @E1 T5	(ok)
+	NAMES #1									// 353 T5 = #1 @E1 T5	(ok)
 
 10. set of testing		//valid
 ----------------------------------------
 JOIN #42
-	MODE #42 +b											// print ban masks for the channel
-	MODE #42 +vbl 3 user1 *!*@42*.de
-	MODE #42 +b											(verify)
-	MODE #42 +ovk user1 user1 pass
-	MODE #42 +ovb user2 user2 *!*@*.tnt					(connect user1)
-	MODE #42 +b  *!*11@*.edu
-	MODE #42 +b											(verify)
-	MODE #42 +b  *!*11@*.edu,*!*11@*.edu			// handle error?
-	MODE #42 +b											(verify)
-	MODE #42 +b  *!*@*.net,!*@*.com					// reply?
-	MODE #42 +b											(verify)
-	MODE #42 +b  *!*@mail.*,*!*@localhost			// reply?
+	MODE #42 +b											// E1 #42 :End of channel ban list
+	MODE #42 +vbl 3 T5 *!*@TT*.de						// ok (show msg to all on channel)
+	MODE #42 +b											(displayed masks)
+	MODE #42 +b	*!*@127.0.0.1							// :E1!V@127.0.0.1 MODE #42 :+b *!*@127.0.0.1			
+	MODE #42 +ovk user1 user1 pass						// E1 user1 :No such nick/channel ... :E1!V@127.0.0.1 MODE #42 :+k user1
+	MODE #42 +ovk T5 E1 pass							// E1 user1 :No such nick/channel
+
+--	MODE #42 +bov T5 E1 *!*@*.tnt						(connect user1) b-> e1
+	
+	MODE #42 +b  *!*11@*.edu							// ok
+	MODE #42 -b  *!*11@*.edu							// :E1!V@127.0.0.1 MODE #42 :-b *!*11@*.edu	
+	MODE #42 +b											// ok -> removed
+	
+	MODE #42 +b  *!*11@*.edu,*!*11@*.edu				// :E1!V@127.0.0.1 MODE #42 :+b *!*11@*.edu,*!*11@*.edu
+	MODE #42 +b											(verify -> only once: *!*11@*.edu)
+	MODE #42 +b  *!*@*.net,!*@*.com						// :E1!V@127.0.0.1 MODE #42 :+b *!*@*.net,!*@*.com
+	MODE #42 +b											(verify : ok)
+	MODE #42 +b  *!*@mail.*,*!*@localhost				// :E1!V@127.0.0.1 MODE #42 :+b *!*@mail.*,*!*@localhost
 	MODE #42 +b											(verify)
 
 	MODE #42 -b											(verify)
