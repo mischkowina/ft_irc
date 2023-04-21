@@ -509,7 +509,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 		return;
 	}
 		// the correct key (password) must be given if it is set.
-	if (_password != "" && keys[keyIndex] != _password) {
+	if (_password != "" && (keys.size() <= (size_t)keyIndex || keys[keyIndex] != _password)) {
 		client.sendErrMsg(server, ERR_BADCHANNELKEY, NULL);
 		return;
 	}
