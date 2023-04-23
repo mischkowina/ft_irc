@@ -286,7 +286,7 @@ void	Channel::manageBanList(Server *server, Client& client, char c, std::string&
 			token.clear();
 		}
 	}
-	else if (c == '-' && banMask.size() > 5)
+	else if (c == '-' && banMask.size())
 	{
 		std::set<std::string>::iterator it = _banList.find(banMask);
 		if (it != _banList.end())
