@@ -168,3 +168,4 @@ struct ChannelUser
 			Client&     client; ##reference to client, so nick, operator status etc. are always up to date
 			ChannelUser(Client& client);
 	};
+

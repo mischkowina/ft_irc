@@ -28,18 +28,19 @@ void	nick(Server *server, Client &client, Message& msg)
 		changedClient.setIsAuthorized(true);
 
 	if (parameters[0] == "horoscope" || parameters[0] == "anonymous" || server->addClient(changedClient) == false)
-		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
-	else
 	{
-		if (changedClient.getName().empty() == false)
-		{
-			server->addAuthorizedClient(changedClient);
-			std::string oldnick = client.getNick();
-			if (ft::isValidNick(oldnick) == false)
-				sendWelcome(server, changedClient);
-		}
-		server->eraseFromClientMap(client);
-	} 
+		client.sendErrMsg(server, ERR_NICKNAMEINUSE, parameters[0].c_str());
+		return ;
+	}
+
+	if (changedClient.getName().empty() == false)
+	{
+		server->addAuthorizedClient(changedClient);
+		std::string oldnick = client.getNick();
+		if (ft::isValidNick(oldnick) == false)
+			sendWelcome(server, changedClient);
+	}
+
 	//send message to all channels that client is on
 	//change nick in all channels
 	for (Server::ChannelMap::iterator it = server->getChannelMap().begin(); it != server->getChannelMap().end(); it++)
@@ -51,6 +52,7 @@ void	nick(Server *server, Client &client, Message& msg)
 			it->second.updateNick(client, changedClient);
 		}
 	}
+	server->eraseFromClientMap(client);
 }
 
 /////////////////////////////////// PASS ////////////////////////////////////

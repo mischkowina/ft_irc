@@ -36,7 +36,10 @@ Channel::Channel(std::string name)
 	, _topic("")
 {
 	if (name.at(0) == '+')
+	{
 		_supportChannelModes = false;
+		_topicChangeOnlyByChanop = true;
+	}
 }
 
 /* setters */
@@ -268,8 +271,6 @@ void	Channel::manageBanList(Server *server, Client& client, char c, std::string&
 		std::vector<std::string> params;
 		params.push_back(_channelName);
 		params.push_back("");
-		if (_banList.empty())
-			std::cout << "EMPTY" << std::endl;
 		for (std::set<std::string>::iterator it = _banList.begin(); it != _banList.end(); it++)
 		{
 			params[1] = *it;
@@ -498,7 +499,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	// check any invalid conditions before adding a new client to the channel
 		// if client has already joined the channel -> stop
 	for (std::list<Client>::const_iterator it = _channelUsers.begin(); it != _channelUsers.end(); ++it) {
-		if (it->getNick() == client.getNick() || it->getName() == client.getName()/* ignore while testing on localhost! || it->getIP() == client.getIP()*/)
+		if (it->getNick() == client.getNick())
 			return;
 	}
 		// a client can be a member of 10 channels max
@@ -534,7 +535,7 @@ void	Channel::addClientToChannel(Server *server, Client& client, std::vector<std
 	// send JOIN msg to all clients on the channel
 	if (_quietChannel == false)
 		sendMsgToChannel(client, "", "JOIN");
-
+		
 	//send RPL_TOPIC && RPL_NAMREPLY && RPL_ENDOFNAMES to that client
 	std::vector<std::string> params;
 	params.push_back(_channelName);
