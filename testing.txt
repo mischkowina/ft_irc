@@ -144,12 +144,12 @@ JOIN #42
 11. set of testing		//invalid
 ----------------------------------------
 JOIN #42
-	MODE #42 +ovk user1 user1 pass fd gdfg dfdfg dfg d
+	MODE #42 +ovk MODE #42 +ovk user1 _pass fd gdfg dfdfg
 	:reply -> 	surf 401 T1 user1 :No such nick/channel
 				:surf 401 T1 user1 :No such nick/channel
 ----			:T1!N@127.0.0.1 MODE #42 :+k user1
 
-	PART #42; MODE #42 +ovk user1 user1 pass fd gdfg dfdfg
+	PART #42; MODE #42 +ovk user1 _pass pass fd gdfg dfdfg
 	: reply -> :surf 403 T1 #42 :No such channel
 
 	MODE #42 +ovkam user1 user1 pass fd gdfg dfdfg dfg d
@@ -183,5 +183,3 @@ JOIN #33
 	: 	:T1!N@127.0.0.1 MODE #33 :+l 2
 		:T1!N@127.0.0.1 MODE #33 :+b *!*@*
 		:surf 441 T1 R1 #33 :They aren't on that channel
-
-		*** R1 not banned -> r1 

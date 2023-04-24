@@ -43,6 +43,41 @@ def key_pass1(sock):
 def key_pass2(sock):
     sock.send(f"JOIN #segF\r\n".encode())
 
+def save_ch(sock):
+    sock.send(f"JOIN +42\r\n".encode())
+    sock.send(f"JOIN +42 +b a*!*@*\r\n".encode())
+    sock.send(f"MODE +42 +k pass\r\n".encode())
+    sock.send(f"JOIN +42 -l\r\n".encode())
+    sock.send(f"JOIN +42 +p\r\n".encode())
+    sock.send(f"JOIN +42 +t\r\n".encode())
+
+def chan_limit(sock):
+    sock.send(f"JOIN +42\r\n".encode())
+    sock.send(f"JOIN #0,#1,#2,#3,#4,#5,#6,#7,#8,#9\r\n".encode())
+    sock.send(f"JOIN &new\r\n".encode())
+    sock.send(f"JOIN 0\r\n".encode())
+    sock.send(f"JOIN #A,#B,#C,#D,#E,#F,#G,#H,#I,#J,#K\r\n".encode())
+
+def mode_ch_1(sock):
+    sock.send(f"MODE \r\n".encode())
+    sock.send(f"MODE #\r\n".encode())
+    sock.send(f"MODE #42\r\n".encode())
+    sock.send(f"MODE #AAA\r\n".encode())
+    sock.send(f"MODE #A #A +m\r\n".encode())
+    sock.send(f"MODE #A #A +m +l 1\r\n".encode())
+    sock.send(f"MODE #42\r\n".encode())
+    sock.send(f"MODE #42 ++m\r\n".encode())
+    sock.send(f"MODE #42 -5\r\n".encode())
+    sock.send(f"MODE #42 234\r\n".encode())
+    sock.send(f"MODE #42 sdf sdf sd\r\n".encode())
+
+def mode_ch_2(sock):
+    sock.send(f"JOIN 0 \r\n".encode())
+    sock.send(f"MODE #test +k pass\r\n".encode())
+    sock.send(f"JOIN #test \r\n".encode())
+    sock.send(f"MODE #test +k pass\r\n".encode())
+    sock.send(f"MODE #test +l 1\r\n".encode())
+
 def main():
     # Connect first client
     client1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -67,15 +102,22 @@ def main():
     recv_msg(client2)  # Wait for server response
    
     # testing
-    # test_user_limit(client2,f"JOIN", 14)
-    # test_user_limit(client2,f"PART", 7)
-    # test_user_limit(client2,f"JOIN", 7)
-    # send_msg(client2, f"JOIN #OneTooMany")
-    # send_msg(client2, f"NAMES")
-    #gen_testing(client2)
 
-    key_pass1(client1)
-    key_pass2(client2)
+    # test_user_limit(client2,f"JOIN", 14)    # OK
+    # test_user_limit(client2,f"PART", 7)     # OK
+    # test_user_limit(client2,f"JOIN", 7)     # OK
+    # send_msg(client2, f"JOIN #OneTooMany")  # OK
+    # send_msg(client2, f"NAMES")             # OK
+    # gen_testing(client2)                    # OK
+    # save_ch(client2)                        # OK
+    # chan_limit(client2)                     # OK
+    # key_pass1(client1)                      # OK
+    # key_pass2(client2)                      # OK
+    # mode_ch_1(client2)                      # OK
+    mode_ch_2(client1)                        # OK
+    send_msg(client2,f"JOIN #test")           # OK
+
+    recv_msg(client2)  # Wait for server response
 
 if __name__ == '__main__':
     main()
