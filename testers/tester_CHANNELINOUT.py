@@ -169,8 +169,8 @@ def main():
 	send_msg(client1, f"NAMES")
 	send_msg(client5, f"NICK test")
 	send_msg(client1, f"NAMES")
-	send_msg(client5, f"QUIT")#REAL PROBLEM: new nick not removed when quitting
-	send_msg(client1, f"NAMES")#REALPROBLEM: client5 noch on quite -> changed nick
+	send_msg(client5, f"QUIT")
+	send_msg(client1, f"NAMES")
 	#JOIN invite only + INVITE
 	send_msg(client1, f"JOIN #invite")
 	send_msg(client2, f"JOIN #invite")

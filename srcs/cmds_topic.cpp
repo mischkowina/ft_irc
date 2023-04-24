@@ -53,6 +53,12 @@ void	topic(Server *server, Client &client, Message& msg)
 			client.sendErrMsg(server, ERR_NOTONCHANNEL, channel.c_str());
 			return ;
 		}
+		//if channel without channelmodes
+		if (it->second.supportedChannelModes() == false)
+		{
+			client.sendErrMsg(server, ERR_NOCHANMODES, it->second.getChannelName().c_str());
+			return ;
+		}
 		//if channelmode +t, only chanops can change the topic
 		if (it->second.isTopicChangeOnlyByChanop() && it->second.clientIsChannelOperator(client.getNick()) == false)
 		{

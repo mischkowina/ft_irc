@@ -271,8 +271,6 @@ void	Channel::manageBanList(Server *server, Client& client, char c, std::string&
 		std::vector<std::string> params;
 		params.push_back(_channelName);
 		params.push_back("");
-		if (_banList.empty())
-			std::cout << "EMPTY" << std::endl;
 		for (std::set<std::string>::iterator it = _banList.begin(); it != _banList.end(); it++)
 		{
 			params[1] = *it;
