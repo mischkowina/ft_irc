@@ -8,21 +8,18 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	// create a socket
 	_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_sockfd == -1) {
-		std::cerr << "ERROR opening socket" << std::endl;
-		// TODO: replace with throw()
-		exit(1);		
+		throw std::runtime_error("opening socket.");
 	}
 	// set socket descriptor to be reuseable
 	int on = 1;
 	if (setsockopt(_sockfd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) == -1) {
-		std::cerr << "ERROR setsockopt()" << std::endl;
 		close(_sockfd);
-		exit(1);
+		throw std::runtime_error("setsockopt()");
 	}
 	// set socket descriptor to be nonblocking
 	if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1) {
-		std::cerr << "ERROR fcntl" << std::endl;
-		exit(1);
+		close(_sockfd);
+		throw std::runtime_error("fcntl()");
 	}
 	// bind the socket to an IP / port
 	memset(&_server_addr, 0, sizeof(_server_addr));
@@ -30,15 +27,13 @@ Server::Server(int port, std::string pass) : _portNum(port), _password(pass), _o
 	_server_addr.sin_port = htons(_portNum);		// small endian -> big endian
 	_server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(_sockfd, (struct sockaddr *)&_server_addr, sizeof(_server_addr)) == -1) {
-		std::cerr << "ERROR binding" << std::endl;
 		close(_sockfd);
-		exit(1);
+		throw std::runtime_error("binding.");
 	}
 	// set the socket for listening to port
 	if (listen(_sockfd, SOMAXCONN) == -1) {
-		std::cerr << "ERROR listening" << std::endl;
 		close(_sockfd);
-		exit(1);
+		throw std::runtime_error("listening.");
 	}
 
 	//get hostname
@@ -184,8 +179,8 @@ void	Server::run()
 		int pollreturn = poll(pollfds.data(), _clients.size() + 1, 0);
 		if (pollreturn < 0)
 		{
-			std::cerr << "ERROR on poll" << std::endl;
-			exit(1);//tbd if we want to exit or just continue running the server??
+			close(_sockfd);
+			throw std::runtime_error("poll() failed.");
 		}
 		else if (pollreturn == 0)
 			continue ;
@@ -228,8 +223,8 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			int recv_return = recv(pollfds[i].fd, buffer, sizeof(buffer), 0);
 			if (recv_return < 0)
 			{
-				std::cerr << "ERROR on recv" << std::endl;
-				exit(1);
+				close(_sockfd);
+				throw std::runtime_error("recv() failed.");
 			}
 			//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client
 			else if (recv_return == 0)
