@@ -19,7 +19,7 @@
 
 # define RPL_NOWAWAY	"306 :You have been marked as being away"
 
-# define RPL_LIST		"322 <channel> <# visible>:<topic>"
+# define RPL_LIST		"322 <channel> <# visible> :<topic>"
 
 # define RPL_LISTEND	"323 :End of /LIST"
 
@@ -31,7 +31,7 @@
 
 # define RPL_INVITING	"341 <channel> <nick>"
 
-# define RPL_NAMREPLY	"353 <channel> <list of names>"
+# define RPL_NAMREPLY	"353 <channel> :<list of names>"
 
 # define RPL_ENDOFNAMES	"366 <channel> :End of NAMES list"
 

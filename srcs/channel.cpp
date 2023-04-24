@@ -407,7 +407,7 @@ void	Channel::sendMsgToChannel(Client &sender, std::string message, std::string 
 
 		msg.insert(0, " ");
 		//insert full prefix of sender - :<nick>!<username>@<IP> or anonymous for anonymous channels
-		if (_anonymousChannel == true)
+		if (_anonymousChannel == true && it->getNick() != sender.getNick())
 			msg.insert(0, "anonymous!anonymous@anonymous.");
 		else
 		{

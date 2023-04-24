@@ -59,7 +59,7 @@ void	names_all(Server *server, Client &client)
 	}
 
 	std::vector<std::string> params;
-	params.push_back("*");
+	params.push_back("= *");
 	std::string	param2 = "";
 	for (Server::ClientMap::iterator it = server->getAuthorizedClientMap().begin(); it != server->getAuthorizedClientMap().end(); it++)
 	{

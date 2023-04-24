@@ -10,13 +10,19 @@ void	list_channel(Server *server, Client &client, Channel &channel)
 		return;
 
 	//channel name is first parameter
-	params.push_back(channel.getChannelName());
-	
-	//second parameter is "Prv" if the channel is private and the client is not on there - else empty
 	if (channel.isPrivate() && channel.clientIsChannelUser(client.getNick()) == false)
-		params.push_back("Prv");
+		params.push_back(channel.getChannelName() + "(Prv)");
 	else
-		params.push_back("");
+		params.push_back(channel.getChannelName());
+	
+	//second parameter is # of visible users
+	int	nbrUsers = 0;
+	for (std::list<Client>::iterator it = channel.getChannelUsers().begin(); it != channel.getChannelUsers().end(); it++)
+	{
+		if (it->isInvisible() == false)
+			nbrUsers++;
+	}
+	params.push_back(ft::itos(nbrUsers));
 	
 	//third parameter is the topic, unless the channel is private and the client is not on there
 	if (channel.isPrivate() && channel.clientIsChannelUser(client.getNick()) == false)

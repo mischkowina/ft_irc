@@ -12,9 +12,8 @@ void	kick_client_from_channel(Server *server, Client &client, Channel &channel, 
 	else
 		msg.append(client.getNick());
 	
-	//send message to the whole channel that the user got kicked from (still including that user) - unless it's a quiet channel
-	if (channel.isQuiet() == false)
-		channel.sendMsgToChannel(client, msg, "KICK");
+	//send message to the whole channel that the user got kicked from (still including that user)
+	channel.sendMsgToChannel(client, msg, "KICK");
 
 	//actually remove the victim from the channel
 	channel.removeUser(victim, "", "PART");
