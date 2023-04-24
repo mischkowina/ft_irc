@@ -149,6 +149,25 @@ void	userMode(Server *server, Client &client, std::vector<std::string>& paramete
 	client.sendMsg(client, options, "MODE");
 }
 
+bool verifyUser(Server *server, Client& client, std::string user, Channel &channel)
+{
+	if (server->getAuthorizedClientMap().find(user) == server->getAuthorizedClientMap().end())
+	{
+		client.sendErrMsg(server, ERR_NOSUCHNICK, user.c_str());
+		return false;
+	}
+	//check if user is on the channel
+	if (channel.clientIsChannelUser(user) == false)
+	{
+		std::vector<std::string> params;
+		params.push_back(user);
+		params.push_back(channel.getChannelName());
+		client.sendErrMsg(server, ERR_USERNOTINCHANNEL, params);
+		return false;
+	}
+	return true;
+}
+
 void	mode(Server *server, Client &client, Message& msg)
 {
 	std::vector<std::string> parameters = msg.getParameters();
@@ -200,17 +219,10 @@ void	mode(Server *server, Client &client, Message& msg)
 		return;
 	}
 	
-
-	///////////////////////////////////////
-
-	// +vbl [<limit>] [<user>] [<ban mask>]
-	std::string limit;
-	std::string user;
-	std::string addBanList;
-
+	std::string arg;
+	std::stringstream ss;
 	if (parameters.size() > 2)
 	{
-		std::stringstream ss;
 		if (parameters.size() > 2) {
 			ss << parameters[2] << " ";
 		}
@@ -220,40 +232,11 @@ void	mode(Server *server, Client &client, Message& msg)
 		if (parameters.size() > 4) {
 			ss << parameters[4] << " ";
 		}
-		if (flags.find_first_of('l') != std::string::npos){
-			ss >> limit;
-		}
-		if (flags.find_first_not_of("lb") != std::string::npos){
-			ss >> user;
-		}
-		if (flags.find_first_of('b') != std::string::npos){
-			ss >> addBanList;
-		}
 	}
 
 	const char* tmpCStr = flags.c_str();
 	for (unsigned int i = 0; i < flags.length(); i++)
 	{
-		//check for o / v option if given user exists / is on the channel
-		if (tmpCStr[i] == 'o' || tmpCStr[i] == 'v')
-		{
-			//check if user exists on the server
-			if (server->getAuthorizedClientMap().find(user) == server->getAuthorizedClientMap().end())
-			{
-				client.sendErrMsg(server, ERR_NOSUCHNICK, user.c_str());
-				continue ;
-			}
-			//check if user is on the channel
-			if (itChannel->second.clientIsChannelUser(user) == false)
-			{
-				std::vector<std::string> params;
-				params.push_back(user);
-				params.push_back(itChannel->second.getChannelName());
-				client.sendErrMsg(server, ERR_USERNOTINCHANNEL, params);
-				continue ;
-			}
-		}
-		
 		std::string message;
 		message.push_back(options[0]);
 		message.push_back(tmpCStr[i]);
@@ -261,22 +244,30 @@ void	mode(Server *server, Client &client, Message& msg)
 		switch (tmpCStr[i])
 		{
 			case 'o':
-				itChannel->second.manageOperatorList(options[0], user);
-				message.append(" " + user);
+				ss >> arg;
+				if (verifyUser(server, client, arg, itChannel->second) == false)
+					continue;
+				itChannel->second.manageOperatorList(options[0], arg);
+				message.append(" " + arg);
 				break;
 			case 'b':
-				itChannel->second.manageBanList(server, client, options[0], addBanList);
-				if (addBanList == "")
+				ss >> arg;
+				itChannel->second.manageBanList(server, client, options[0], arg);
+				if (arg == "")
 					continue;
-				message.append(" " + addBanList);
+				message.append(" " + arg);
 				break;
 			case 'v':
-				itChannel->second.manageVoiceList(options[0], user);
-				message.append(" " + user);
+				ss >> arg;
+				if (verifyUser(server, client, arg, itChannel->second) == false)
+					continue;
+				itChannel->second.manageVoiceList(options[0], arg);
+				message.append(" " + arg);
 				break;
 			case 'k':
-				itChannel->second.setPassWD(options[0], user);
-				message.append(" " + user);
+				ss >> arg;
+				itChannel->second.setPassWD(options[0], arg);
+				message.append(" " + arg);
 				break;
 			case 'i':
 				itChannel->second.setInvite(options[0]);
@@ -294,8 +285,9 @@ void	mode(Server *server, Client &client, Message& msg)
 				itChannel->second.setModeratedChannel(options[0]);
 				break;
 			case 'l':
-				itChannel->second.setLimit(options[0], limit);
-				message.append(" " + limit);
+				ss >> arg;
+				itChannel->second.setLimit(options[0], arg);
+				message.append(" " + arg);
 				break;
 			case 'n':
 				itChannel->second.setOutsideMsg(options[0]);
