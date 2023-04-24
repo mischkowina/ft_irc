@@ -180,6 +180,8 @@ void	Server::run()
 		if (pollreturn < 0)
 		{
 			close(_sockfd);
+			for (Server::ClientMap::iterator it = _clients.begin(); it != _clients.end(); it++)
+				close(it->second.getSocket());
 			throw std::runtime_error("poll() failed.");
 		}
 		else if (pollreturn == 0)
@@ -224,6 +226,8 @@ void	Server::checkAllClientSockets(std::vector<pollfd> pollfds)
 			if (recv_return < 0)
 			{
 				close(_sockfd);
+				for (Server::ClientMap::iterator it = _clients.begin(); it != _clients.end(); it++)
+					close(it->second.getSocket());
 				throw std::runtime_error("recv() failed.");
 			}
 			//if recv returns 0, the connection has been closed/lost on the client side -> close connection and delete client

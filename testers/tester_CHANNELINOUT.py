@@ -89,17 +89,21 @@ def main():
 	send_msg(client1, f"LIST")
 	send_msg(client1, f"TOPIC +valid :test_topic2")
 	send_msg(client1, f"LIST")
+	# time.sleep(120)
+	#JOIN valid
+	#MODE valid
 	send_msg(client2, f"PART +valid")
 	send_msg(client1, f"MODE +valid +b client*!*@*")
 	send_msg(client1, f"MODE +valid +o client_2")
 	send_msg(client1, f"NAMES")
-	#try modes for +valid
 	#TO-DO: multiple (valid/invalid) channels
 	send_msg(client2, f"JOIN +valid,invalid,#valid,#new,#limit")
 	send_msg(client1, f"NAMES")
 	#channel with key
 	send_msg(client1, f"MODE &valid +k key")
 	send_msg(client1, f"MODE #valid +k key")
+	time.sleep(120)
+	#JOIN valid key(invalid, valid)
 	send_msg(client3, f"JOIN #valid")
 	send_msg(client3, f"JOIN #valid invalidkey")
 	send_msg(client3, f"JOIN #valid key")
