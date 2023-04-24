@@ -136,8 +136,8 @@ void	Server::setHasDied(bool status)
 
 void	Server::eraseFromClientMap(Client &client)
 {
-	_clients.erase(client.getNick());
 	_authorizedClients.erase(client.getNick());
+	_clients.erase(client.getNick());
 	this->_clientMapChanged = true;
 }
 
@@ -365,7 +365,7 @@ void	Server::execCmd(Client &client, Message& msg)
 void	Server::createNewChannel(std::string name, Client &client)
 {
 	if (client.maxNumOfChannels() == true) {
-		client.sendErrMsg(this, ERR_TOOMANYCHANNELS, NULL);
+		client.sendErrMsg(this, ERR_TOOMANYCHANNELS, name.c_str());
 		return;
 	}
 	Channel tmp(name);

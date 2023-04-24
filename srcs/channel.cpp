@@ -36,7 +36,10 @@ Channel::Channel(std::string name)
 	, _topic("")
 {
 	if (name.at(0) == '+')
+	{
 		_supportChannelModes = false;
+		_topicChangeOnlyByChanop = true;
+	}
 }
 
 /* setters */

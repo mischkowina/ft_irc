@@ -57,6 +57,8 @@
 
 # define ERR_BADCHANMASK		"476 <channel> :Invalid channel name"
 
+# define ERR_NOCHANMODES	"477 <channel> :Channel doesn't support modes"
+
 # define ERR_NOPRIVILEGES		"481 :Permission Denied- You're not an IRC operator"
 
 # define ERR_CHANOPRIVSNEEDED	"482 <channel> :You're not channel operator"

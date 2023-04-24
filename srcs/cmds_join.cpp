@@ -7,7 +7,7 @@ bool	validChannelName(Server *server, std::string& name, Client &client)
 	std::string tmp = name.substr(1);
 	if (name.length() < 2 || (name[0] != '#' && name[0] != '&' && name[0] != '+')
 		|| name.length() > 50 || name.find_first_of(" \a") != std::string::npos) {
-		client.sendErrMsg(server, ERR_BADCHANMASK, NULL);
+		client.sendErrMsg(server, ERR_BADCHANMASK, name.c_str());
 		return false;
 	}
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);

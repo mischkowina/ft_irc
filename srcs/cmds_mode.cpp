@@ -190,14 +190,16 @@ void	mode(Server *server, Client &client, Message& msg)
 		client.sendErrMsg(server, ERR_UNKNOWNMODE, flags.data());
 		return;
 	}
+	if (itChannel->second.supportedChannelModes() == false) {
+
+		client.sendErrMsg(server, ERR_NOCHANMODES, itChannel->second.getChannelName().c_str());
+		return;
+	}
 	if (operators.find(client.getNick()) == operators.end()) {
 		client.sendErrMsg(server, ERR_CHANOPRIVSNEEDED, itChannel->second.getChannelName().c_str());
 		return;
 	}
-	if (itChannel->second.supportedChannelModes() == false && flags == "t") {
-		itChannel->second.setTopicChangeOnlyByChanop(options[0]);
-		return;
-	}
+	
 
 	///////////////////////////////////////
 
